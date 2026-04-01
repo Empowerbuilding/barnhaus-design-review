@@ -561,7 +561,8 @@ const appStyles = `
 
   /* Mobile FAB */
   .mobile-chat-fab {
-    position: absolute;
+    display: none !important;
+    position: fixed;
     bottom: 80px;
     right: 1rem;
     z-index: 50;
@@ -574,12 +575,10 @@ const appStyles = `
     font-weight: 600;
     font-family: 'Inter', sans-serif;
     cursor: pointer;
-    display: flex;
     align-items: center;
     gap: 0.4rem;
     box-shadow: 0 4px 20px rgba(0,0,0,0.5);
     transition: transform 0.15s, opacity 0.15s;
-    position: fixed;
   }
   .mobile-chat-fab:hover { transform: scale(1.03); }
   .mobile-chat-fab:active { transform: scale(0.97); }
@@ -628,6 +627,7 @@ const appStyles = `
       padding: 2rem 1.5rem;
     }
     .mobile-chat-fab {
+      display: flex !important;
       bottom: 80px;
       right: 1rem;
     }
