@@ -26,9 +26,12 @@ export default function ImageViewer({
     );
   }
 
-  const displayLabel = roomType
-    ? roomType.charAt(0).toUpperCase() + roomType.slice(1)
-    : '';
+  const displayLabel = roomType ? roomType.charAt(0).toUpperCase() + roomType.slice(1) : '';
+  const totalImages = images.length;
+  const hasMultiple = totalImages > 1;
+
+  const goPrev = () => { if (currentIndex > 0) onSelectImage(currentIndex - 1); };
+  const goNext = () => { if (currentIndex < totalImages - 1) onSelectImage(currentIndex + 1); };
 
   return (
     <div className="image-viewer">
@@ -37,17 +40,49 @@ export default function ImageViewer({
       <div className="image-header">
         <span className="room-label">{displayLabel}</span>
         {isFloorPlan && <span className="ref-badge">Reference Only</span>}
+        {hasMultiple && (
+          <span className="image-counter">{currentIndex + 1} of {totalImages}</span>
+        )}
         <span className="image-name">{image.name}</span>
       </div>
 
-      <div className="image-main">
-        <img src={image.url} alt={image.name} className="main-image" />
+      <div className="image-main-wrap">
+        {hasMultiple && currentIndex > 0 && (
+          <button className="nav-arrow nav-prev" onClick={goPrev} aria-label="Previous image">‹</button>
+        )}
+        <div className="image-main">
+          <img src={image.url} alt={image.name} className="main-image" />
+        </div>
+        {hasMultiple && currentIndex < totalImages - 1 && (
+          <button className="nav-arrow nav-next" onClick={goNext} aria-label="Next image">›</button>
+        )}
       </div>
 
       {enhancedUrl && (
         <div className="enhanced-container">
-          <div className="enhanced-label">Enhanced Version</div>
-          <img src={enhancedUrl} alt="Enhanced render" className="enhanced-image" />
+          <div className="enhanced-label">✨ Visualized Style</div>
+          <img src={enhancedUrl} alt="Visualized render" className="enhanced-image" />
+        </div>
+      )}
+
+      {hasMultiple && (
+        <div className="thumbnails">
+          <div className="thumb-scroll-hint">
+            {totalImages} views — click to explore
+          </div>
+          <div className="thumb-strip">
+            {images.map((img, i) => (
+              <button
+                key={img.id}
+                className={`thumb ${i === currentIndex ? 'active' : ''}`}
+                onClick={() => onSelectImage(i)}
+                title={img.name}
+              >
+                <img src={img.url} alt={img.name} />
+                <span className="thumb-num">{i + 1}</span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
@@ -58,6 +93,7 @@ export default function ImageViewer({
 
         {!isFloorPlan && (
           <FeedbackButtons
+            imageId={image.id}
             feedback={feedback}
             onFeedback={onFeedback}
             onNext={onNext}
@@ -69,24 +105,10 @@ export default function ImageViewer({
 
         {isFloorPlan && hasNext && (
           <button className="btn-floor-next" onClick={onNext}>
-            Continue to Next Section
+            Continue to Next Section →
           </button>
         )}
       </div>
-
-      {images.length > 1 && (
-        <div className="thumbnails">
-          {images.map((img, i) => (
-            <button
-              key={img.id}
-              className={`thumb ${i === currentIndex ? 'active' : ''}`}
-              onClick={() => onSelectImage(i)}
-            >
-              <img src={img.url} alt={img.name} />
-            </button>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
@@ -98,11 +120,12 @@ const styles = `
     height: 100%;
     padding: 1rem;
     overflow-y: auto;
+    background: #1a1a1a;
   }
   .image-viewer.empty {
     align-items: center;
     justify-content: center;
-    color: #666;
+    color: #555;
   }
   .image-header {
     display: flex;
@@ -114,60 +137,154 @@ const styles = `
   .room-label {
     font-size: 1rem;
     font-weight: 600;
-    color: var(--gold);
+    color: #B8860B;
   }
   .ref-badge {
     font-size: 0.7rem;
     padding: 0.2rem 0.6rem;
-    background: var(--charcoal-light);
-    border: 1px solid var(--gold);
+    background: #2a2a2a;
+    border: 1px solid #B8860B;
     border-radius: 12px;
-    color: var(--gold);
+    color: #B8860B;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
+  .image-counter {
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.2rem 0.7rem;
+    background: linear-gradient(135deg, #B8860B, #DAA520);
+    color: #1a1a1a;
+    border-radius: 12px;
+    letter-spacing: 0.03em;
+  }
   .image-name {
-    font-size: 0.8rem;
-    color: #666;
+    font-size: 0.78rem;
+    color: #555;
     margin-left: auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 200px;
+  }
+  .image-main-wrap {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: stretch;
+    min-height: 0;
   }
   .image-main {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 0;
     overflow: hidden;
-    background: var(--charcoal-light);
+    background: #2a2a2a;
     border-radius: 8px;
+    border: 1px solid #3a3a3a;
   }
   .main-image {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
-    border-radius: 4px;
+    border-radius: 6px;
+  }
+  .nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(184, 134, 11, 0.9);
+    color: #1a1a1a;
+    border: none;
+    cursor: pointer;
+    font-size: 1.4rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: background 0.2s, transform 0.15s;
+    line-height: 1;
+  }
+  .nav-arrow:hover { background: #DAA520; transform: translateY(-50%) scale(1.1); }
+  .nav-prev { left: 8px; }
+  .nav-next { right: 8px; }
+  .thumbnails {
+    flex-shrink: 0;
+    margin-top: 0.75rem;
+  }
+  .thumb-scroll-hint {
+    font-size: 0.72rem;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  .thumb-strip {
+    display: flex;
+    gap: 0.6rem;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .thumb-strip::-webkit-scrollbar { height: 4px; }
+  .thumb-strip::-webkit-scrollbar-track { background: #2a2a2a; border-radius: 2px; }
+  .thumb-strip::-webkit-scrollbar-thumb { background: #3a3a3a; border-radius: 2px; }
+  .thumb {
+    position: relative;
+    width: 90px;
+    height: 68px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 2px solid #3a3a3a;
+    cursor: pointer;
+    padding: 0;
+    background: #2a2a2a;
+    flex-shrink: 0;
+    transition: border-color 0.2s, transform 0.15s;
+  }
+  .thumb:hover { border-color: #aaa; transform: scale(1.03); }
+  .thumb.active { border-color: #DAA520; box-shadow: 0 0 0 1px #B8860B; }
+  .thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .thumb-num {
+    position: absolute;
+    bottom: 3px;
+    right: 5px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
   }
   .enhanced-container {
     margin-top: 0.75rem;
-    border: 1px solid rgba(201, 168, 76, 0.2);
+    border: 1px solid rgba(184, 134, 11, 0.3);
     border-radius: 8px;
     overflow: hidden;
+    flex-shrink: 0;
   }
   .enhanced-label {
     padding: 0.4rem 0.75rem;
-    background: rgba(201, 168, 76, 0.08);
+    background: rgba(184, 134, 11, 0.1);
     font-size: 0.75rem;
-    color: var(--gold);
-    font-weight: 500;
+    color: #DAA520;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
   }
   .enhanced-image {
     width: 100%;
     max-height: 300px;
     object-fit: contain;
-    background: var(--charcoal-light);
+    background: #2a2a2a;
   }
   .image-controls {
     flex-shrink: 0;
@@ -175,41 +292,15 @@ const styles = `
   .btn-floor-next {
     margin-top: 0.75rem;
     padding: 0.6rem 1.5rem;
-    background: var(--gold);
-    color: var(--charcoal);
+    background: linear-gradient(135deg, #B8860B, #DAA520);
+    color: #1a1a1a;
     border: none;
     border-radius: 8px;
     font-weight: 600;
     font-size: 0.85rem;
     cursor: pointer;
-    font-family: inherit;
-    transition: background 0.2s;
+    font-family: 'Inter', sans-serif;
+    transition: opacity 0.2s;
   }
-  .btn-floor-next:hover { background: var(--gold-bright); }
-  .thumbnails {
-    display: flex;
-    gap: 0.5rem;
-    padding: 0.75rem 0 0;
-    overflow-x: auto;
-    flex-shrink: 0;
-  }
-  .thumb {
-    width: 64px;
-    height: 48px;
-    border-radius: 6px;
-    overflow: hidden;
-    border: 2px solid transparent;
-    cursor: pointer;
-    padding: 0;
-    background: var(--charcoal-light);
-    flex-shrink: 0;
-    transition: border-color 0.2s;
-  }
-  .thumb.active { border-color: var(--gold); }
-  .thumb:hover { border-color: #666; }
-  .thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+  .btn-floor-next:hover { opacity: 0.85; }
 `;

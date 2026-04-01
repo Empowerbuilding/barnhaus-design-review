@@ -1,4 +1,4 @@
-export default function ProgressBar({ sections, currentIndex }) {
+export default function ProgressBar({ sections, currentIndex, onSelect }) {
   if (!sections.length) return null;
 
   return (
@@ -9,6 +9,10 @@ export default function ProgressBar({ sections, currentIndex }) {
           <div
             key={i}
             className={`progress-step ${i < currentIndex ? 'done' : ''} ${i === currentIndex ? 'active' : ''}`}
+            onClick={() => onSelect && onSelect(i)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={e => e.key === 'Enter' && onSelect && onSelect(i)}
           >
             <div className="step-dot" />
             <span className="step-label">{label}</span>
@@ -26,8 +30,8 @@ export default function ProgressBar({ sections, currentIndex }) {
 const styles = `
   .progress-bar-container {
     padding: 0.5rem 1.5rem;
-    background: var(--charcoal-light);
-    border-bottom: 1px solid var(--charcoal-lighter);
+    background: #2a2a2a;
+    border-bottom: 1px solid #3a3a3a;
     overflow-x: auto;
     flex-shrink: 0;
   }
@@ -42,7 +46,7 @@ const styles = `
     top: 50%;
     left: 0;
     height: 2px;
-    background: var(--gold);
+    background: linear-gradient(90deg, #B8860B, #DAA520);
     transform: translateY(-50%);
     transition: width 0.4s ease;
     z-index: 0;
@@ -55,24 +59,29 @@ const styles = `
     align-items: center;
     position: relative;
     z-index: 1;
-    min-width: 60px;
+    min-width: 64px;
+    cursor: pointer;
+    user-select: none;
+    outline: none;
   }
+  .progress-step:hover .step-dot { border-color: #DAA520; }
+  .progress-step:hover .step-label { color: #aaa; }
   .step-dot {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: var(--charcoal-lighter);
+    background: #3a3a3a;
     border: 2px solid #444;
     transition: all 0.3s;
   }
   .progress-step.done .step-dot {
-    background: var(--gold);
-    border-color: var(--gold);
+    background: #B8860B;
+    border-color: #B8860B;
   }
   .progress-step.active .step-dot {
-    background: var(--charcoal);
-    border-color: var(--gold);
-    box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.3);
+    background: #1a1a1a;
+    border-color: #DAA520;
+    box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.3);
   }
   .step-label {
     font-size: 0.65rem;
@@ -80,7 +89,8 @@ const styles = `
     margin-top: 4px;
     white-space: nowrap;
     transition: color 0.3s;
+    font-family: 'Inter', sans-serif;
   }
-  .progress-step.active .step-label { color: var(--gold); font-weight: 500; }
+  .progress-step.active .step-label { color: #DAA520; font-weight: 600; }
   .progress-step.done .step-label { color: #888; }
 `;

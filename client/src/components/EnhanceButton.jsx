@@ -35,7 +35,7 @@ export default function EnhanceButton({ imageUrl, roomType, onEnhanced }) {
       <style>{styles}</style>
       {!showInput ? (
         <button className="btn-enhance" onClick={() => setShowInput(true)}>
-          Enhance This Render
+          ✨ Visualize My Style
         </button>
       ) : (
         <div className="enhance-input-group">
@@ -48,7 +48,7 @@ export default function EnhanceButton({ imageUrl, roomType, onEnhanced }) {
             onKeyDown={e => e.key === 'Enter' && handleEnhance()}
           />
           <button className="btn-enhance" onClick={handleEnhance} disabled={loading || !prompt.trim()}>
-            {loading ? <span className="enhance-spinner" /> : 'Enhance'}
+            {loading ? <span className="enhance-spinner" /> : 'Apply'}
           </button>
           <button className="btn-cancel" onClick={() => { setShowInput(false); setPrompt(''); }}>
             Cancel
@@ -61,36 +61,38 @@ export default function EnhanceButton({ imageUrl, roomType, onEnhanced }) {
 
 const styles = `
   .enhance-section {
-    padding: 0.75rem 0;
+    padding: 0.75rem 0 0.25rem;
   }
   .btn-enhance {
-    padding: 0.6rem 1.5rem;
-    background: var(--gold);
-    color: var(--charcoal);
+    padding: 0.6rem 1.4rem;
+    background: linear-gradient(135deg, #B8860B, #DAA520);
+    color: #1a1a1a;
     border: none;
     border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.85rem;
+    font-weight: 700;
+    font-size: 0.88rem;
     cursor: pointer;
-    font-family: inherit;
-    transition: background 0.2s;
+    font-family: 'Inter', sans-serif;
+    transition: opacity 0.2s, transform 0.15s;
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.4rem;
+    letter-spacing: 0.01em;
   }
-  .btn-enhance:hover:not(:disabled) { background: var(--gold-bright); }
-  .btn-enhance:disabled { opacity: 0.6; cursor: not-allowed; }
+  .btn-enhance:hover:not(:disabled) { opacity: 0.85; transform: scale(1.02); }
+  .btn-enhance:disabled { opacity: 0.55; cursor: not-allowed; }
   .btn-cancel {
     padding: 0.6rem 1rem;
     background: transparent;
-    color: #888;
-    border: 1px solid var(--charcoal-lighter);
+    color: #aaa;
+    border: 1px solid #3a3a3a;
     border-radius: 8px;
     font-size: 0.85rem;
     cursor: pointer;
-    font-family: inherit;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.2s;
   }
-  .btn-cancel:hover { border-color: #666; color: #aaa; }
+  .btn-cancel:hover { border-color: #666; color: #f0f0f0; }
   .enhance-input-group {
     display: flex;
     gap: 0.5rem;
@@ -101,21 +103,23 @@ const styles = `
     flex: 1;
     min-width: 200px;
     padding: 0.6rem 0.9rem;
-    background: var(--charcoal-light);
-    border: 1px solid var(--charcoal-lighter);
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
     border-radius: 8px;
-    color: var(--text);
+    color: #f0f0f0;
     font-size: 0.85rem;
-    font-family: inherit;
+    font-family: 'Inter', sans-serif;
     outline: none;
+    transition: border-color 0.2s;
   }
-  .enhance-input-group input:focus { border-color: var(--gold); }
+  .enhance-input-group input:focus { border-color: #B8860B; }
   .enhance-input-group input::placeholder { color: #555; }
   .enhance-spinner {
     width: 16px; height: 16px;
     border: 2px solid rgba(26, 26, 26, 0.25);
-    border-top-color: var(--charcoal);
+    border-top-color: #1a1a1a;
     border-radius: 50%;
     animation: spin 0.6s linear infinite;
+    display: inline-block;
   }
 `;

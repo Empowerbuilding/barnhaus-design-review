@@ -38,7 +38,7 @@ function ReviewPage() {
   const [feedback, setFeedback] = useState({});
   const [enhancedImages, setEnhancedImages] = useState({});
   const [completed, setCompleted] = useState(false);
-  const [calendlyLink, setCalendlyLink] = useState('');
+  const [sessionId, setSessionId] = useState(null);
   const initialGreetingSent = useRef(false);
 
   const clientName = projectSlug
@@ -61,15 +61,44 @@ function ReviewPage() {
     load();
   }, [projectSlug]);
 
+  // Start Supabase session when project loads
+  useEffect(() => {
+    if (!project) return;
+    fetch('/api/session/start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ projectSlug, draft, clientName }),
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (data.sessionId) setSessionId(data.sessionId);
+      })
+      .catch(() => {});
+  }, [project]);
+
   const currentGroup = project?.groups?.[currentGroupIdx];
   const currentImage = currentGroup?.images?.[currentImageIdx];
   const isFloorPlan = currentGroup?.roomType?.toLowerCase() === 'floor plan';
   const sectionLabels = project?.groups?.map(g => SECTION_LABELS[g.roomType] || g.roomType) || [];
 
+  // Next section name for Silas to guide to
+  const nextSectionLabel = project?.groups?.[currentGroupIdx + 1]
+    ? SECTION_LABELS[project.groups[currentGroupIdx + 1].roomType] || project.groups[currentGroupIdx + 1].roomType
+    : null;
+
   const sendChat = useCallback(
     async (userMessage) => {
       const newMessages = [...messages, { role: 'user', content: userMessage }];
       setMessages(newMessages);
+
+      // Patch transcript
+      if (sessionId) {
+        fetch(`/api/session/${sessionId}/transcript`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ transcript: newMessages }),
+        }).catch(() => {});
+      }
 
       try {
         const res = await fetch('/api/chat', {
@@ -81,10 +110,24 @@ function ReviewPage() {
             clientName,
             currentRoom: currentGroup?.roomType || 'greeting',
             currentImage: currentImage?.name || '',
+            currentImageId: currentImage?.id || null,
+            totalImagesInSection: currentGroup?.images?.length || 1,
+            currentImageIndexInSection: currentImageIdx,
+            nextSectionName: currentImageIdx === (currentGroup?.images?.length || 1) - 1 ? nextSectionLabel : null,
           }),
         });
         const data = await res.json();
-        setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+        const updatedMessages = [...newMessages, { role: 'assistant', content: data.reply }];
+        setMessages(updatedMessages);
+
+        // Patch transcript with assistant reply
+        if (sessionId) {
+          fetch(`/api/session/${sessionId}/transcript`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ transcript: updatedMessages }),
+          }).catch(() => {});
+        }
       } catch {
         setMessages(prev => [
           ...prev,
@@ -92,7 +135,7 @@ function ReviewPage() {
         ]);
       }
     },
-    [messages, project, clientName, currentGroup, currentImage]
+    [messages, project, clientName, currentGroup, currentImage, currentImageIdx, nextSectionLabel, sessionId]
   );
 
   useEffect(() => {
@@ -110,6 +153,9 @@ function ReviewPage() {
           currentRoom: project.groups?.[0]?.roomType || 'greeting',
           currentImage: project.groups?.[0]?.images?.[0]?.name || '',
           currentImageId: project.groups?.[0]?.images?.[0]?.id || null,
+          totalImagesInSection: project.groups?.[0]?.images?.length || 1,
+          currentImageIndexInSection: 0,
+          nextSectionName: null,
         }),
       })
         .then(r => r.json())
@@ -119,7 +165,7 @@ function ReviewPage() {
         .catch(() => {
           setMessages(prev => [
             ...prev,
-            { role: 'assistant', content: `Welcome ${clientName}! Let's review your ${project.projectName} designs together. I'll walk you through each render and we'll discuss what you love and what you'd like to change. Ready to get started?` },
+            { role: 'assistant', content: `Welcome ${clientName}! I'm Silas, your Barnhaus design guide. Let's walk through your ${project.projectName} renders together — I'll ask about each space and we'll capture everything you love or want to change. Ready to get started?` },
           ]);
         });
     }
@@ -134,6 +180,11 @@ function ReviewPage() {
       setCurrentImageIdx(0);
     }
   }, [currentGroup, currentGroupIdx, currentImageIdx, project]);
+
+  const handleSectionChange = useCallback((idx) => {
+    setCurrentGroupIdx(idx);
+    setCurrentImageIdx(0);
+  }, []);
 
   const handleFeedback = useCallback(
     (imageId, status, notes) => {
@@ -160,27 +211,26 @@ function ReviewPage() {
   const handleComplete = useCallback(async () => {
     const feedbackList = Object.values(feedback);
     try {
-      const res = await fetch('/api/feedback', {
+      await fetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           projectName: project?.projectName,
           clientName,
           feedback: feedbackList,
+          sessionId,
         }),
       });
-      const data = await res.json();
-      setCalendlyLink(data.calendlyLink || '');
       setCompleted(true);
     } catch {
       alert('Failed to submit feedback. Please try again.');
     }
-  }, [feedback, project, clientName]);
+  }, [feedback, project, clientName, sessionId]);
 
   if (loading) {
     return (
       <div className="loading-screen">
-        <div className="loader" />
+        <div className="loading-spinner" />
         <p>Loading your design review...</p>
       </div>
     );
@@ -195,14 +245,30 @@ function ReviewPage() {
     );
   }
 
+  if (completed) {
+    return (
+      <div className="completion-screen">
+        <style>{completionStyles}</style>
+        <div className="completion-card">
+          <img src="https://barnhaussteelbuilders.com/assets/images/logo-BbjiAVC6.png" alt="Barnhaus" className="completion-logo" />
+          <div className="completion-checkmark">✓</div>
+          <h2>Review Complete</h2>
+          <p className="completion-message">Your feedback has been sent to the Barnhaus team. We'll be in touch shortly with next steps.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="review-page">
       <header className="review-header">
-        <div className="logo">BARNHAUS</div>
-        <div className="project-title">{project?.projectName} — Draft {draft}</div>
+        <div className="header-inner">
+          <img src="https://barnhaussteelbuilders.com/assets/images/logo-BbjiAVC6.png" alt="Barnhaus Steel Builders" className="header-logo" />
+          <div className="header-subtitle">Design Review</div>
+        </div>
       </header>
 
-      <ProgressBar sections={sectionLabels} currentIndex={currentGroupIdx} />
+      <ProgressBar sections={sectionLabels} currentIndex={currentGroupIdx} onSelect={handleSectionChange} />
 
       <div className="review-content">
         <div className="image-panel">
@@ -235,7 +301,6 @@ function ReviewPage() {
             messages={messages}
             onSend={sendChat}
             isComplete={completed}
-            calendlyLink={calendlyLink}
           />
         </div>
       </div>
@@ -247,7 +312,7 @@ function LandingPage() {
   return (
     <div className="landing-page">
       <div className="landing-card">
-        <h1>BARNHAUS</h1>
+        <img src="https://barnhaussteelbuilders.com/assets/images/logo-BbjiAVC6.png" alt="Barnhaus Steel Builders" style={{ height: '44px', marginBottom: '1.5rem' }} />
         <h2>Design Review Portal</h2>
         <p>Use the unique link provided by your Barnhaus team to access your design review.</p>
       </div>
@@ -267,13 +332,62 @@ export default function App() {
   );
 }
 
-const appStyles = `
-  .loading-screen .loader {
-    width: 48px; height: 48px;
-    border: 3px solid var(--charcoal-lighter);
-    border-top-color: var(--gold);
+const completionStyles = `
+  .completion-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: var(--charcoal);
+    padding: 2rem;
+  }
+  .completion-card {
+    background: var(--charcoal-light);
+    border: 1px solid var(--charcoal-lighter);
+    border-radius: 16px;
+    padding: 3rem 4rem;
+    text-align: center;
+    max-width: 480px;
+    width: 100%;
+  }
+  .completion-logo {
+    height: 44px;
+    margin-bottom: 2rem;
+  }
+  .completion-checkmark {
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    background: linear-gradient(135deg, #B8860B, #DAA520);
+    color: #1a1a1a;
+    font-size: 2rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+  }
+  .completion-card h2 {
+    color: var(--text);
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin-bottom: 1rem;
+    letter-spacing: 0.05em;
+  }
+  .completion-message {
+    color: var(--text-dim);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+`;
+
+const appStyles = `
+  .loading-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
   }
   .loading-screen p { margin-top: 1rem; color: var(--text-muted); }
 
@@ -286,25 +400,24 @@ const appStyles = `
     padding: 2rem;
     text-align: center;
   }
-  .landing-page h1 {
-    font-size: 3rem;
-    letter-spacing: 0.3em;
-    color: var(--gold);
-    font-weight: 300;
-  }
-  .landing-page h2 {
-    font-size: 1.2rem;
-    font-weight: 300;
-    color: var(--text-muted);
-    margin-top: 0.5rem;
-  }
-  .landing-page p { margin-top: 2rem; color: #666; max-width: 400px; }
   .landing-card {
     background: var(--charcoal-light);
     padding: 3rem 4rem;
     border-radius: 12px;
     border: 1px solid var(--charcoal-lighter);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
+  .landing-card h2 {
+    font-size: 1.2rem;
+    font-weight: 300;
+    color: var(--text-dim);
+    margin-bottom: 1rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .landing-card p { color: #666; max-width: 400px; }
 
   .review-page {
     display: flex;
@@ -315,21 +428,26 @@ const appStyles = `
   .review-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     padding: 0.75rem 1.5rem;
     background: var(--charcoal-light);
     border-bottom: 1px solid var(--charcoal-lighter);
     flex-shrink: 0;
   }
-  .logo {
-    font-size: 1.1rem;
-    letter-spacing: 0.25em;
-    color: var(--gold);
-    font-weight: 300;
+  .header-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
   }
-  .project-title {
-    font-size: 0.85rem;
+  .header-logo {
+    height: 44px;
+  }
+  .header-subtitle {
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
     color: var(--text-muted);
+    text-transform: uppercase;
     font-weight: 400;
   }
   .review-content {

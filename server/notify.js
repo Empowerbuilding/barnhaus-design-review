@@ -32,8 +32,8 @@ function formatFeedbackSummary(projectName, clientName, feedback) {
 async function notifyDiscord(projectName, clientName, feedback) {
   const summary = formatFeedbackSummary(projectName, clientName, feedback);
 
-  if (process.env.DISCORD_TOKEN && process.env.DISCORD_CHANNEL) {
-    await postToDiscord(process.env.DISCORD_TOKEN, process.env.DISCORD_CHANNEL, summary);
+  if (process.env.DISCORD_TOKEN) {
+    await postToDiscord(process.env.DISCORD_TOKEN, '1488756820892848229', summary);
   }
 
   if (process.env.VANESSA_DISCORD_TOKEN && process.env.VANESSA_LEAD_ALERTS_CHANNEL) {
