@@ -199,8 +199,8 @@ app.post('/api/feedback', async (req, res) => {
   const { projectName, clientName, feedback, sessionId } = req.body;
   try {
     await Promise.allSettled([
-      notifyDiscord(projectName, clientName, feedback),
-      writeToCRM(projectName, clientName, feedback),
+      notifyDiscord(projectName, clientName, feedback, chatTranscript),
+      writeToCRM(projectName, clientName, feedback, chatTranscript),
       sessionId ? supabaseFetch(`/rest/v1/design_review_sessions?id=eq.${sessionId}`, {
         method: 'PATCH',
         body: JSON.stringify({
