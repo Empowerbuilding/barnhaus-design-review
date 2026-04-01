@@ -1,0 +1,135 @@
+const { google } = require('googleapis');
+const Fuse = require('fuse.js');
+
+let driveClient = null;
+
+function getDrive() {
+  if (driveClient) return driveClient;
+  const oauth2 = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET
+  );
+  oauth2.setCredentials({ refresh_token: process.env.GOOGLE_REFRESH_TOKEN });
+  driveClient = google.drive({ version: 'v3', auth: oauth2 });
+  return driveClient;
+}
+
+async function findProjectFolder(projectSlug) {
+  const drive = getDrive();
+  const plansFolderId = process.env.PLANS_FOLDER_ID;
+
+  const res = await drive.files.list({
+    q: `'${plansFolderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+    fields: 'files(id,name)',
+    supportsAllDrives: true,
+    includeItemsFromAllDrives: true,
+    driveId: process.env.SHARED_DRIVE_ID,
+    corpora: 'drive',
+    pageSize: 200,
+  });
+
+  const folders = res.data.files || [];
+  if (!folders.length) return null;
+
+  const fuse = new Fuse(folders, { keys: ['name'], threshold: 0.4 });
+  const results = fuse.search(projectSlug);
+  if (results.length > 0) return results[0].item;
+
+  const lower = projectSlug.toLowerCase();
+  const exact = folders.find(f => f.name.toLowerCase().includes(lower));
+  return exact || null;
+}
+
+async function findRendersFolder(projectFolderId) {
+  const drive = getDrive();
+  const res = await drive.files.list({
+    q: `'${projectFolderId}' in parents and mimeType='application/vnd.google-apps.folder' and name contains 'render' and trashed=false`,
+    fields: 'files(id,name)',
+    supportsAllDrives: true,
+    includeItemsFromAllDrives: true,
+    driveId: process.env.SHARED_DRIVE_ID,
+    corpora: 'drive',
+  });
+  const folders = res.data.files || [];
+  if (folders.length > 0) return folders[0];
+
+  const allFolders = await drive.files.list({
+    q: `'${projectFolderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+    fields: 'files(id,name)',
+    supportsAllDrives: true,
+    includeItemsFromAllDrives: true,
+    driveId: process.env.SHARED_DRIVE_ID,
+    corpora: 'drive',
+  });
+  const fuse = new Fuse(allFolders.data.files || [], { keys: ['name'], threshold: 0.4 });
+  const results = fuse.search('renders');
+  return results.length > 0 ? results[0].item : null;
+}
+
+async function listImages(folderId) {
+  const drive = getDrive();
+  const res = await drive.files.list({
+    q: `'${folderId}' in parents and mimeType contains 'image/' and trashed=false`,
+    fields: 'files(id,name,mimeType,thumbnailLink)',
+    supportsAllDrives: true,
+    includeItemsFromAllDrives: true,
+    driveId: process.env.SHARED_DRIVE_ID,
+    corpora: 'drive',
+    pageSize: 100,
+  });
+  return res.data.files || [];
+}
+
+async function streamImage(fileId, res) {
+  const drive = getDrive();
+  const meta = await drive.files.get({
+    fileId,
+    fields: 'mimeType',
+    supportsAllDrives: true,
+  });
+  res.setHeader('Content-Type', meta.data.mimeType);
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  const stream = await drive.files.get(
+    { fileId, alt: 'media', supportsAllDrives: true },
+    { responseType: 'stream' }
+  );
+  stream.data.pipe(res);
+}
+
+async function getImageBase64(fileId) {
+  const drive = getDrive();
+  const res = await drive.files.get(
+    { fileId, alt: 'media', supportsAllDrives: true },
+    { responseType: 'arraybuffer' }
+  );
+  const meta = await drive.files.get({
+    fileId,
+    fields: 'mimeType',
+    supportsAllDrives: true,
+  });
+  return {
+    base64: Buffer.from(res.data).toString('base64'),
+    mimeType: meta.data.mimeType,
+  };
+}
+
+async function getProjectRenders(projectSlug) {
+  const projectFolder = await findProjectFolder(projectSlug);
+  if (!projectFolder) throw new Error(`Project folder not found for: ${projectSlug}`);
+
+  const rendersFolder = await findRendersFolder(projectFolder.id);
+  if (!rendersFolder) throw new Error(`Renders folder not found in: ${projectFolder.name}`);
+
+  const images = await listImages(rendersFolder.id);
+  return {
+    projectName: projectFolder.name,
+    images: images.map(img => ({
+      id: img.id,
+      name: img.name,
+      mimeType: img.mimeType,
+      url: `/api/image/${img.id}`,
+    })),
+  };
+}
+
+module.exports = { getProjectRenders, streamImage, getImageBase64 };
