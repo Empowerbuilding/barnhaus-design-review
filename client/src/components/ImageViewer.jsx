@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import EnhanceButton from './EnhanceButton';
 import Lightbox from './Lightbox';
 import FeedbackButtons from './FeedbackButtons';
