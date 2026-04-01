@@ -116,4 +116,29 @@ const styles = `
   }
   .btn-next:hover { opacity: 0.85; }
   .btn-submit { padding: 0.55rem 2rem; }
+
+  @media (max-width: 768px) {
+    .feedback-buttons {
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .fb-btn {
+      width: 100%;
+      min-height: 44px;
+      font-size: 0.9rem;
+      padding: 0.65rem 1rem;
+    }
+    .btn-next {
+      width: 100%;
+      min-height: 44px;
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+    }
+    .feedback-label {
+      font-size: 0.8rem;
+    }
+    .feedback-notes {
+      font-size: 0.9rem;
+    }
+  }
 `;

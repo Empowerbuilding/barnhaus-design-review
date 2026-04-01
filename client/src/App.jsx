@@ -455,4 +455,26 @@ const appStyles = `
     flex: 1;
     overflow: hidden;
   }
+
+  @media (max-width: 768px) {
+    .review-page {
+      height: auto;
+      min-height: 100vh;
+      overflow: visible;
+    }
+    .review-content {
+      flex-direction: column;
+      overflow: visible;
+      flex: none;
+    }
+    .header-logo {
+      height: 36px;
+    }
+    .header-subtitle {
+      font-size: 0.65rem;
+    }
+    .landing-card {
+      padding: 2rem 1.5rem;
+    }
+  }
 `;

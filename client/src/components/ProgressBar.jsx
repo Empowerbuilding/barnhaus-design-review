@@ -93,4 +93,37 @@ const styles = `
   }
   .progress-step.active .step-label { color: #DAA520; font-weight: 600; }
   .progress-step.done .step-label { color: #888; }
+
+  @media (max-width: 768px) {
+    .progress-bar-container {
+      padding: 0 0;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .progress-bar-container::-webkit-scrollbar {
+      display: none;
+    }
+    .progress-track {
+      padding: 0 0.75rem;
+      gap: 0;
+      min-width: max-content;
+    }
+    .progress-step {
+      min-width: 80px;
+      flex: none;
+      padding: 0.5rem 0.25rem;
+    }
+    .step-label {
+      font-size: 0.7rem;
+      font-weight: 500;
+    }
+    .progress-step.active .step-label {
+      font-size: 0.72rem;
+    }
+    .step-dot {
+      width: 8px;
+      height: 8px;
+    }
+  }
 `;

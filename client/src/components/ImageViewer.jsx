@@ -303,4 +303,49 @@ const styles = `
     transition: opacity 0.2s;
   }
   .btn-floor-next:hover { opacity: 0.85; }
+
+  @media (max-width: 768px) {
+    .image-viewer {
+      height: auto;
+      overflow-y: visible;
+      padding: 0.75rem;
+    }
+    .image-main-wrap {
+      flex: none;
+    }
+    .image-main {
+      max-height: 45vh;
+    }
+    .main-image {
+      max-height: 45vh;
+    }
+    .room-label {
+      font-size: 0.9rem;
+    }
+    .image-name {
+      max-width: 120px;
+      font-size: 0.72rem;
+    }
+    .thumb {
+      width: 80px;
+      height: 60px;
+      min-width: 80px;
+      min-height: 60px;
+    }
+    .nav-arrow {
+      width: 44px;
+      height: 44px;
+      font-size: 1.6rem;
+    }
+    .btn-floor-next {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      min-height: 44px;
+      margin-top: 0.75rem;
+    }
+    .enhanced-image {
+      max-height: 200px;
+    }
+  }
 `;

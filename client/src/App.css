@@ -89,17 +89,32 @@ body {
 }
 
 @media (max-width: 768px) {
+  body {
+    overflow: auto;
+    height: auto;
+  }
+
+  #root {
+    height: auto;
+    min-height: 100vh;
+  }
+
   .review-content {
     flex-direction: column;
+    overflow: visible;
   }
+
   .image-panel {
     border-right: none;
     border-bottom: 1px solid var(--charcoal-lighter);
-    max-height: 50vh;
+    overflow-y: visible;
+    flex: none;
   }
+
   .chat-panel {
     width: 100%;
     min-width: unset;
     flex: 1;
+    min-height: 40vh;
   }
 }

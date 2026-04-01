@@ -240,4 +240,39 @@ const styles = `
   }
   .send-btn:hover:not(:disabled) { opacity: 0.85; transform: scale(1.05); }
   .send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  @media (max-width: 768px) {
+    .chat-window {
+      min-height: 40vh;
+      height: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .chat-messages {
+      min-height: 200px;
+      overflow-y: auto;
+      max-height: 50vh;
+    }
+    .chat-input-area {
+      position: sticky;
+      bottom: 0;
+      z-index: 100;
+      background: #2a2a2a;
+      padding: 0.75rem 1rem;
+    }
+    .chat-input-area input {
+      font-size: 16px; /* prevents iOS zoom */
+      min-height: 44px;
+      padding: 0.65rem 1rem;
+    }
+    .send-btn {
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      min-height: 44px;
+    }
+    .msg-bubble {
+      font-size: 0.9rem;
+    }
+  }
 `;
