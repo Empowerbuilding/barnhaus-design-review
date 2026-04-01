@@ -107,7 +107,7 @@ function ReviewPage() {
           messages: [{ role: 'user', content: greeting }],
           projectName: project.projectName,
           clientName,
-          currentRoom: 'greeting',
+          currentRoom: project.groups?.[0]?.roomType || 'greeting',
           currentImage: '',
         }),
       })
