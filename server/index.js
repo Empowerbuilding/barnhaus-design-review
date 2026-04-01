@@ -63,9 +63,6 @@ app.get('/api/image/:fileId', async (req, res) => {
 app.get('/api/project/:projectSlug', async (req, res) => {
   const { projectSlug } = req.params;
   try {
-    if (projectCache.has(projectSlug)) {
-      return res.json(projectCache.get(projectSlug));
-    }
 
     const { projectName, images } = await getProjectRenders(projectSlug);
 
@@ -86,7 +83,6 @@ app.get('/api/project/:projectSlug', async (req, res) => {
 
     const groups = groupAndSortImages(analyzed);
     const result = { projectName, projectSlug, groups, allImages: analyzed };
-    projectCache.set(projectSlug, result);
     res.json(result);
   } catch (err) {
     console.error('Project load error:', err.message);
