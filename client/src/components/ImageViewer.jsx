@@ -21,7 +21,9 @@ export default function ImageViewer({
 }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [showEnhanced, setShowEnhanced] = useState(true);
   useEffect(() => { setImgLoaded(false); }, [image?.id]);
+  useEffect(() => { setShowEnhanced(true); }, [enhancedUrl]);
 
   if (!image) {
     return (
@@ -83,8 +85,23 @@ export default function ImageViewer({
 
       {enhancedUrl && (
         <div className="enhanced-container">
-          <div className="enhanced-label">✨ Visualized Style</div>
-          <img src={enhancedUrl} alt="Visualized render" className="enhanced-image" />
+          <div className="enhanced-toggle-row">
+            <button
+              className={`toggle-btn ${!showEnhanced ? 'active' : ''}`}
+              onClick={() => setShowEnhanced(false)}
+            >Original</button>
+            <button
+              className={`toggle-btn ${showEnhanced ? 'active' : ''}`}
+              onClick={() => setShowEnhanced(true)}
+            >✨ Visualized</button>
+          </div>
+          <img
+            src={showEnhanced ? enhancedUrl : image.url}
+            alt={showEnhanced ? 'Visualized render' : 'Original render'}
+            className="enhanced-image"
+            onClick={() => setLightboxOpen(true)}
+            style={{ cursor: 'zoom-in' }}
+          />
         </div>
       )}
 
@@ -310,6 +327,29 @@ const styles = `
     text-transform: uppercase;
     letter-spacing: 0.06em;
   }
+  .enhanced-toggle-row {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 0.6rem;
+  }
+  .toggle-btn {
+    flex: 1;
+    padding: 0.45rem 0.75rem;
+    border-radius: 20px;
+    border: 1px solid #3a3a3a;
+    background: #2a2a2a;
+    color: #888;
+    font-size: 0.8rem;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .toggle-btn.active {
+    background: linear-gradient(135deg, #B8860B, #DAA520);
+    color: #1a1a1a;
+    font-weight: 600;
+    border-color: transparent;
+  }
   .enhanced-image {
     width: 100%;
     max-height: 300px;
@@ -374,7 +414,30 @@ const styles = `
       min-height: 44px;
       margin-top: 0.75rem;
     }
-    .enhanced-image {
+    .enhanced-toggle-row {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 0.6rem;
+  }
+  .toggle-btn {
+    flex: 1;
+    padding: 0.45rem 0.75rem;
+    border-radius: 20px;
+    border: 1px solid #3a3a3a;
+    background: #2a2a2a;
+    color: #888;
+    font-size: 0.8rem;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .toggle-btn.active {
+    background: linear-gradient(135deg, #B8860B, #DAA520);
+    color: #1a1a1a;
+    font-weight: 600;
+    border-color: transparent;
+  }
+  .enhanced-image {
       max-height: 200px;
     }
   }

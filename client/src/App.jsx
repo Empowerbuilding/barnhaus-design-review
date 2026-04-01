@@ -251,6 +251,7 @@ function ReviewPage() {
           clientName,
           feedback: feedbackList,
           sessionId,
+          chatTranscript: messages,
         }),
       });
       setCompleted(true);

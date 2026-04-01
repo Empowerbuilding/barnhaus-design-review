@@ -251,7 +251,7 @@ app.post('/api/enhance', async (req, res) => {
 
 // Submit final feedback
 app.post('/api/feedback', async (req, res) => {
-  const { projectName, clientName, feedback, sessionId } = req.body;
+  const { projectName, clientName, feedback, sessionId, chatTranscript } = req.body;
   try {
     await Promise.allSettled([
       notifyDiscord(projectName, clientName, feedback, chatTranscript),
