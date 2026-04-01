@@ -702,6 +702,7 @@ const appStyles = `
     .image-panel {
       width: 100%;
       flex: none;
+      padding-bottom: 60px;
     }
     .header-logo {
       height: 36px;

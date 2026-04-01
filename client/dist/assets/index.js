@@ -1132,6 +1132,7 @@ Please change the parent <Route path="${Y}"> to <Route path="${Y==="/"?"*":`${Y}
     .image-panel {
       width: 100%;
       flex: none;
+      padding-bottom: 60px;
     }
     .header-logo {
       height: 36px;
