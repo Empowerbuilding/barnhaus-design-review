@@ -357,6 +357,11 @@ function ReviewPage() {
             <div className="silas-dot" />
             <span>💬 Chat with Silas</span>
             {unread && <span className="mobile-chat-unread">New message</span>}
+            {!drawerAutoOpened.current && !unread && (
+              <span className="mobile-chat-hint">
+                Tap to start&nbsp;<span className="mobile-chat-hint-arrow">↑</span>
+              </span>
+            )}
           </div>
         </div>
       )}
@@ -664,6 +669,24 @@ const appStyles = `
       border-radius: 10px;
       letter-spacing: 0.03em;
       text-transform: uppercase;
+    }
+    .mobile-chat-hint {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.78rem;
+      font-weight: 500;
+      opacity: 0.75;
+      animation: bounceUp 1.2s ease-in-out infinite;
+    }
+    .mobile-chat-hint-arrow {
+      font-size: 1rem;
+      animation: bounceUp 1.2s ease-in-out infinite;
+    }
+    @keyframes bounceUp {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
     }
 
     .review-page {
