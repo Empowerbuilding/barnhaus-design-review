@@ -328,18 +328,7 @@ function ReviewPage() {
             }
           />
 
-          {/* Mobile floating chat button — only rendered on mobile */}
-          {isMobile && (
-            <button
-              className="mobile-chat-fab"
-              onClick={openDrawer}
-              aria-label="Open chat with Silas"
-            >
-              <span className="fab-icon">💬</span>
-              <span className="fab-label">Chat with Silas</span>
-              {unread && <span className="fab-unread-dot" />}
-            </button>
-          )}
+
         </div>
 
         {/* Desktop chat panel */}
