@@ -20,6 +20,8 @@ export default function ImageViewer({
   isLastImage,
 }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  useEffect(() => { setImgLoaded(false); }, [image?.id]);
 
   if (!image) {
     return (
@@ -55,12 +57,22 @@ export default function ImageViewer({
           <button className="nav-arrow nav-prev" onClick={goPrev} aria-label="Previous image">‹</button>
         )}
         <div className="image-main">
-          <img
+          {!imgLoaded && (
+          <div style={{
+            width: '100%', minHeight: 300,
+            background: 'linear-gradient(90deg, #2a2a2a 25%, #333 50%, #2a2a2a 75%)',
+            backgroundSize: '200% 100%',
+            animation: 'shimmer 1.5s infinite',
+            borderRadius: 8,
+          }} />
+        )}
+        <img
           src={image.url}
           alt={image.name}
           className="main-image"
           onClick={() => setLightboxOpen(true)}
-          style={{ cursor: 'zoom-in' }}
+          onLoad={() => setImgLoaded(true)}
+          style={{ cursor: 'zoom-in', display: imgLoaded ? 'block' : 'none' }}
           title="Click to zoom"
         />
         </div>
