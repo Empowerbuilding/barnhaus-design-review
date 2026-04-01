@@ -71,7 +71,7 @@ app.get('/api/project/:projectSlug', async (req, res) => {
 
 // Chat endpoint
 app.post('/api/chat', async (req, res) => {
-  const { messages, projectName, clientName, currentRoom, currentImage } = req.body;
+  const { messages, projectName, clientName, currentRoom, currentImage, currentImageId } = req.body;
 
   const questions = getQuestionsForRoom(currentRoom || 'other');
   const isFloorPlan = currentRoom?.toLowerCase() === 'floor plan';
@@ -96,7 +96,16 @@ ${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
 Keep the conversation flowing naturally. Don't list all questions at once — ask them one by one based on the client's responses.`;
 
   try {
-    const reply = await chatResponse(messages, systemPrompt);
+    // Fetch current image for vision context
+    let imageBase64 = null, imageMime = null;
+    if (currentImageId) {
+      try {
+        const imgData = await getImageBase64(currentImageId);
+        imageBase64 = imgData.base64;
+        imageMime = imgData.mimeType;
+      } catch (e) { /* skip if image fetch fails */ }
+    }
+    const reply = await chatResponse(messages, systemPrompt, imageBase64, imageMime);
     res.json({ reply });
   } catch (err) {
     console.error('Chat error:', err.message);

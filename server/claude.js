@@ -172,13 +172,34 @@ function groupAndSortImages(analyzedImages) {
   return sorted;
 }
 
-async function chatResponse(messages, systemPrompt) {
+async function chatResponse(messages, systemPrompt, currentImageBase64, currentImageMime) {
   const anthropic = getClient();
+
+  // Inject the current image into the last user message so Claude can see what's on screen
+  let claudeMessages = messages;
+  if (currentImageBase64 && messages.length > 0) {
+    claudeMessages = messages.map((m, i) => {
+      if (i === messages.length - 1 && m.role === 'user') {
+        return {
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              source: { type: 'base64', media_type: currentImageMime || 'image/png', data: currentImageBase64 },
+            },
+            { type: 'text', text: m.content },
+          ],
+        };
+      }
+      return m;
+    });
+  }
+
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 1024,
     system: systemPrompt,
-    messages,
+    messages: claudeMessages,
   });
   return response.content[0].text;
 }
