@@ -14,7 +14,7 @@ export default function EnhanceButton({ imageUrl, roomType, onEnhanced }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           imageUrl: window.location.origin + imageUrl,
-          prompt: `Photorealistic architectural render, luxury custom barndominium home, Hill Country Texas style, high-end finishes. ${roomType.charAt(0).toUpperCase() + roomType.slice(1)} view: ${prompt}. Cinematic lighting, sharp detail, professional interior photography quality.`,
+          prompt: `Photorealistic architectural render, luxury custom home, high-end finishes. ${roomType.charAt(0).toUpperCase() + roomType.slice(1)}: ${prompt}. Cinematic lighting, sharp detail, professional architectural photography quality.`,
         }),
       });
       const data = await res.json();
