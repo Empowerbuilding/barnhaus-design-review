@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import EnhanceButton from './EnhanceButton';
+import Lightbox from './Lightbox';
 import FeedbackButtons from './FeedbackButtons';
 
 export default function ImageViewer({
@@ -17,6 +19,8 @@ export default function ImageViewer({
   onComplete,
   isLastImage,
 }) {
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+
   if (!image) {
     return (
       <div className="image-viewer empty">
@@ -51,7 +55,14 @@ export default function ImageViewer({
           <button className="nav-arrow nav-prev" onClick={goPrev} aria-label="Previous image">‹</button>
         )}
         <div className="image-main">
-          <img src={image.url} alt={image.name} className="main-image" />
+          <img
+          src={image.url}
+          alt={image.name}
+          className="main-image"
+          onClick={() => setLightboxOpen(true)}
+          style={{ cursor: 'zoom-in' }}
+          title="Click to zoom"
+        />
         </div>
         {hasMultiple && currentIndex < totalImages - 1 && (
           <button className="nav-arrow nav-next" onClick={goNext} aria-label="Next image">›</button>
@@ -109,6 +120,13 @@ export default function ImageViewer({
           </button>
         )}
       </div>
+    {lightboxOpen && (
+      <Lightbox
+        src={enhancedUrl || image.url}
+        alt={image.name}
+        onClose={() => setLightboxOpen(false)}
+      />
+    )}
     </div>
   );
 }
