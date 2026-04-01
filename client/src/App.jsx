@@ -42,6 +42,13 @@ function ReviewPage() {
   const [sessionId, setSessionId] = useState(null);
   const [chatOpen, setChatOpen] = useState(true);   // desktop: open by default
   const [drawerOpen, setDrawerOpen] = useState(false); // mobile drawer: closed by default
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
   const [unread, setUnread] = useState(false);
   const initialGreetingSent = useRef(false);
   const prevMessageCount = useRef(0);
@@ -321,16 +328,18 @@ function ReviewPage() {
             }
           />
 
-          {/* Mobile floating chat button */}
-          <button
-            className="mobile-chat-fab mobile-only"
-            onClick={openDrawer}
-            aria-label="Open chat with Silas"
-          >
-            <span className="fab-icon">💬</span>
-            <span className="fab-label">Chat with Silas</span>
-            {unread && <span className="fab-unread-dot" />}
-          </button>
+          {/* Mobile floating chat button — only rendered on mobile */}
+          {isMobile && (
+            <button
+              className="mobile-chat-fab"
+              onClick={openDrawer}
+              aria-label="Open chat with Silas"
+            >
+              <span className="fab-icon">💬</span>
+              <span className="fab-label">Chat with Silas</span>
+              {unread && <span className="fab-unread-dot" />}
+            </button>
+          )}
         </div>
 
         {/* Desktop chat panel */}
