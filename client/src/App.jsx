@@ -52,6 +52,7 @@ function ReviewPage() {
   const [unread, setUnread] = useState(false);
   const initialGreetingSent = useRef(false);
   const prevMessageCount = useRef(0);
+  const drawerAutoOpened = useRef(false);
 
   const clientName = projectSlug
     ? projectSlug.charAt(0).toUpperCase() + projectSlug.slice(1)
@@ -100,10 +101,18 @@ function ReviewPage() {
   useEffect(() => {
     const lastMsg = messages[messages.length - 1];
     if (lastMsg && lastMsg.role === 'assistant' && messages.length > prevMessageCount.current) {
-      if (!drawerOpen) setUnread(true);
+      if (!drawerOpen) {
+        // Auto-open on first greeting message on mobile
+        if (!drawerAutoOpened.current && isMobile) {
+          drawerAutoOpened.current = true;
+          setDrawerOpen(true);
+        } else {
+          setUnread(true);
+        }
+      }
     }
     prevMessageCount.current = messages.length;
-  }, [messages, drawerOpen]);
+  }, [messages, drawerOpen, isMobile]);
 
   const openDrawer = () => {
     setDrawerOpen(true);
@@ -340,6 +349,17 @@ function ReviewPage() {
           />
         </div>
       </div>
+
+      {/* Mobile sticky bottom bar */}
+      {isMobile && (
+        <div className="mobile-chat-bar" onClick={openDrawer}>
+          <div className="mobile-chat-bar-inner">
+            <div className="silas-dot" />
+            <span>💬 Chat with Silas</span>
+            {unread && <span className="mobile-chat-unread">New message</span>}
+          </div>
+        </div>
+      )}
 
       {/* Mobile slide-up drawer */}
       <ChatDrawer
@@ -597,9 +617,54 @@ const appStyles = `
     50% { transform: scale(1.2); opacity: 0.8; }
   }
 
+  /* Mobile sticky chat bar */
+  .mobile-chat-bar {
+    display: none;
+  }
+
   @media (max-width: 768px) {
     .desktop-only { display: none !important; }
     .mobile-only { display: flex !important; }
+
+    .mobile-chat-bar {
+      display: block;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: linear-gradient(135deg, #B8860B, #DAA520);
+      padding: 0.75rem 1.25rem;
+      cursor: pointer;
+      box-shadow: 0 -2px 16px rgba(0,0,0,0.4);
+    }
+    .mobile-chat-bar-inner {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: #1a1a1a;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .silas-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #1a1a1a;
+      opacity: 0.6;
+      animation: pulse 1.5s infinite;
+    }
+    .mobile-chat-unread {
+      margin-left: auto;
+      background: #1a1a1a;
+      color: #DAA520;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 10px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
 
     .review-page {
       height: auto;
