@@ -468,7 +468,7 @@ const appStyles = `
 
   /* Visibility helpers */
   .desktop-only { display: flex; }
-  .mobile-only { display: none; }
+  .mobile-only { display: none !important; }
 
   .review-page {
     display: flex;
