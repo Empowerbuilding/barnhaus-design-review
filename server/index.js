@@ -96,7 +96,15 @@ ${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
 Keep the conversation flowing naturally. Don't list all questions at once — ask them one by one based on the client's responses.`;
 
   try {
-    const reply = await chatResponse(messages, systemPrompt);
+    let imageBase64 = null, imageMime = null;
+    if (currentImageId) {
+      try {
+        const imgData = await getImageBase64(currentImageId);
+        imageBase64 = imgData.base64;
+        imageMime = imgData.mimeType;
+      } catch (e) { console.error('Image fetch for vision failed:', e.message); }
+    }
+    const reply = await chatResponse(messages, systemPrompt, imageBase64, imageMime);
     res.json({ reply });
   } catch (err) {
     console.error('Chat error:', err.message);

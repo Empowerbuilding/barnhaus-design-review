@@ -108,7 +108,8 @@ function ReviewPage() {
           projectName: project.projectName,
           clientName,
           currentRoom: project.groups?.[0]?.roomType || 'greeting',
-          currentImage: '',
+          currentImage: project.groups?.[0]?.images?.[0]?.name || '',
+          currentImageId: project.groups?.[0]?.images?.[0]?.id || null,
         }),
       })
         .then(r => r.json())
