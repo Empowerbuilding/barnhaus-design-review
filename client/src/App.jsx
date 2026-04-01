@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Routes, Route, useParams } from 'react-router-dom';
 import ChatWindow from './components/ChatWindow';
+import ChatDrawer from './components/ChatDrawer';
 import ImageViewer from './components/ImageViewer';
 import ProgressBar from './components/ProgressBar';
 import './App.css';
@@ -39,7 +40,11 @@ function ReviewPage() {
   const [enhancedImages, setEnhancedImages] = useState({});
   const [completed, setCompleted] = useState(false);
   const [sessionId, setSessionId] = useState(null);
+  const [chatOpen, setChatOpen] = useState(true);   // desktop: open by default
+  const [drawerOpen, setDrawerOpen] = useState(false); // mobile drawer: closed by default
+  const [unread, setUnread] = useState(false);
   const initialGreetingSent = useRef(false);
+  const prevMessageCount = useRef(0);
 
   const clientName = projectSlug
     ? projectSlug.charAt(0).toUpperCase() + projectSlug.slice(1)
@@ -61,7 +66,6 @@ function ReviewPage() {
     load();
   }, [projectSlug]);
 
-  // Start Supabase session when project loads
   useEffect(() => {
     if (!project) return;
     fetch('/api/session/start', {
@@ -81,17 +85,30 @@ function ReviewPage() {
   const isFloorPlan = currentGroup?.roomType?.toLowerCase() === 'floor plan';
   const sectionLabels = project?.groups?.map(g => SECTION_LABELS[g.roomType] || g.roomType) || [];
 
-  // Next section name for Silas to guide to
   const nextSectionLabel = project?.groups?.[currentGroupIdx + 1]
     ? SECTION_LABELS[project.groups[currentGroupIdx + 1].roomType] || project.groups[currentGroupIdx + 1].roomType
     : null;
+
+  // Detect new assistant messages → set unread badge when drawer is closed
+  useEffect(() => {
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg && lastMsg.role === 'assistant' && messages.length > prevMessageCount.current) {
+      if (!drawerOpen) setUnread(true);
+    }
+    prevMessageCount.current = messages.length;
+  }, [messages, drawerOpen]);
+
+  const openDrawer = () => {
+    setDrawerOpen(true);
+    setUnread(false);
+  };
+  const closeDrawer = () => setDrawerOpen(false);
 
   const sendChat = useCallback(
     async (userMessage) => {
       const newMessages = [...messages, { role: 'user', content: userMessage }];
       setMessages(newMessages);
 
-      // Patch transcript
       if (sessionId) {
         fetch(`/api/session/${sessionId}/transcript`, {
           method: 'PATCH',
@@ -120,7 +137,6 @@ function ReviewPage() {
         const updatedMessages = [...newMessages, { role: 'assistant', content: data.reply }];
         setMessages(updatedMessages);
 
-        // Patch transcript with assistant reply
         if (sessionId) {
           fetch(`/api/session/${sessionId}/transcript`, {
             method: 'PATCH',
@@ -271,7 +287,17 @@ function ReviewPage() {
       <ProgressBar sections={sectionLabels} currentIndex={currentGroupIdx} onSelect={handleSectionChange} />
 
       <div className="review-content">
+        {/* Image panel — full width on mobile, 65% on desktop */}
         <div className="image-panel">
+          {/* Desktop chat toggle button */}
+          <button
+            className="chat-toggle-btn desktop-only"
+            onClick={() => setChatOpen(o => !o)}
+            aria-label={chatOpen ? 'Hide chat' : 'Show chat'}
+          >
+            💬 {chatOpen ? 'Hide Silas' : 'Silas'}
+          </button>
+
           <ImageViewer
             image={currentImage}
             images={currentGroup?.images || []}
@@ -294,9 +320,21 @@ function ReviewPage() {
               currentImageIdx === (currentGroup?.images?.length || 0) - 1
             }
           />
+
+          {/* Mobile floating chat button */}
+          <button
+            className="mobile-chat-fab mobile-only"
+            onClick={openDrawer}
+            aria-label="Open chat with Silas"
+          >
+            <span className="fab-icon">💬</span>
+            <span className="fab-label">Chat with Silas</span>
+            {unread && <span className="fab-unread-dot" />}
+          </button>
         </div>
 
-        <div className="chat-panel">
+        {/* Desktop chat panel */}
+        <div className={`chat-panel desktop-only ${chatOpen ? 'chat-panel-open' : 'chat-panel-closed'}`}>
           <ChatWindow
             messages={messages}
             onSend={sendChat}
@@ -304,6 +342,15 @@ function ReviewPage() {
           />
         </div>
       </div>
+
+      {/* Mobile slide-up drawer */}
+      <ChatDrawer
+        open={drawerOpen}
+        onClose={closeDrawer}
+        messages={messages}
+        onSend={sendChat}
+        isComplete={completed}
+      />
     </div>
   );
 }
@@ -419,6 +466,10 @@ const appStyles = `
   }
   .landing-card p { color: #666; max-width: 400px; }
 
+  /* Visibility helpers */
+  .desktop-only { display: flex; }
+  .mobile-only { display: none; }
+
   .review-page {
     display: flex;
     flex-direction: column;
@@ -454,9 +505,105 @@ const appStyles = `
     display: flex;
     flex: 1;
     overflow: hidden;
+    position: relative;
+  }
+
+  /* Image panel */
+  .image-panel {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    transition: flex 0.3s ease;
+  }
+
+  /* Desktop chat toggle button */
+  .chat-toggle-btn {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 10;
+    background: rgba(30,30,30,0.85);
+    border: 1px solid #3a3a3a;
+    border-radius: 20px;
+    color: #f0f0f0;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    backdrop-filter: blur(6px);
+    transition: background 0.2s, border-color 0.2s;
+    white-space: nowrap;
+  }
+  .chat-toggle-btn:hover {
+    background: rgba(50,50,50,0.95);
+    border-color: #B8860B;
+  }
+
+  /* Desktop chat panel */
+  .chat-panel {
+    width: 35%;
+    min-width: 280px;
+    max-width: 420px;
+    border-left: 1px solid var(--charcoal-lighter);
+    overflow: hidden;
+    flex-shrink: 0;
+    transition: width 0.3s ease, min-width 0.3s ease, opacity 0.3s ease;
+  }
+  .chat-panel-closed {
+    width: 0 !important;
+    min-width: 0 !important;
+    opacity: 0;
+    pointer-events: none;
+    border-left: none;
+  }
+
+  /* Mobile FAB */
+  .mobile-chat-fab {
+    position: absolute;
+    bottom: 80px;
+    right: 1rem;
+    z-index: 50;
+    background: linear-gradient(135deg, #B8860B, #DAA520);
+    color: #1a1a1a;
+    border: none;
+    border-radius: 28px;
+    padding: 0.65rem 1.1rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    transition: transform 0.15s, opacity 0.15s;
+    position: fixed;
+  }
+  .mobile-chat-fab:hover { transform: scale(1.03); }
+  .mobile-chat-fab:active { transform: scale(0.97); }
+  .fab-icon { font-size: 1.1rem; }
+  .fab-unread-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ff4444;
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    border: 2px solid #1a1a1a;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.8; }
   }
 
   @media (max-width: 768px) {
+    .desktop-only { display: none !important; }
+    .mobile-only { display: flex !important; }
+
     .review-page {
       height: auto;
       min-height: 100vh;
@@ -467,6 +614,10 @@ const appStyles = `
       overflow: visible;
       flex: none;
     }
+    .image-panel {
+      width: 100%;
+      flex: none;
+    }
     .header-logo {
       height: 36px;
     }
@@ -475,6 +626,10 @@ const appStyles = `
     }
     .landing-card {
       padding: 2rem 1.5rem;
+    }
+    .mobile-chat-fab {
+      bottom: 80px;
+      right: 1rem;
     }
   }
 `;
