@@ -5,7 +5,7 @@ const { WebSocketServer } = require('ws');
 const http = require('http');
 const { getProjectRenders, streamImage, getImageBase64 } = require('./drive');
 const { sendToJuanito, initJuanitoSession } = require('./juanito');
-const { analyzeImage, groupAndSortImages } = require('./claude');
+const { analyzeImage, groupAndSortImages, analyzeInspirationImage } = require('./claude');
 const { notifyDiscord, writeToCRM, enhanceImage } = require('./notify');
 const multer = require('multer');
 const { getInspirationImages, setProjectStyle, getProjectStyle } = require('./inspiration');
@@ -212,6 +212,47 @@ app.post('/api/enhance', async (req, res) => {
   } catch (err) {
     console.error('Enhance error:', err.message);
     res.status(500).json({ error: 'Enhancement failed' });
+  }
+});
+
+// Client picked an inspiration image — analyze it and send to Silas
+app.post('/api/inspiration/pick', async (req, res) => {
+  const { imageUrl, imageIndex, roomType, clientName, sessionId } = req.body;
+  try {
+    // Analyze the image in parallel with sending the pick to Silas
+    const description = await analyzeInspirationImage(imageUrl);
+
+    const contextMsg = description
+      ? `[CLIENT INSPIRATION PICK — ${roomType}]
+The client selected inspiration image ${imageIndex} for the ${roomType}.
+
+Visual analysis of what they picked:
+${description}
+
+Image URL: ${imageUrl}
+
+You now know their visual direction for this room. Acknowledge their pick with 1 sentence referencing something specific you see in the image (a color, material, or feature). Then immediately continue with your most important detail question for this room based on what the inspiration reveals.`
+      : `[CLIENT INSPIRATION PICK — ${roomType}]
+The client selected inspiration image ${imageIndex} for the ${roomType}.
+Image URL: ${imageUrl}
+Acknowledge their pick and continue with targeted detail questions.`;
+
+    const reply = await sendToJuanito(contextMsg);
+
+    // Save picked image to session
+    if (sessionId) {
+      supabaseFetch(`/rest/v1/design_review_sessions?id=eq.${sessionId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          [`picked_inspiration_${roomType.replace(/\s/g,'_')}`]: { url: imageUrl, description, index: imageIndex },
+        }),
+      }).catch(() => {});
+    }
+
+    res.json({ reply, description });
+  } catch (err) {
+    console.error('Inspiration pick error:', err.message);
+    res.status(500).json({ error: 'Failed to process pick' });
   }
 });
 

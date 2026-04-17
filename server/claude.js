@@ -198,10 +198,34 @@ async function chatResponse(messages, systemPrompt, imageBase64, imageMime) {
   return response.content[0].text;
 }
 
-module.exports = {
-  analyzeImage,
-  getQuestionsForRoom,
-  groupAndSortImages,
-  chatResponse,
-  QUESTION_BANK,
-};
+
+
+async function analyzeInspirationImage(imageUrl) {
+  const anthropic = getClient();
+  try {
+    // Fetch the image and convert to base64
+    const res = await fetch(imageUrl);
+    if (!res.ok) throw new Error(`Image fetch ${res.status}`);
+    const buffer = await res.arrayBuffer();
+    const base64 = Buffer.from(buffer).toString('base64');
+    const mimeType = res.headers.get('content-type') || 'image/jpeg';
+
+    const response = await anthropic.messages.create({
+      model: 'claude-haiku-4-5-20251022',
+      max_tokens: 300,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: mimeType, data: base64 } },
+          { type: 'text', text: 'Describe this interior/exterior design inspiration image concisely for a designer. Cover: overall style, color palette, key materials, standout features, and mood. 3-4 sentences max.' },
+        ],
+      }],
+    });
+    return response.content[0].text;
+  } catch (err) {
+    console.error('Inspiration analysis error:', err.message);
+    return null;
+  }
+}
+
+module.exports = { analyzeImage, getQuestionsForRoom, groupAndSortImages, chatResponse, analyzeInspirationImage, QUESTION_BANK };

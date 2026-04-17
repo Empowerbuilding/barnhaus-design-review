@@ -168,12 +168,37 @@ function ReviewPage() {
   const closeDrawer = () => setDrawerOpen(false);
 
   const handleVibePick = useCallback(async (img, index) => {
-    setInspirationImages([]); // dismiss strip
-    const message = img
-      ? `I like option ${index} — that direction feels right.`
-      : `None of those quite fit — let me describe what I have in mind.`;
-    await sendChat(message);
-  }, [sendChat]);
+    setInspirationImages([]); // dismiss strip immediately
+
+    if (!img) {
+      // Client skipped — send plain text
+      await sendChat("None of those quite fit — let me describe what I have in mind.");
+      return;
+    }
+
+    // Show the pick as a user bubble immediately
+    setMessages(prev => [...prev, { role: 'user', content: `I like the look of option ${index}.` }]);
+
+    try {
+      const res = await fetch('/api/inspiration/pick', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageUrl: img.url,
+          imageIndex: index,
+          roomType: currentGroup?.roomType || 'this room',
+          clientName,
+          sessionId,
+        }),
+      });
+      const data = await res.json();
+      if (data.reply) {
+        setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+      }
+    } catch {
+      setMessages(prev => [...prev, { role: 'assistant', content: "Great choice — let me ask you a few more things about that direction." }]);
+    }
+  }, [currentGroup, clientName, sessionId, sendChat]);
 
   const handleStart = useCallback(async (inspirationUploads) => {
     // If client uploaded inspirations, notify Juanito via the session endpoint
