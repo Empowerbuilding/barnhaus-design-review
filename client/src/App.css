@@ -27,6 +27,25 @@ body {
 
 #root {
   height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Walkthrough page — flex column fills the viewport */
+.review-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Header + ProgressBar are fixed height; review-content fills the rest */
+.review-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
 }
 
 .image-panel {
@@ -42,8 +61,8 @@ body {
   min-width: 360px;
   display: flex;
   flex-direction: column;
-  height: 100vh;
   overflow: hidden;
+  /* NO height:100vh — parent flex handles sizing */
 }
 
 .loading-screen {
