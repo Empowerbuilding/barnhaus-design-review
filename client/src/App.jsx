@@ -4,6 +4,7 @@ import ChatWindow from './components/ChatWindow';
 import ChatDrawer from './components/ChatDrawer';
 import ImageViewer from './components/ImageViewer';
 import ProgressBar from './components/ProgressBar';
+import OverviewScreen from './components/OverviewScreen';
 import './App.css';
 
 const SECTION_LABELS = {
@@ -35,6 +36,8 @@ function ReviewPage() {
   const [error, setError] = useState(null);
   const [currentGroupIdx, setCurrentGroupIdx] = useState(0);
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
+  const [phase, setPhase] = useState('overview'); // 'overview' | 'walkthrough'
+  const [memo, setMemo] = useState(null);
   const [messages, setMessages] = useState([]);
   const [feedback, setFeedback] = useState({});
   const [enhancedImages, setEnhancedImages] = useState({});
@@ -76,14 +79,16 @@ function ReviewPage() {
 
   useEffect(() => {
     if (!project) return;
+    const rooms = (project.groups || []).map(g => SECTION_LABELS[g.roomType] || g.roomType);
     fetch('/api/session/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ projectSlug, draft, clientName }),
+      body: JSON.stringify({ projectSlug, draft, clientName, projectName: project.projectName, rooms }),
     })
       .then(r => r.json())
       .then(data => {
         if (data.sessionId) setSessionId(data.sessionId);
+        if (data.memo) setMemo(data.memo);
       })
       .catch(() => {});
   }, [project]);
@@ -157,6 +162,12 @@ function ReviewPage() {
   };
   const closeDrawer = () => setDrawerOpen(false);
 
+  const handleStart = useCallback(async (inspirationUploads) => {
+    // If client uploaded inspirations, notify Juanito via the session endpoint
+    // (already handled by OverviewScreen component — just transition)
+    setPhase('walkthrough');
+  }, []);
+
   const sendChat = useCallback(
     async (userMessage) => {
       const newMessages = [...messages, { role: 'user', content: userMessage }];
@@ -207,38 +218,7 @@ function ReviewPage() {
     [messages, project, clientName, currentGroup, currentImage, currentImageIdx, nextSectionLabel, sessionId]
   );
 
-  useEffect(() => {
-    if (project && !initialGreetingSent.current) {
-      initialGreetingSent.current = true;
-      const greeting = `Hi, I'm ${clientName} and I'm here to review the ${project.projectName} ${draft || 'draft'} designs.`;
-      // Don't show the init message as a user bubble — just send it silently
-      fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [],
-          projectName: project.projectName,
-          clientName,
-          currentRoom: project.groups?.[0]?.roomType || 'greeting',
-          currentImage: project.groups?.[0]?.images?.[0]?.name || '',
-          currentImageId: project.groups?.[0]?.images?.[0]?.id || null,
-          totalImagesInSection: project.groups?.[0]?.images?.length || 1,
-          currentImageIndexInSection: 0,
-          nextSectionName: null,
-        }),
-      })
-        .then(r => r.json())
-        .then(data => {
-          setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
-        })
-        .catch(() => {
-          setMessages(prev => [
-            ...prev,
-            { role: 'assistant', content: `Welcome ${clientName}! I'm Silas, your Barnhaus design guide. Let's walk through your ${project.projectName} renders together — I'll ask about each space and we'll capture everything you love or want to change. Ready to get started?` },
-          ]);
-        });
-    }
-  }, [project, clientName, draft]);
+  // Greeting for first image is now triggered by image-change effect on walkthrough entry
 
   const handleNextImage = useCallback(() => {
     if (!currentGroup) return;
@@ -304,6 +284,10 @@ function ReviewPage() {
         <p>Loading your design review...</p>
       </div>
     );
+  }
+
+  if (!loading && !error && phase === 'overview') {
+    return <OverviewScreen memo={memo} sessionId={sessionId} onStart={handleStart} />;
   }
 
   if (error) {

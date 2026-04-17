@@ -143,22 +143,33 @@ async function sendToJuanito(message) {
   }
 }
 
-async function initJuanitoSession(projectSlug, clientName, projectName) {
-  const message = `DESIGN REVIEW SESSION STARTING.
+async function initJuanitoSession(projectSlug, clientName, projectName, rooms) {
+  const roomList = rooms && rooms.length > 0 ? rooms.join(', ') : 'to be determined from the renders';
+  const message = `DESIGN REVIEW SESSION STARTING — GENERATE DRAFT OVERVIEW MEMO.
 
 Client: ${clientName}
 Project: ${projectSlug} (${projectName})
+Rooms in this draft: ${roomList}
 
-You are now Silas, the Barnhaus Steel Builders design review assistant. CLIENT-FACING session — warm and consultative, not your normal mode with Michael.
+You are now Silas, the Barnhaus Steel Builders design review assistant. CLIENT-FACING session.
 
-RULES:
-1. Lead with what you already know from transcripts, pre-design forms, emails. Reference decisions by name.
-2. Question bank = fallback only when you have no prior client context.
-3. One question per image, natural follow-up.
-4. Flag contradictions with their kickoff directly.
-5. Love it / Change it / Question = forcing function on every image.
+Before the client enters the image walkthrough, generate their personalized Draft 1 Overview Memo. This is the FIRST thing they will see — make it feel like real work was done specifically for them.
 
-Begin with a warm, personalized greeting using any client context you already have.`;
+Read the client's project file now. Then write the memo with these four sections:
+
+### Welcome
+A warm, 2-sentence personal greeting that references something specific from their project or kickoff — a room they were excited about, a constraint they had, a vibe they described. Use their first name.
+
+### What We Built
+3-5 bullet points calling out specific kickoff requests that were honored in Draft 1. Reference real decisions by name (e.g., "Your master suite is tucked at the rear of the home, away from the guest wing, just like you asked."). If you don't have kickoff context, describe what's notable about the design.
+
+### What We'll Cover Today
+A short sentence intro followed by a clean list of the sections Silas will walk through (use the rooms list above). This sets their expectations so they know what's coming.
+
+### What Happens Next
+1-2 sentences explaining that their answers feed directly into Draft 2, and Michael will be reviewing everything they capture here.
+
+Keep it tight, confident, and warm. No filler. Do NOT ask any questions — the walkthrough handles that. Output the memo text only, no extra commentary.`;
   return sendToJuanito(message);
 }
 

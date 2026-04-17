@@ -7,6 +7,8 @@ const { getProjectRenders, streamImage, getImageBase64 } = require('./drive');
 const { sendToJuanito, initJuanitoSession } = require('./juanito');
 const { analyzeImage, groupAndSortImages } = require('./claude');
 const { notifyDiscord, writeToCRM, enhanceImage } = require('./notify');
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } });
 
 const app = express();
 const server = http.createServer(app);
@@ -94,7 +96,7 @@ app.get('/api/project/:projectSlug', async (req, res) => {
 
 // Start a new design review session
 app.post('/api/session/start', async (req, res) => {
-  const { projectSlug, draft, clientName, projectName } = req.body;
+  const { projectSlug, draft, clientName, projectName, rooms } = req.body;
   try {
     const r = await supabaseFetch('/rest/v1/design_review_sessions', {
       method: 'POST',
@@ -109,11 +111,38 @@ app.post('/api/session/start', async (req, res) => {
     });
     const data = await r.json();
     const sessionId = Array.isArray(data) ? data[0]?.id : data?.id;
-    const greeting = await initJuanitoSession(projectSlug, clientName || 'there', projectName || projectSlug);
-    res.json({ sessionId: sessionId || null, greeting });
+    const memo = await initJuanitoSession(projectSlug, clientName || 'there', projectName || projectSlug, rooms || []);
+    res.json({ sessionId: sessionId || null, memo });
   } catch (err) {
     console.error('Session start error:', err.message);
-    res.json({ sessionId: null });
+    res.json({ sessionId: null, memo: null });
+  }
+});
+
+// Inspiration image upload
+app.post('/api/session/inspiration', upload.array('images', 10), async (req, res) => {
+  const { sessionId } = req.body;
+  const files = req.files || [];
+  if (!files.length) return res.json({ ok: true });
+  try {
+    // Send inspiration context to Juanito
+    const descriptions = files.map(f => f.originalname).join(', ');
+    const imageContents = [];
+    for (const f of files.slice(0, 5)) {
+      imageContents.push(`[CLIENT INSPIRATION IMAGE: ${f.originalname} (${f.mimetype})]`);
+    }
+    const msg = `[CLIENT UPLOADED INSPIRATION IMAGES before starting the review]\n${imageContents.join('\n')}\nThe client has shared these inspiration images before the walkthrough begins. Keep them in mind as context for their style preferences throughout the session.`;
+    await sendToJuanito(msg).catch(() => {});
+    if (sessionId) {
+      await supabaseFetch(\`/rest/v1/design_review_sessions?id=eq.\${sessionId}\`, {
+        method: 'PATCH',
+        body: JSON.stringify({ inspiration_uploaded: true, inspiration_count: files.length }),
+      }).catch(() => {});
+    }
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Inspiration upload error:', err.message);
+    res.json({ ok: false });
   }
 });
 
