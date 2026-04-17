@@ -14,12 +14,10 @@ function getDrive() {
   return driveClient;
 }
 
-async function findProjectFolder(projectSlug) {
+async function searchFoldersIn(parentId, projectSlug) {
   const drive = getDrive();
-  const plansFolderId = process.env.PLANS_FOLDER_ID;
-
   const res = await drive.files.list({
-    q: `'${plansFolderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+    q: `'${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
     fields: 'files(id,name)',
     supportsAllDrives: true,
     includeItemsFromAllDrives: true,
@@ -27,17 +25,27 @@ async function findProjectFolder(projectSlug) {
     corpora: 'drive',
     pageSize: 200,
   });
-
   const folders = res.data.files || [];
   if (!folders.length) return null;
-
   const fuse = new Fuse(folders, { keys: ['name'], threshold: 0.4 });
   const results = fuse.search(projectSlug);
   if (results.length > 0) return results[0].item;
-
   const lower = projectSlug.toLowerCase();
-  const exact = folders.find(f => f.name.toLowerCase().includes(lower));
-  return exact || null;
+  return folders.find(f => f.name.toLowerCase().includes(lower)) || null;
+}
+
+async function findProjectFolder(projectSlug) {
+  const plansFolderId = process.env.PLANS_FOLDER_ID;
+  const sharedDriveId = process.env.SHARED_DRIVE_ID;
+  if (plansFolderId) {
+    const result = await searchFoldersIn(plansFolderId, projectSlug);
+    if (result) return result;
+  }
+  if (sharedDriveId) {
+    const result = await searchFoldersIn(sharedDriveId, projectSlug);
+    if (result) return result;
+  }
+  return null;
 }
 
 async function findRendersFolder(projectFolderId) {
