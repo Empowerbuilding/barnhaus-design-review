@@ -1,45 +1,4 @@
 export default function InspirationStrip({ images, onPick }) {
-  if (!images || images.length === 0) return null;
-
-  return (
-    <div className="inspiration-strip">
-      <style>{styles}</style>
-      <div className="strip-label">Pick a vibe →</div>
-      <div className="strip-images">
-        {images.map((img, i) => (
-          <div key={i} className="strip-card">
-            <div className="strip-img-wrap">
-              <img
-                src={img.thumb || img.url}
-                alt={`Inspiration ${i + 1}`}
-                loading="lazy"
-                onError={e => { e.target.style.display = 'none'; }}
-              />
-            </div>
-            <button
-              className="strip-pick-btn"
-              onClick={() => onPick(img, i + 1)}
-            >
-              This vibe ✓
-            </button>
-          </div>
-        ))}
-        <div className="strip-card strip-none">
-          <div className="strip-none-inner">
-            <span>None of<br />these</span>
-          </div>
-          <button
-            className="strip-pick-btn strip-pick-none"
-            onClick={() => onPick(null, 0)}
-          >
-            Skip →
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 const styles = `
   .inspiration-strip {
     padding: 0.75rem 1rem;
@@ -142,3 +101,44 @@ const styles = `
     .strip-none-inner { width: 78px; height: 74px; }
   }
 `;
+  if (!images || images.length === 0) return null;
+
+  return (
+    <div className="inspiration-strip">
+      <style>{styles}</style>
+      <div className="strip-label">Pick a vibe →</div>
+      <div className="strip-images">
+        {images.map((img, i) => (
+          <div key={i} className="strip-card">
+            <div className="strip-img-wrap">
+              <img
+                src={img.thumb || img.url}
+                alt={`Inspiration ${i + 1}`}
+                loading="lazy"
+                onError={e => { e.target.style.display = 'none'; }}
+              />
+            </div>
+            <button
+              className="strip-pick-btn"
+              onClick={() => onPick(img, i + 1)}
+            >
+              This vibe ✓
+            </button>
+          </div>
+        ))}
+        <div className="strip-card strip-none">
+          <div className="strip-none-inner">
+            <span>None of<br />these</span>
+          </div>
+          <button
+            className="strip-pick-btn strip-pick-none"
+            onClick={() => onPick(null, 0)}
+          >
+            Skip →
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+

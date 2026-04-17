@@ -1,67 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import ChatWindow from './ChatWindow';
 import InspirationStrip from './InspirationStrip';
-
-export default function ChatDrawer({ open, onClose, messages, onSend, isComplete, inspirationImages, onVibePick }) {
-  const dragStartY = useRef(null);
-  const [dragging, setDragging] = useState(false);
-  const [translateY, setTranslateY] = useState(0);
-
-  useEffect(() => {
-    setTranslateY(0);
-  }, [open]);
-
-  const onTouchStart = (e) => {
-    dragStartY.current = e.touches[0].clientY;
-    setDragging(true);
-  };
-
-  const onTouchMove = (e) => {
-    if (dragStartY.current === null) return;
-    const delta = e.touches[0].clientY - dragStartY.current;
-    if (delta > 0) setTranslateY(delta);
-  };
-
-  const onTouchEnd = () => {
-    setDragging(false);
-    if (translateY > 120) {
-      onClose();
-      setTranslateY(0);
-    } else {
-      setTranslateY(0);
-    }
-    dragStartY.current = null;
-  };
-
-  return (
-    <>
-      <style>{styles}</style>
-      <div className={`chat-drawer-backdrop ${open ? 'visible' : ''}`} onClick={onClose} />
-      <div
-        className={`chat-drawer ${open ? 'open' : ''}`}
-        style={{
-          transform: open ? `translateY(${translateY}px)` : 'translateY(100%)',
-          transition: dragging ? 'none' : 'transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)',
-        }}
-      >
-        <div
-          className="chat-drawer-handle-area"
-          onTouchStart={onTouchStart}
-          onTouchMove={onTouchMove}
-          onTouchEnd={onTouchEnd}
-        >
-          <div className="chat-drawer-handle" />
-          <button className="chat-drawer-close" onClick={onClose} aria-label="Close chat">✕</button>
-        </div>
-        <div className="chat-drawer-body">
-          <ChatWindow messages={messages} onSend={onSend} isComplete={isComplete} />
-          <InspirationStrip images={inspirationImages || []} onPick={onVibePick || (() => {})} />
-        </div>
-      </div>
-    </>
-  );
-}
-
 const styles = `
   .chat-drawer-backdrop {
     display: none;
@@ -151,3 +90,64 @@ const styles = `
     }
   }
 `;
+
+export default function ChatDrawer({ open, onClose, messages, onSend, isComplete, inspirationImages, onVibePick }) {
+  const dragStartY = useRef(null);
+  const [dragging, setDragging] = useState(false);
+  const [translateY, setTranslateY] = useState(0);
+
+  useEffect(() => {
+    setTranslateY(0);
+  }, [open]);
+
+  const onTouchStart = (e) => {
+    dragStartY.current = e.touches[0].clientY;
+    setDragging(true);
+  };
+
+  const onTouchMove = (e) => {
+    if (dragStartY.current === null) return;
+    const delta = e.touches[0].clientY - dragStartY.current;
+    if (delta > 0) setTranslateY(delta);
+  };
+
+  const onTouchEnd = () => {
+    setDragging(false);
+    if (translateY > 120) {
+      onClose();
+      setTranslateY(0);
+    } else {
+      setTranslateY(0);
+    }
+    dragStartY.current = null;
+  };
+
+  return (
+    <>
+      <style>{styles}</style>
+      <div className={`chat-drawer-backdrop ${open ? 'visible' : ''}`} onClick={onClose} />
+      <div
+        className={`chat-drawer ${open ? 'open' : ''}`}
+        style={{
+          transform: open ? `translateY(${translateY}px)` : 'translateY(100%)',
+          transition: dragging ? 'none' : 'transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)',
+        }}
+      >
+        <div
+          className="chat-drawer-handle-area"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
+          <div className="chat-drawer-handle" />
+          <button className="chat-drawer-close" onClick={onClose} aria-label="Close chat">✕</button>
+        </div>
+        <div className="chat-drawer-body">
+          <ChatWindow messages={messages} onSend={onSend} isComplete={isComplete} />
+          <InspirationStrip images={inspirationImages || []} onPick={onVibePick || (() => {})} />
+        </div>
+      </div>
+    </>
+  );
+}
+

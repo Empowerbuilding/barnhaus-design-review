@@ -2,165 +2,6 @@ import { useState, useEffect } from 'react';
 import EnhanceButton from './EnhanceButton';
 import Lightbox from './Lightbox';
 import FeedbackButtons from './FeedbackButtons';
-
-export default function ImageViewer({
-  image,
-  images,
-  currentIndex,
-  onSelectImage,
-  isFloorPlan,
-  enhancedUrl,
-  roomType,
-  onEnhanced,
-  autoEnhancePrompt,
-  feedback,
-  onFeedback,
-  onNext,
-  hasNext,
-  onComplete,
-  isLastImage,
-}) {
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [imgLoaded, setImgLoaded] = useState(false);
-  const [showEnhanced, setShowEnhanced] = useState(true);
-  useEffect(() => { setImgLoaded(false); }, [image?.id]);
-  useEffect(() => { setShowEnhanced(true); }, [enhancedUrl]);
-
-  if (!image) {
-    return (
-      <div className="image-viewer empty">
-        <style>{styles}</style>
-        <p>No image to display</p>
-      </div>
-    );
-  }
-
-  const displayLabel = roomType ? roomType.charAt(0).toUpperCase() + roomType.slice(1) : '';
-  const totalImages = images.length;
-  const hasMultiple = totalImages > 1;
-
-  const goPrev = () => { if (currentIndex > 0) onSelectImage(currentIndex - 1); };
-  const goNext = () => { if (currentIndex < totalImages - 1) onSelectImage(currentIndex + 1); };
-
-  return (
-    <div className="image-viewer">
-      <style>{styles}</style>
-
-      <div className="image-header">
-        <span className="room-label">{displayLabel}</span>
-        {isFloorPlan && <span className="ref-badge">Reference Only</span>}
-        {hasMultiple && (
-          <span className="image-counter">{currentIndex + 1} of {totalImages}</span>
-        )}
-        <span className="image-name">{image.name}</span>
-      </div>
-
-      <div className="image-main-wrap">
-        {hasMultiple && currentIndex > 0 && (
-          <button className="nav-arrow nav-prev" onClick={goPrev} aria-label="Previous image">‹</button>
-        )}
-        <div className="image-main">
-          {!imgLoaded && (
-          <div style={{
-            width: '100%', minHeight: 300,
-            background: 'linear-gradient(90deg, #2a2a2a 25%, #333 50%, #2a2a2a 75%)',
-            backgroundSize: '200% 100%',
-            animation: 'shimmer 1.5s infinite',
-            borderRadius: 8,
-          }} />
-        )}
-        <img
-          src={image.url}
-          alt={image.name}
-          className="main-image"
-          onClick={() => setLightboxOpen(true)}
-          onLoad={() => setImgLoaded(true)}
-          style={{ cursor: 'zoom-in', display: imgLoaded ? 'block' : 'none' }}
-          title="Click to zoom"
-        />
-        </div>
-        {hasMultiple && currentIndex < totalImages - 1 && (
-          <button className="nav-arrow nav-next" onClick={goNext} aria-label="Next image">›</button>
-        )}
-      </div>
-
-      {enhancedUrl && (
-        <div className="enhanced-container">
-          <div className="enhanced-toggle-row">
-            <button
-              className={`toggle-btn ${!showEnhanced ? 'active' : ''}`}
-              onClick={() => setShowEnhanced(false)}
-            >Original</button>
-            <button
-              className={`toggle-btn ${showEnhanced ? 'active' : ''}`}
-              onClick={() => setShowEnhanced(true)}
-            >✨ Visualized</button>
-          </div>
-          <img
-            src={showEnhanced ? enhancedUrl : image.url}
-            alt={showEnhanced ? 'Visualized render' : 'Original render'}
-            className="enhanced-image"
-            onClick={() => setLightboxOpen(true)}
-            style={{ cursor: 'zoom-in' }}
-          />
-        </div>
-      )}
-
-      {hasMultiple && (
-        <div className="thumbnails">
-          <div className="thumb-scroll-hint">
-            {totalImages} views — click to explore
-          </div>
-          <div className="thumb-strip">
-            {images.map((img, i) => (
-              <button
-                key={img.id}
-                className={`thumb ${i === currentIndex ? 'active' : ''}`}
-                onClick={() => onSelectImage(i)}
-                title={img.name}
-              >
-                <img src={img.url} alt={img.name} />
-                <span className="thumb-num">{i + 1}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div className="image-controls">
-        {!isFloorPlan && (
-          <EnhanceButton imageUrl={image.url} roomType={roomType} onEnhanced={onEnhanced} autoPrompt={autoEnhancePrompt} />
-        )}
-
-        {!isFloorPlan && (
-          <FeedbackButtons
-            imageId={image.id}
-            feedback={feedback}
-            onFeedback={onFeedback}
-            onNext={onNext}
-            hasNext={hasNext}
-            onComplete={onComplete}
-            isLastImage={isLastImage}
-          />
-        )}
-
-        {isFloorPlan && hasNext && (
-          <button className="btn-floor-next" onClick={onNext}>
-            Continue to Next Section →
-          </button>
-        )}
-      </div>
-    {lightboxOpen && (
-      <Lightbox
-        src={enhancedUrl || image.url}
-        alt={image.name}
-        onClose={() => setLightboxOpen(false)}
-      />
-    )}
-    </div>
-  );
-}
-
 const styles = `
   .image-viewer {
     display: flex;
@@ -443,3 +284,162 @@ const styles = `
     }
   }
 `;
+
+export default function ImageViewer({
+  image,
+  images,
+  currentIndex,
+  onSelectImage,
+  isFloorPlan,
+  enhancedUrl,
+  roomType,
+  onEnhanced,
+  autoEnhancePrompt,
+  feedback,
+  onFeedback,
+  onNext,
+  hasNext,
+  onComplete,
+  isLastImage,
+}) {
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [showEnhanced, setShowEnhanced] = useState(true);
+  useEffect(() => { setImgLoaded(false); }, [image?.id]);
+  useEffect(() => { setShowEnhanced(true); }, [enhancedUrl]);
+
+  if (!image) {
+    return (
+      <div className="image-viewer empty">
+        <style>{styles}</style>
+        <p>No image to display</p>
+      </div>
+    );
+  }
+
+  const displayLabel = roomType ? roomType.charAt(0).toUpperCase() + roomType.slice(1) : '';
+  const totalImages = images.length;
+  const hasMultiple = totalImages > 1;
+
+  const goPrev = () => { if (currentIndex > 0) onSelectImage(currentIndex - 1); };
+  const goNext = () => { if (currentIndex < totalImages - 1) onSelectImage(currentIndex + 1); };
+
+  return (
+    <div className="image-viewer">
+      <style>{styles}</style>
+
+      <div className="image-header">
+        <span className="room-label">{displayLabel}</span>
+        {isFloorPlan && <span className="ref-badge">Reference Only</span>}
+        {hasMultiple && (
+          <span className="image-counter">{currentIndex + 1} of {totalImages}</span>
+        )}
+        <span className="image-name">{image.name}</span>
+      </div>
+
+      <div className="image-main-wrap">
+        {hasMultiple && currentIndex > 0 && (
+          <button className="nav-arrow nav-prev" onClick={goPrev} aria-label="Previous image">‹</button>
+        )}
+        <div className="image-main">
+          {!imgLoaded && (
+          <div style={{
+            width: '100%', minHeight: 300,
+            background: 'linear-gradient(90deg, #2a2a2a 25%, #333 50%, #2a2a2a 75%)',
+            backgroundSize: '200% 100%',
+            animation: 'shimmer 1.5s infinite',
+            borderRadius: 8,
+          }} />
+        )}
+        <img
+          src={image.url}
+          alt={image.name}
+          className="main-image"
+          onClick={() => setLightboxOpen(true)}
+          onLoad={() => setImgLoaded(true)}
+          style={{ cursor: 'zoom-in', display: imgLoaded ? 'block' : 'none' }}
+          title="Click to zoom"
+        />
+        </div>
+        {hasMultiple && currentIndex < totalImages - 1 && (
+          <button className="nav-arrow nav-next" onClick={goNext} aria-label="Next image">›</button>
+        )}
+      </div>
+
+      {enhancedUrl && (
+        <div className="enhanced-container">
+          <div className="enhanced-toggle-row">
+            <button
+              className={`toggle-btn ${!showEnhanced ? 'active' : ''}`}
+              onClick={() => setShowEnhanced(false)}
+            >Original</button>
+            <button
+              className={`toggle-btn ${showEnhanced ? 'active' : ''}`}
+              onClick={() => setShowEnhanced(true)}
+            >✨ Visualized</button>
+          </div>
+          <img
+            src={showEnhanced ? enhancedUrl : image.url}
+            alt={showEnhanced ? 'Visualized render' : 'Original render'}
+            className="enhanced-image"
+            onClick={() => setLightboxOpen(true)}
+            style={{ cursor: 'zoom-in' }}
+          />
+        </div>
+      )}
+
+      {hasMultiple && (
+        <div className="thumbnails">
+          <div className="thumb-scroll-hint">
+            {totalImages} views — click to explore
+          </div>
+          <div className="thumb-strip">
+            {images.map((img, i) => (
+              <button
+                key={img.id}
+                className={`thumb ${i === currentIndex ? 'active' : ''}`}
+                onClick={() => onSelectImage(i)}
+                title={img.name}
+              >
+                <img src={img.url} alt={img.name} />
+                <span className="thumb-num">{i + 1}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="image-controls">
+        {!isFloorPlan && (
+          <EnhanceButton imageUrl={image.url} roomType={roomType} onEnhanced={onEnhanced} autoPrompt={autoEnhancePrompt} />
+        )}
+
+        {!isFloorPlan && (
+          <FeedbackButtons
+            imageId={image.id}
+            feedback={feedback}
+            onFeedback={onFeedback}
+            onNext={onNext}
+            hasNext={hasNext}
+            onComplete={onComplete}
+            isLastImage={isLastImage}
+          />
+        )}
+
+        {isFloorPlan && hasNext && (
+          <button className="btn-floor-next" onClick={onNext}>
+            Continue to Next Section →
+          </button>
+        )}
+      </div>
+    {lightboxOpen && (
+      <Lightbox
+        src={enhancedUrl || image.url}
+        alt={image.name}
+        onClose={() => setLightboxOpen(false)}
+      />
+    )}
+    </div>
+  );
+}
+

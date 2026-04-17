@@ -1,87 +1,4 @@
 import { useState } from 'react';
-
-export default function EnhanceButton({ imageUrl, roomType, onEnhanced, autoPrompt }) {
-  const [loading, setLoading] = useState(false);
-  const [manualPrompt, setManualPrompt] = useState('');
-  const [showManual, setShowManual] = useState(false);
-
-  const runEnhance = async (promptText) => {
-    if (!promptText?.trim()) return;
-    setLoading(true);
-    try {
-      const res = await fetch('/api/enhance', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          imageUrl: window.location.origin + imageUrl,
-          prompt: `Photorealistic architectural render, luxury custom home, high-end finishes, bright daytime lighting, natural sunlight. ${roomType.charAt(0).toUpperCase() + roomType.slice(1)}: ${promptText}. Sharp detail, professional architectural photography quality.`,
-        }),
-      });
-      const data = await res.json();
-      if (data.enhancedImage) {
-        onEnhanced(data.enhancedImage);
-        setShowManual(false);
-        setManualPrompt('');
-      }
-    } catch {
-      alert('Enhancement failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="enhance-section">
-      <style>{styles}</style>
-
-      {/* Auto-prompt button — appears after client picks inspiration vibe */}
-      {autoPrompt && !showManual && (
-        <div className="enhance-auto-group">
-          <button
-            className="btn-enhance btn-enhance-auto"
-            onClick={() => runEnhance(autoPrompt)}
-            disabled={loading}
-          >
-            {loading ? <span className="enhance-spinner" /> : '✨ Visualize This Style'}
-          </button>
-          <button className="btn-manual-toggle" onClick={() => setShowManual(true)}>
-            Custom prompt
-          </button>
-        </div>
-      )}
-
-      {/* Manual prompt — always available if no autoPrompt, or via toggle */}
-      {(!autoPrompt || showManual) && (
-        showManual || !autoPrompt ? (
-          !showManual && !autoPrompt ? (
-            <button className="btn-enhance" onClick={() => setShowManual(true)}>
-              ✨ Visualize My Style
-            </button>
-          ) : (
-            <div className="enhance-input-group">
-              <input
-                type="text"
-                value={manualPrompt}
-                onChange={e => setManualPrompt(e.target.value)}
-                placeholder={`Describe your finish preferences for this ${roomType}...`}
-                disabled={loading}
-                onKeyDown={e => e.key === 'Enter' && runEnhance(manualPrompt)}
-                autoFocus
-              />
-              <button className="btn-enhance" onClick={() => runEnhance(manualPrompt)} disabled={loading || !manualPrompt.trim()}>
-                {loading ? <span className="enhance-spinner" /> : 'Apply'}
-              </button>
-              <button className="btn-cancel" onClick={() => { setShowManual(false); setManualPrompt(''); }}>
-                Cancel
-              </button>
-            </div>
-          )
-        ) : null
-      )}
-    </div>
-  );
-}
-
 const styles = `
   .enhance-section {
     padding: 0.75rem 0 0.25rem;
@@ -172,3 +89,86 @@ const styles = `
     display: inline-block;
   }
 `;
+
+export default function EnhanceButton({ imageUrl, roomType, onEnhanced, autoPrompt }) {
+  const [loading, setLoading] = useState(false);
+  const [manualPrompt, setManualPrompt] = useState('');
+  const [showManual, setShowManual] = useState(false);
+
+  const runEnhance = async (promptText) => {
+    if (!promptText?.trim()) return;
+    setLoading(true);
+    try {
+      const res = await fetch('/api/enhance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageUrl: window.location.origin + imageUrl,
+          prompt: `Photorealistic architectural render, luxury custom home, high-end finishes, bright daytime lighting, natural sunlight. ${roomType.charAt(0).toUpperCase() + roomType.slice(1)}: ${promptText}. Sharp detail, professional architectural photography quality.`,
+        }),
+      });
+      const data = await res.json();
+      if (data.enhancedImage) {
+        onEnhanced(data.enhancedImage);
+        setShowManual(false);
+        setManualPrompt('');
+      }
+    } catch {
+      alert('Enhancement failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="enhance-section">
+      <style>{styles}</style>
+
+      {/* Auto-prompt button — appears after client picks inspiration vibe */}
+      {autoPrompt && !showManual && (
+        <div className="enhance-auto-group">
+          <button
+            className="btn-enhance btn-enhance-auto"
+            onClick={() => runEnhance(autoPrompt)}
+            disabled={loading}
+          >
+            {loading ? <span className="enhance-spinner" /> : '✨ Visualize This Style'}
+          </button>
+          <button className="btn-manual-toggle" onClick={() => setShowManual(true)}>
+            Custom prompt
+          </button>
+        </div>
+      )}
+
+      {/* Manual prompt — always available if no autoPrompt, or via toggle */}
+      {(!autoPrompt || showManual) && (
+        showManual || !autoPrompt ? (
+          !showManual && !autoPrompt ? (
+            <button className="btn-enhance" onClick={() => setShowManual(true)}>
+              ✨ Visualize My Style
+            </button>
+          ) : (
+            <div className="enhance-input-group">
+              <input
+                type="text"
+                value={manualPrompt}
+                onChange={e => setManualPrompt(e.target.value)}
+                placeholder={`Describe your finish preferences for this ${roomType}...`}
+                disabled={loading}
+                onKeyDown={e => e.key === 'Enter' && runEnhance(manualPrompt)}
+                autoFocus
+              />
+              <button className="btn-enhance" onClick={() => runEnhance(manualPrompt)} disabled={loading || !manualPrompt.trim()}>
+                {loading ? <span className="enhance-spinner" /> : 'Apply'}
+              </button>
+              <button className="btn-cancel" onClick={() => { setShowManual(false); setManualPrompt(''); }}>
+                Cancel
+              </button>
+            </div>
+          )
+        ) : null
+      )}
+    </div>
+  );
+}
+

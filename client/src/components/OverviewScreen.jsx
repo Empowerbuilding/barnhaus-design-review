@@ -1,147 +1,4 @@
 import { useState, useRef, useCallback } from 'react';
-
-export default function OverviewScreen({ memo, sessionId, onStart }) {
-  const [uploads, setUploads] = useState([]);
-  const [dragging, setDragging] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef(null);
-
-  const handleFiles = useCallback(async (files) => {
-    if (!files || files.length === 0) return;
-    setUploading(true);
-    const newUploads = [];
-    for (const file of Array.from(files)) {
-      if (!file.type.startsWith('image/')) continue;
-      const reader = new FileReader();
-      const dataUrl = await new Promise(res => { reader.onload = e => res(e.target.result); reader.readAsDataURL(file); });
-      newUploads.push({ name: file.name, dataUrl, file });
-    }
-    if (sessionId && newUploads.length > 0) {
-      try {
-        const formData = new FormData();
-        newUploads.forEach(u => formData.append('images', u.file));
-        formData.append('sessionId', sessionId);
-        await fetch('/api/session/inspiration', { method: 'POST', body: formData });
-      } catch (e) { /* non-blocking */ }
-    }
-    setUploads(prev => [...prev, ...newUploads]);
-    setUploading(false);
-  }, [sessionId]);
-
-  const onDrop = useCallback((e) => {
-    e.preventDefault();
-    setDragging(false);
-    handleFiles(e.dataTransfer.files);
-  }, [handleFiles]);
-
-  const onDragOver = (e) => { e.preventDefault(); setDragging(true); };
-  const onDragLeave = () => setDragging(false);
-  const removeUpload = (idx) => setUploads(prev => prev.filter((_, i) => i !== idx));
-
-  const renderMemo = (text) => {
-    if (!text) return null;
-    const lines = text.split('\n');
-    const elements = [];
-    let inList = false;
-    let listItems = [];
-
-    const flushList = () => {
-      if (listItems.length > 0) {
-        elements.push(<ul key={`list-${elements.length}`} className="memo-list">{listItems}</ul>);
-        listItems = [];
-        inList = false;
-      }
-    };
-
-    lines.forEach((line, i) => {
-      if (line.startsWith('### ') || line.startsWith('## ') || line.startsWith('# ')) {
-        flushList();
-        elements.push(<h3 key={i} className="memo-section-heading">{line.replace(/^#+\s*/, '')}</h3>);
-      } else if (line.startsWith('- ') || line.startsWith('* ')) {
-        inList = true;
-        const content = line.replace(/^[-*]\s*/, '').replace(/\*\*([^*]+)\*\*/g, '$1');
-        listItems.push(<li key={i} className="memo-bullet">{content}</li>);
-      } else if (line.trim() === '') {
-        flushList();
-        elements.push(<div key={i} className="memo-spacer" />);
-      } else {
-        flushList();
-        const content = line.replace(/\*\*([^*]+)\*\*/g, '$1');
-        elements.push(<p key={i} className="memo-p">{content}</p>);
-      }
-    });
-    flushList();
-    return elements;
-  };
-
-  return (
-    <div className="overview-screen">
-      <style>{styles}</style>
-      <div className="overview-inner">
-
-        <div className="overview-header">
-          <img src="https://barnhaussteelbuilders.com/assets/images/logo-BbjiAVC6.png" alt="Barnhaus" className="overview-logo" />
-          <div className="overview-badge">Draft 1 Review</div>
-        </div>
-
-        <div className="memo-card">
-          <div className="silas-tag">
-            <div className="silas-dot-lg" />
-            <span>Silas · Barnhaus Design Guide</span>
-          </div>
-          <div className="memo-body">
-            {memo ? renderMemo(memo) : (
-              <div className="memo-loading">
-                <div className="memo-spinner" />
-                <span>Preparing your overview...</span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="inspiration-section">
-          <div className="inspiration-label">
-            <span>Have inspiration images?</span>
-            <span className="inspiration-sub">Drop them here — Silas will reference them throughout your review.</span>
-          </div>
-          <div
-            className={`drop-zone ${dragging ? 'drop-zone-active' : ''}`}
-            onDrop={onDrop}
-            onDragOver={onDragOver}
-            onDragLeave={onDragLeave}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <input ref={fileInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={e => handleFiles(e.target.files)} />
-            {uploads.length === 0 ? (
-              <div className="drop-zone-placeholder">
-                {uploading
-                  ? <><div className="memo-spinner small" /><span>Uploading...</span></>
-                  : <><div className="drop-icon">📎</div><span>Drag &amp; drop or tap to browse</span><span className="drop-sub">Kitchen vibes, tile ideas, fireplace inspo — anything helps</span></>
-                }
-              </div>
-            ) : (
-              <div className="upload-grid">
-                {uploads.map((u, i) => (
-                  <div key={i} className="upload-thumb">
-                    <img src={u.dataUrl} alt={u.name} />
-                    <button className="upload-remove" onClick={e => { e.stopPropagation(); removeUpload(i); }}>×</button>
-                  </div>
-                ))}
-                <div className="upload-add" onClick={e => { e.stopPropagation(); fileInputRef.current?.click(); }}>+ Add more</div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <button className="start-btn" onClick={() => onStart(uploads)} disabled={!memo}>
-          {memo ? 'Start My Review →' : 'Loading...'}
-        </button>
-
-      </div>
-    </div>
-  );
-}
-
 const styles = `
   .overview-screen {
     min-height: 100vh;
@@ -322,3 +179,146 @@ const styles = `
     .memo-body { padding: 1.25rem; }
   }
 `;
+
+export default function OverviewScreen({ memo, sessionId, onStart }) {
+  const [uploads, setUploads] = useState([]);
+  const [dragging, setDragging] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleFiles = useCallback(async (files) => {
+    if (!files || files.length === 0) return;
+    setUploading(true);
+    const newUploads = [];
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith('image/')) continue;
+      const reader = new FileReader();
+      const dataUrl = await new Promise(res => { reader.onload = e => res(e.target.result); reader.readAsDataURL(file); });
+      newUploads.push({ name: file.name, dataUrl, file });
+    }
+    if (sessionId && newUploads.length > 0) {
+      try {
+        const formData = new FormData();
+        newUploads.forEach(u => formData.append('images', u.file));
+        formData.append('sessionId', sessionId);
+        await fetch('/api/session/inspiration', { method: 'POST', body: formData });
+      } catch (e) { /* non-blocking */ }
+    }
+    setUploads(prev => [...prev, ...newUploads]);
+    setUploading(false);
+  }, [sessionId]);
+
+  const onDrop = useCallback((e) => {
+    e.preventDefault();
+    setDragging(false);
+    handleFiles(e.dataTransfer.files);
+  }, [handleFiles]);
+
+  const onDragOver = (e) => { e.preventDefault(); setDragging(true); };
+  const onDragLeave = () => setDragging(false);
+  const removeUpload = (idx) => setUploads(prev => prev.filter((_, i) => i !== idx));
+
+  const renderMemo = (text) => {
+    if (!text) return null;
+    const lines = text.split('\n');
+    const elements = [];
+    let inList = false;
+    let listItems = [];
+
+    const flushList = () => {
+      if (listItems.length > 0) {
+        elements.push(<ul key={`list-${elements.length}`} className="memo-list">{listItems}</ul>);
+        listItems = [];
+        inList = false;
+      }
+    };
+
+    lines.forEach((line, i) => {
+      if (line.startsWith('### ') || line.startsWith('## ') || line.startsWith('# ')) {
+        flushList();
+        elements.push(<h3 key={i} className="memo-section-heading">{line.replace(/^#+\s*/, '')}</h3>);
+      } else if (line.startsWith('- ') || line.startsWith('* ')) {
+        inList = true;
+        const content = line.replace(/^[-*]\s*/, '').replace(/\*\*([^*]+)\*\*/g, '$1');
+        listItems.push(<li key={i} className="memo-bullet">{content}</li>);
+      } else if (line.trim() === '') {
+        flushList();
+        elements.push(<div key={i} className="memo-spacer" />);
+      } else {
+        flushList();
+        const content = line.replace(/\*\*([^*]+)\*\*/g, '$1');
+        elements.push(<p key={i} className="memo-p">{content}</p>);
+      }
+    });
+    flushList();
+    return elements;
+  };
+
+  return (
+    <div className="overview-screen">
+      <style>{styles}</style>
+      <div className="overview-inner">
+
+        <div className="overview-header">
+          <img src="https://barnhaussteelbuilders.com/assets/images/logo-BbjiAVC6.png" alt="Barnhaus" className="overview-logo" />
+          <div className="overview-badge">Draft 1 Review</div>
+        </div>
+
+        <div className="memo-card">
+          <div className="silas-tag">
+            <div className="silas-dot-lg" />
+            <span>Silas · Barnhaus Design Guide</span>
+          </div>
+          <div className="memo-body">
+            {memo ? renderMemo(memo) : (
+              <div className="memo-loading">
+                <div className="memo-spinner" />
+                <span>Preparing your overview...</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="inspiration-section">
+          <div className="inspiration-label">
+            <span>Have inspiration images?</span>
+            <span className="inspiration-sub">Drop them here — Silas will reference them throughout your review.</span>
+          </div>
+          <div
+            className={`drop-zone ${dragging ? 'drop-zone-active' : ''}`}
+            onDrop={onDrop}
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <input ref={fileInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={e => handleFiles(e.target.files)} />
+            {uploads.length === 0 ? (
+              <div className="drop-zone-placeholder">
+                {uploading
+                  ? <><div className="memo-spinner small" /><span>Uploading...</span></>
+                  : <><div className="drop-icon">📎</div><span>Drag &amp; drop or tap to browse</span><span className="drop-sub">Kitchen vibes, tile ideas, fireplace inspo — anything helps</span></>
+                }
+              </div>
+            ) : (
+              <div className="upload-grid">
+                {uploads.map((u, i) => (
+                  <div key={i} className="upload-thumb">
+                    <img src={u.dataUrl} alt={u.name} />
+                    <button className="upload-remove" onClick={e => { e.stopPropagation(); removeUpload(i); }}>×</button>
+                  </div>
+                ))}
+                <div className="upload-add" onClick={e => { e.stopPropagation(); fileInputRef.current?.click(); }}>+ Add more</div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <button className="start-btn" onClick={() => onStart(uploads)} disabled={!memo}>
+          {memo ? 'Start My Review →' : 'Loading...'}
+        </button>
+
+      </div>
+    </div>
+  );
+}
+

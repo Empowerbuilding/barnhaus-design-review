@@ -1,55 +1,4 @@
 import { useState, useEffect } from 'react';
-
-export default function FeedbackButtons({ imageId, feedback, onFeedback, onNext, hasNext, onComplete, isLastImage }) {
-  const [notes, setNotes] = useState(feedback?.notes || '');
-  const [selected, setSelected] = useState(feedback?.status || null);
-
-  // Reset/restore state when image changes
-  useEffect(() => {
-    setSelected(feedback?.status || null);
-    setNotes(feedback?.notes || '');
-  }, [imageId]);
-
-  const handleSelect = status => {
-    setSelected(status);
-    onFeedback(status, notes);
-  };
-
-  const handleNotes = e => {
-    setNotes(e.target.value);
-    if (selected) onFeedback(selected, e.target.value);
-  };
-
-  return (
-    <div className="feedback-section">
-      <style>{styles}</style>
-      <div className="feedback-label">How do you feel about this render?</div>
-      <div className="feedback-buttons">
-        <button className={`fb-btn love ${selected === 'love' ? 'active' : ''}`} onClick={() => handleSelect('love')}>💚 Love It</button>
-        <button className={`fb-btn change ${selected === 'change' ? 'active' : ''}`} onClick={() => handleSelect('change')}>🔶 Change It</button>
-        <button className={`fb-btn question ${selected === 'question' ? 'active' : ''}`} onClick={() => handleSelect('question')}>❓ Question</button>
-      </div>
-
-      {selected && (
-        <>
-          <textarea
-            className="feedback-notes"
-            value={notes}
-            onChange={handleNotes}
-            placeholder="Add any notes or details..."
-            rows={2}
-          />
-          {isLastImage ? (
-            <button className="btn-next btn-submit" onClick={onComplete}>Submit Review ✓</button>
-          ) : hasNext ? (
-            <button className="btn-next" onClick={onNext}>Next Image →</button>
-          ) : null}
-        </>
-      )}
-    </div>
-  );
-}
-
 const styles = `
   .feedback-section {
     padding: 0.75rem 0;
@@ -142,3 +91,54 @@ const styles = `
     }
   }
 `;
+
+export default function FeedbackButtons({ imageId, feedback, onFeedback, onNext, hasNext, onComplete, isLastImage }) {
+  const [notes, setNotes] = useState(feedback?.notes || '');
+  const [selected, setSelected] = useState(feedback?.status || null);
+
+  // Reset/restore state when image changes
+  useEffect(() => {
+    setSelected(feedback?.status || null);
+    setNotes(feedback?.notes || '');
+  }, [imageId]);
+
+  const handleSelect = status => {
+    setSelected(status);
+    onFeedback(status, notes);
+  };
+
+  const handleNotes = e => {
+    setNotes(e.target.value);
+    if (selected) onFeedback(selected, e.target.value);
+  };
+
+  return (
+    <div className="feedback-section">
+      <style>{styles}</style>
+      <div className="feedback-label">How do you feel about this render?</div>
+      <div className="feedback-buttons">
+        <button className={`fb-btn love ${selected === 'love' ? 'active' : ''}`} onClick={() => handleSelect('love')}>💚 Love It</button>
+        <button className={`fb-btn change ${selected === 'change' ? 'active' : ''}`} onClick={() => handleSelect('change')}>🔶 Change It</button>
+        <button className={`fb-btn question ${selected === 'question' ? 'active' : ''}`} onClick={() => handleSelect('question')}>❓ Question</button>
+      </div>
+
+      {selected && (
+        <>
+          <textarea
+            className="feedback-notes"
+            value={notes}
+            onChange={handleNotes}
+            placeholder="Add any notes or details..."
+            rows={2}
+          />
+          {isLastImage ? (
+            <button className="btn-next btn-submit" onClick={onComplete}>Submit Review ✓</button>
+          ) : hasNext ? (
+            <button className="btn-next" onClick={onNext}>Next Image →</button>
+          ) : null}
+        </>
+      )}
+    </div>
+  );
+}
+

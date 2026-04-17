@@ -1,79 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-
-export default function ChatWindow({ messages, onSend, isComplete }) {
-  const [input, setInput] = useState('');
-  const [sending, setSending] = useState(false);
-  const bottomRef = useRef(null);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  const handleSend = async () => {
-    if (!input.trim() || sending) return;
-    const text = input.trim();
-    setInput('');
-    setSending(true);
-    await onSend(text);
-    setSending(false);
-  };
-
-  return (
-    <div className="chat-window">
-      <style>{styles}</style>
-      <div className="chat-header">
-        <div className="silas-avatar-small">S</div>
-        <div className="chat-header-info">
-          <span className="chat-header-name">Silas</span>
-          <span className="chat-header-role">Barnhaus Design Guide</span>
-        </div>
-        <div className="chat-header-status" />
-      </div>
-      <div className="chat-messages">
-        {messages.map((msg, i) => (
-          <div key={i} className={`chat-msg ${msg.role}`}>
-            {msg.role === 'assistant' && <div className="msg-avatar silas-bubble">S</div>}
-            <div className="msg-bubble">{msg.content}</div>
-          </div>
-        ))}
-        {sending && (
-          <div className="chat-msg assistant">
-            <div className="msg-avatar silas-bubble">S</div>
-            <div className="msg-bubble typing">
-              <span /><span /><span />
-            </div>
-          </div>
-        )}
-        {isComplete && (
-          <div className="chat-msg assistant">
-            <div className="msg-avatar silas-bubble">S</div>
-            <div className="msg-bubble completion-note">
-              Your feedback has been sent to the Barnhaus team. We'll be in touch shortly with next steps. 🏡
-            </div>
-          </div>
-        )}
-        <div ref={bottomRef} />
-      </div>
-      <div className="chat-input-area">
-        <input
-          type="text"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleSend()}
-          placeholder={isComplete ? 'Review complete!' : 'Type your response...'}
-          disabled={sending || isComplete}
-        />
-        <button onClick={handleSend} disabled={!input.trim() || sending || isComplete} className="send-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="22" y1="2" x2="11" y2="13" />
-            <polygon points="22 2 15 22 11 13 2 9 22 2" />
-          </svg>
-        </button>
-      </div>
-    </div>
-  );
-}
-
 const styles = `
   .chat-window {
     display: flex;
@@ -277,3 +202,78 @@ const styles = `
     }
   }
 `;
+
+export default function ChatWindow({ messages, onSend, isComplete }) {
+  const [input, setInput] = useState('');
+  const [sending, setSending] = useState(false);
+  const bottomRef = useRef(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (!input.trim() || sending) return;
+    const text = input.trim();
+    setInput('');
+    setSending(true);
+    await onSend(text);
+    setSending(false);
+  };
+
+  return (
+    <div className="chat-window">
+      <style>{styles}</style>
+      <div className="chat-header">
+        <div className="silas-avatar-small">S</div>
+        <div className="chat-header-info">
+          <span className="chat-header-name">Silas</span>
+          <span className="chat-header-role">Barnhaus Design Guide</span>
+        </div>
+        <div className="chat-header-status" />
+      </div>
+      <div className="chat-messages">
+        {messages.map((msg, i) => (
+          <div key={i} className={`chat-msg ${msg.role}`}>
+            {msg.role === 'assistant' && <div className="msg-avatar silas-bubble">S</div>}
+            <div className="msg-bubble">{msg.content}</div>
+          </div>
+        ))}
+        {sending && (
+          <div className="chat-msg assistant">
+            <div className="msg-avatar silas-bubble">S</div>
+            <div className="msg-bubble typing">
+              <span /><span /><span />
+            </div>
+          </div>
+        )}
+        {isComplete && (
+          <div className="chat-msg assistant">
+            <div className="msg-avatar silas-bubble">S</div>
+            <div className="msg-bubble completion-note">
+              Your feedback has been sent to the Barnhaus team. We'll be in touch shortly with next steps. 🏡
+            </div>
+          </div>
+        )}
+        <div ref={bottomRef} />
+      </div>
+      <div className="chat-input-area">
+        <input
+          type="text"
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && handleSend()}
+          placeholder={isComplete ? 'Review complete!' : 'Type your response...'}
+          disabled={sending || isComplete}
+        />
+        <button onClick={handleSend} disabled={!input.trim() || sending || isComplete} className="send-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13" />
+            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+}
+

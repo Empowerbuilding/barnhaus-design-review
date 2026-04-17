@@ -1,32 +1,4 @@
 export default function ProgressBar({ sections, currentIndex, onSelect }) {
-  if (!sections.length) return null;
-
-  return (
-    <div className="progress-bar-container">
-      <style>{styles}</style>
-      <div className="progress-track">
-        {sections.map((label, i) => (
-          <div
-            key={i}
-            className={`progress-step ${i < currentIndex ? 'done' : ''} ${i === currentIndex ? 'active' : ''}`}
-            onClick={() => onSelect && onSelect(i)}
-            role="button"
-            tabIndex={0}
-            onKeyDown={e => e.key === 'Enter' && onSelect && onSelect(i)}
-          >
-            <div className="step-dot" />
-            <span className="step-label">{label}</span>
-          </div>
-        ))}
-        <div
-          className="progress-fill"
-          style={{ width: `${(currentIndex / Math.max(sections.length - 1, 1)) * 100}%` }}
-        />
-      </div>
-    </div>
-  );
-}
-
 const styles = `
   .progress-bar-container {
     padding: 0.5rem 1.5rem;
@@ -127,3 +99,31 @@ const styles = `
     }
   }
 `;
+  if (!sections.length) return null;
+
+  return (
+    <div className="progress-bar-container">
+      <style>{styles}</style>
+      <div className="progress-track">
+        {sections.map((label, i) => (
+          <div
+            key={i}
+            className={`progress-step ${i < currentIndex ? 'done' : ''} ${i === currentIndex ? 'active' : ''}`}
+            onClick={() => onSelect && onSelect(i)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={e => e.key === 'Enter' && onSelect && onSelect(i)}
+          >
+            <div className="step-dot" />
+            <span className="step-label">{label}</span>
+          </div>
+        ))}
+        <div
+          className="progress-fill"
+          style={{ width: `${(currentIndex / Math.max(sections.length - 1, 1)) * 100}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
