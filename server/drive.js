@@ -136,15 +136,16 @@ async function getProjectRenders(projectSlug) {
   if (!projectFolder) throw new Error(`Project folder not found for: ${projectSlug}`);
 
   const rendersFolder = await findRendersFolder(projectFolder.id);
-  if (!rendersFolder) throw new Error(`Renders folder not found in: ${projectFolder.name}`);
+  // If no renders subfolder, use the project folder directly (images stored at root)
+  const imageSourceFolder = rendersFolder || projectFolder;
 
   // Look for images directly in renders/, OR in subfolders (d1, d2, etc.)
-  let images = await listImages(rendersFolder.id);
+  let images = await listImages(imageSourceFolder.id);
 
   if (images.length === 0) {
     const drive = getDrive();
     const subRes = await drive.files.list({
-      q: `'${rendersFolder.id}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+      q: `'${imageSourceFolder.id}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
       fields: 'files(id,name)',
       supportsAllDrives: true,
       includeItemsFromAllDrives: true,
