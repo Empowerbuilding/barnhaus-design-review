@@ -1,9 +1,16 @@
+FROM node:20-alpine AS client-build
+WORKDIR /app/client
+COPY client/package.json client/package-lock.json ./
+RUN npm install
+COPY client/ ./
+RUN npm run build
+
 FROM node:20-alpine
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install --omit=dev
 COPY server/ server/
-COPY client/dist/ client/dist/
+COPY --from=client-build /app/client/dist/ client/dist/
 ENV NODE_ENV=production
 ENV PORT=3000
 EXPOSE 3000
