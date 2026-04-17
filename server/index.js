@@ -62,9 +62,10 @@ app.get('/api/image/:fileId', async (req, res) => {
 // Get project data with analyzed images
 app.get('/api/project/:projectSlug', async (req, res) => {
   const { projectSlug } = req.params;
+  const draft = req.query.draft || 'draft1';
   try {
 
-    const { projectName, images } = await getProjectRenders(projectSlug);
+    const { projectName, images } = await getProjectRenders(projectSlug, draft);
 
     const analyzed = [];
     for (const img of images) {

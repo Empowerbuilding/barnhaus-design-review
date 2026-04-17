@@ -131,16 +131,38 @@ async function getImageBase64(fileId) {
   };
 }
 
-async function getProjectRenders(projectSlug) {
+async function findDraftFolder(projectFolderId, draft) {
+  const drive = getDrive();
+  // Normalize: "draft1" -> "draft 1", "draft2" -> "draft 2"
+  const normalized = draft.toLowerCase().replace(/draft(\d+)/, 'draft $1');
+  const res = await drive.files.list({
+    q: `'${projectFolderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+    fields: 'files(id,name)',
+    supportsAllDrives: true,
+    includeItemsFromAllDrives: true,
+    driveId: process.env.SHARED_DRIVE_ID,
+    corpora: 'drive',
+    pageSize: 50,
+  });
+  const folders = res.data.files || [];
+  if (!folders.length) return null;
+  // Fuzzy match on draft number
+  const fuse = new Fuse(folders, { keys: ['name'], threshold: 0.5 });
+  const results = fuse.search(normalized);
+  if (results.length > 0) return results[0].item;
+  // Fallback: contains "draft" and the number
+  const num = draft.replace(/\D/g, '');
+  return folders.find(f => f.name.toLowerCase().includes('draft') && f.name.includes(num)) || null;
+}
+
+async function getProjectRenders(projectSlug, draft = 'draft1') {
   const projectFolder = await findProjectFolder(projectSlug);
   if (!projectFolder) throw new Error(`Project folder not found for: ${projectSlug}`);
 
-  const rendersFolder = await findRendersFolder(projectFolder.id);
-  // If no renders subfolder, use the project folder directly (images stored at root)
-  const imageSourceFolder = rendersFolder || projectFolder;
+  const draftFolder = await findDraftFolder(projectFolder.id, draft);
+  if (!draftFolder) throw new Error(`Draft folder not found in: ${projectFolder.name} (looking for "${draft}")`);
 
-  // Look for images directly in renders/, OR in subfolders (d1, d2, etc.)
-  let images = await listImages(imageSourceFolder.id);
+  let images = await listImages(draftFolder.id);
 
   if (images.length === 0) {
     const drive = getDrive();
