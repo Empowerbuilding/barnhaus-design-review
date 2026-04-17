@@ -140,7 +140,7 @@ app.post('/api/session/inspiration', upload.array('images', 10), async (req, res
     const msg = `[CLIENT UPLOADED INSPIRATION IMAGES before starting the review]\n${imageContents.join('\n')}\nThe client has shared these inspiration images before the walkthrough begins. Keep them in mind as context for their style preferences throughout the session.`;
     await sendToJuanito(msg).catch(() => {});
     if (sessionId) {
-      await supabaseFetch(\`/rest/v1/design_review_sessions?id=eq.\${sessionId}\`, {
+      await supabaseFetch(`/rest/v1/design_review_sessions?id=eq.${sessionId}`, {
         method: 'PATCH',
         body: JSON.stringify({ inspiration_uploaded: true, inspiration_count: files.length }),
       }).catch(() => {});
