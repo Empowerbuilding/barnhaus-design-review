@@ -136,7 +136,7 @@ function ReviewPage() {
     })
       .then(r => r.json())
       .then(data => {
-        if (data.reply) setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+        if (data.reply && data.reply !== 'NO_REPLY' && data.reply !== 'ANNOUNCE_SKIP') setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
         if (data.inspiration && data.inspiration.length > 0) setInspirationImages(data.inspiration);
         else setInspirationImages([]);
       })
@@ -240,6 +240,7 @@ function ReviewPage() {
           }),
         });
         const data = await res.json();
+        if (!data.reply || data.reply === 'NO_REPLY' || data.reply === 'ANNOUNCE_SKIP') return;
         const updatedMessages = [...newMessages, { role: 'assistant', content: data.reply }];
         setMessages(updatedMessages);
 

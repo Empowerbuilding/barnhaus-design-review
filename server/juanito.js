@@ -131,12 +131,18 @@ async function sendToJuanito(message) {
     const outerText = result.result.content[0].text;
     try {
       const parsed = JSON.parse(outerText);
-      if (parsed.reply && parsed.reply.length > 5) return stripThinkBlocks(parsed.reply);
+      if (parsed.reply && parsed.reply.length > 5) {
+      const clean = stripThinkBlocks(parsed.reply);
+      if (clean === 'NO_REPLY' || clean === 'ANNOUNCE_SKIP' || clean === 'HEARTBEAT_OK') return null;
+      return clean;
+    }
     } catch (e) { /* not JSON */ }
 
     // outerText itself might be the reply
     if (outerText && outerText.length > 5 && !outerText.startsWith('{')) {
-      return stripThinkBlocks(outerText);
+      const clean = stripThinkBlocks(outerText);
+      if (clean === 'NO_REPLY' || clean === 'ANNOUNCE_SKIP' || clean === 'HEARTBEAT_OK') return null;
+      return clean;
     }
 
     return "I'm still reviewing your designs — send a message and I'll respond.";
