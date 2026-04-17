@@ -8,6 +8,7 @@ const { sendToJuanito, initJuanitoSession } = require('./juanito');
 const { analyzeImage, groupAndSortImages } = require('./claude');
 const { notifyDiscord, writeToCRM, enhanceImage } = require('./notify');
 const multer = require('multer');
+const { getInspirationImages, setProjectStyle, getProjectStyle } = require('./inspiration');
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } });
 
 const app = express();
@@ -112,6 +113,11 @@ app.post('/api/session/start', async (req, res) => {
     const data = await r.json();
     const sessionId = Array.isArray(data) ? data[0]?.id : data?.id;
     const memo = await initJuanitoSession(projectSlug, clientName || 'there', projectName || projectSlug, rooms || []);
+    // Extract style keywords from memo for inspiration image queries
+    if (memo) {
+      const styleMatch = memo.match(/scandinavian|farmhouse|modern|rustic|industrial|transitional|mediterranean|craftsman|contemporary|minimalist/gi);
+      if (styleMatch) setProjectStyle(projectSlug, [...new Set(styleMatch.map(s => s.toLowerCase()))].slice(0, 2).join(' '));
+    }
     res.json({ sessionId: sessionId || null, memo });
   } catch (err) {
     console.error('Session start error:', err.message);
@@ -166,14 +172,13 @@ app.patch('/api/session/:sessionId/transcript', async (req, res) => {
 app.post('/api/chat', async (req, res) => {
   const {
     messages, clientName, currentRoom, currentImage, currentImageId,
-    isImageChangeTrigger, triggerMessage,
+    isImageChangeTrigger, triggerMessage, projectSlug,
   } = req.body;
 
   try {
     let fullMessage;
 
     if (isImageChangeTrigger && triggerMessage) {
-      // Proactive image change — send trigger directly to Juanito, no user message
       fullMessage = triggerMessage;
     } else {
       const lastUserMessage = [...messages].reverse().find(m => m.role === 'user')?.content || '';
@@ -181,8 +186,17 @@ app.post('/api/chat', async (req, res) => {
       fullMessage = `${contextPrefix}\n\n${lastUserMessage}`;
     }
 
-    const reply = await sendToJuanito(fullMessage);
-    res.json({ reply });
+    // Fetch inspiration images in parallel with Silas response (image-change only)
+    const inspirationPromise = (isImageChangeTrigger && currentRoom && currentRoom !== 'floor plan' && currentRoom !== 'other')
+      ? getInspirationImages(currentRoom, getProjectStyle(projectSlug || ''), 3)
+      : Promise.resolve([]);
+
+    const [reply, inspiration] = await Promise.all([
+      sendToJuanito(fullMessage),
+      inspirationPromise,
+    ]);
+
+    res.json({ reply, inspiration: inspiration || [] });
   } catch (err) {
     console.error('Chat error:', err.message);
     res.status(500).json({ error: 'Chat failed' });

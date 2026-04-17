@@ -5,6 +5,7 @@ import ChatDrawer from './components/ChatDrawer';
 import ImageViewer from './components/ImageViewer';
 import ProgressBar from './components/ProgressBar';
 import OverviewScreen from './components/OverviewScreen';
+import InspirationStrip from './components/InspirationStrip';
 import './App.css';
 
 const SECTION_LABELS = {
@@ -37,6 +38,7 @@ function ReviewPage() {
   const [currentGroupIdx, setCurrentGroupIdx] = useState(0);
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
   const [phase, setPhase] = useState('overview'); // 'overview' | 'walkthrough'
+  const [inspirationImages, setInspirationImages] = useState([]);
   const [memo, setMemo] = useState(null);
   const [messages, setMessages] = useState([]);
   const [feedback, setFeedback] = useState({});
@@ -123,6 +125,7 @@ function ReviewPage() {
       body: JSON.stringify({
         messages: [],
         clientName,
+        projectSlug,
         currentRoom: roomLabel,
         currentImage: currentImage.name,
         currentImageId: currentImage.id,
@@ -135,6 +138,8 @@ function ReviewPage() {
       .then(r => r.json())
       .then(data => {
         if (data.reply) setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+        if (data.inspiration && data.inspiration.length > 0) setInspirationImages(data.inspiration);
+        else setInspirationImages([]);
       })
       .catch(() => {});
   }, [currentGroup, currentImage, currentGroupIdx, currentImageIdx, project, sessionId, clientName]);
@@ -161,6 +166,14 @@ function ReviewPage() {
     setUnread(false);
   };
   const closeDrawer = () => setDrawerOpen(false);
+
+  const handleVibePick = useCallback(async (img, index) => {
+    setInspirationImages([]); // dismiss strip
+    const message = img
+      ? `I like option ${index} — that direction feels right.`
+      : `None of those quite fit — let me describe what I have in mind.`;
+    await sendChat(message);
+  }, [sendChat]);
 
   const handleStart = useCallback(async (inspirationUploads) => {
     // If client uploaded inspirations, notify Juanito via the session endpoint
@@ -233,6 +246,7 @@ function ReviewPage() {
   const handleSectionChange = useCallback((idx) => {
     setCurrentGroupIdx(idx);
     setCurrentImageIdx(0);
+    setInspirationImages([]);
   }, []);
 
   const handleFeedback = useCallback(
@@ -369,6 +383,7 @@ function ReviewPage() {
             onSend={sendChat}
             isComplete={completed}
           />
+          <InspirationStrip images={inspirationImages} onPick={handleVibePick} />
         </div>
       </div>
 
@@ -395,6 +410,8 @@ function ReviewPage() {
         messages={messages}
         onSend={sendChat}
         isComplete={completed}
+        inspirationImages={inspirationImages}
+        onVibePick={handleVibePick}
       />
     </div>
   );
