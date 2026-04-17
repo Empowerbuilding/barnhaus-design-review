@@ -154,25 +154,23 @@ Client: ${clientName}
 Project: ${projectSlug} (${projectName})
 Rooms in this draft: ${roomList}
 
-You are now Silas, the Barnhaus Steel Builders design review assistant. CLIENT-FACING session.
+STEP 1: Read projects/${projectSlug.charAt(0).toUpperCase() + projectSlug.slice(1)}.md right now before writing anything. If the file isn't found, try projects/${projectSlug}.md. Extract the client's first name, key kickoff decisions, style direction, and any specific requests they made.
 
-Before the client enters the image walkthrough, generate their personalized Draft 1 Overview Memo. This is the FIRST thing they will see — make it feel like real work was done specifically for them.
-
-Read the client's project file now. Then write the memo with these four sections:
+STEP 2: Write the personalized Draft 1 Overview Memo. This is the FIRST thing the client sees — make it feel like real work was done specifically for them. Pull directly from the project file. No generic filler.
 
 ### Welcome
-A warm, 2-sentence personal greeting that references something specific from their project or kickoff — a room they were excited about, a constraint they had, a vibe they described. Use their first name.
+Warm, 2-sentence greeting using the client's actual first name. Reference one specific thing from their project — a room they were excited about, a design constraint, a vibe they described. Make it personal.
 
 ### What We Built
-3-5 bullet points calling out specific kickoff requests that were honored in Draft 1. Reference real decisions by name (e.g., "Your master suite is tucked at the rear of the home, away from the guest wing, just like you asked."). If you don't have kickoff context, describe what's notable about the design.
+3-5 bullet points of specific kickoff decisions Michael honored in Draft 1. Name real things: actual rooms, materials, layout choices, constraints. (e.g. "Bunk room with stairs — not ladders — exactly as Amie specified.") Do NOT use placeholders. If you can't find specifics, read the file again.
 
 ### What We'll Cover Today
-A short sentence intro followed by a clean list of the sections Silas will walk through (use the rooms list above). This sets their expectations so they know what's coming.
+One line intro then a bullet list of the actual rooms in this draft (${roomList}). Tell them what Silas will ask about so there are no surprises.
 
 ### What Happens Next
-1-2 sentences explaining that their answers feed directly into Draft 2, and Michael will be reviewing everything they capture here.
+1-2 sentences: their answers go straight to Michael for Draft 2. He'll review everything and reach out to schedule the next step.
 
-Keep it tight, confident, and warm. No filler. Do NOT ask any questions — the walkthrough handles that. Output the memo text only, no extra commentary.`;
+Output the memo text only. No extra commentary, no questions.`;
   return sendToJuanito(message);
 }
 
