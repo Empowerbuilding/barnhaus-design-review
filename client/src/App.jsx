@@ -611,6 +611,8 @@ const appStyles = `
     border-left: 1px solid var(--charcoal-lighter);
     overflow: hidden;
     flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
     transition: width 0.3s ease, min-width 0.3s ease, opacity 0.3s ease;
   }
   .chat-panel-closed {
