@@ -108,13 +108,10 @@ function ReviewPage() {
   // When client navigates to a new image, notify Juanito with context so he can lead
   const lastNotifiedImage = useRef(null);
   useEffect(() => {
-    if (!project || !currentImage || !sessionId) return;
+    if (!project || !currentImage || !sessionId || phase !== 'walkthrough') return;
     const imageKey = `${currentGroup?.roomType}-${currentImage.id}`;
     if (lastNotifiedImage.current === imageKey) return;
     lastNotifiedImage.current = imageKey;
-
-    const isFirst = currentGroupIdx === 0 && currentImageIdx === 0;
-    if (isFirst) return; // init greeting handles the first image
 
     const roomLabel = currentGroup?.roomType || 'other';
     const features = currentImage.analysis?.features?.join(', ') || '';
@@ -143,7 +140,7 @@ function ReviewPage() {
         else setInspirationImages([]);
       })
       .catch(() => {});
-  }, [currentGroup, currentImage, currentGroupIdx, currentImageIdx, project, sessionId, clientName]);
+  }, [currentGroup, currentImage, currentGroupIdx, currentImageIdx, project, sessionId, clientName, phase]);
 
   // Detect new assistant messages → set unread badge when drawer is closed
   useEffect(() => {
