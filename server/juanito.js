@@ -56,7 +56,7 @@ async function analyzeImageWithClaude(imageId, base64, mimeType) {
       method: 'POST',
       headers: { 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5',
+        model: 'claude-haiku-4-5-20251022',
         max_tokens: 256,
         messages: [{ role: 'user', content: [
           { type: 'image', source: { type: 'base64', media_type: mimeType, data: base64 } },

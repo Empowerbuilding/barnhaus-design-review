@@ -97,6 +97,43 @@ function ReviewPage() {
     ? SECTION_LABELS[project.groups[currentGroupIdx + 1].roomType] || project.groups[currentGroupIdx + 1].roomType
     : null;
 
+  // When client navigates to a new image, notify Juanito with context so he can lead
+  const lastNotifiedImage = useRef(null);
+  useEffect(() => {
+    if (!project || !currentImage || !sessionId) return;
+    const imageKey = `${currentGroup?.roomType}-${currentImage.id}`;
+    if (lastNotifiedImage.current === imageKey) return;
+    lastNotifiedImage.current = imageKey;
+
+    const isFirst = currentGroupIdx === 0 && currentImageIdx === 0;
+    if (isFirst) return; // init greeting handles the first image
+
+    const roomLabel = currentGroup?.roomType || 'other';
+    const features = currentImage.analysis?.features?.join(', ') || '';
+    const trigger = `[IMAGE CHANGE] The client is now viewing image ${currentImageIdx + 1} of ${currentGroup?.images?.length} in the ${roomLabel} section. Image name: ${currentImage.name}. Visible features: ${features || 'not analyzed'}. Open the conversation for this image — ask one targeted question based on the room type and what you know about this client. Do not wait for them to speak first.`;
+
+    fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [],
+        clientName,
+        currentRoom: roomLabel,
+        currentImage: currentImage.name,
+        currentImageId: currentImage.id,
+        sessionId,
+        currentImageIndexInSection: currentImageIdx,
+        isImageChangeTrigger: true,
+        triggerMessage: trigger,
+      }),
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (data.reply) setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+      })
+      .catch(() => {});
+  }, [currentGroup, currentImage, currentGroupIdx, currentImageIdx, project, sessionId, clientName]);
+
   // Detect new assistant messages → set unread badge when drawer is closed
   useEffect(() => {
     const lastMsg = messages[messages.length - 1];

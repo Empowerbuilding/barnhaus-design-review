@@ -136,21 +136,22 @@ app.patch('/api/session/:sessionId/transcript', async (req, res) => {
 app.post('/api/chat', async (req, res) => {
   const {
     messages, clientName, currentRoom, currentImage, currentImageId,
+    isImageChangeTrigger, triggerMessage,
   } = req.body;
 
   try {
-    let imageBase64 = null, imageMime = null;
-    if (currentImageId) {
-      try {
-        const imgData = await getImageBase64(currentImageId);
-        imageBase64 = imgData.base64;
-        imageMime = imgData.mimeType;
-      } catch (e) { console.error('Image fetch for vision failed:', e.message); }
+    let fullMessage;
+
+    if (isImageChangeTrigger && triggerMessage) {
+      // Proactive image change — send trigger directly to Juanito, no user message
+      fullMessage = triggerMessage;
+    } else {
+      const lastUserMessage = [...messages].reverse().find(m => m.role === 'user')?.content || '';
+      const contextPrefix = `[CONTEXT: room=${currentRoom}, image=${currentImage}, client=${clientName}]`;
+      fullMessage = `${contextPrefix}\n\n${lastUserMessage}`;
     }
-    const lastUserMessage = [...messages].reverse().find(m => m.role === 'user')?.content || '';
-    const contextPrefix = `[CONTEXT: room=${currentRoom}, image=${currentImage}, client=${clientName}]`;
-    const fullMessage = `${contextPrefix}\n\n${lastUserMessage}`;
-    const reply = await sendToJuanito(fullMessage, imageBase64, imageMime);
+
+    const reply = await sendToJuanito(fullMessage);
     res.json({ reply });
   } catch (err) {
     console.error('Chat error:', err.message);
