@@ -153,7 +153,8 @@ async function sendToJuanito(message, imageBase64, imageMime) {
     }
 
     const result = await response.json();
-    return result.content[0].text;
+    if (!result.ok) throw new Error(result.error || 'Gateway error');
+    return result.result.content[0].text;
   } catch (err) {
     console.error('Juanito unreachable:', err.message);
     return "I'm having trouble connecting right now. Please try again in a moment.";
