@@ -4,7 +4,8 @@ const path = require('path');
 const { WebSocketServer } = require('ws');
 const http = require('http');
 const { getProjectRenders, streamImage, getImageBase64 } = require('./drive');
-const { sendToJuanito, initJuanitoSession, analyzeImageWithJuanito, groupAndSortImages } = require('./juanito');
+const { sendToJuanito, initJuanitoSession } = require('./juanito');
+const { analyzeImage, groupAndSortImages } = require('./claude');
 const { notifyDiscord, writeToCRM, enhanceImage } = require('./notify');
 
 const app = express();
@@ -71,7 +72,7 @@ app.get('/api/project/:projectSlug', async (req, res) => {
     for (const img of images) {
       try {
         const { base64, mimeType } = await getImageBase64(img.id);
-        const analysis = await analyzeImageWithJuanito(img.id, base64, mimeType);
+        const analysis = await analyzeImage(img.id, base64, mimeType);
         analyzed.push({ ...img, analysis });
       } catch (err) {
         console.error(`Failed to analyze ${img.name}:`, err.message);
