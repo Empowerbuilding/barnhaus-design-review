@@ -1010,7 +1010,7 @@ Please change the parent <Route path="${Y}"> to <Route path="${Y==="/"?"*":`${Y}
   }
 `;return c.length?g.jsxs("div",{className:"progress-bar-container",children:[g.jsx("style",{children:r}),g.jsxs("div",{className:"progress-track",children:[c.map((d,m)=>g.jsxs("div",{className:`progress-step ${m<s?"done":""} ${m===s?"active":""}`,onClick:()=>f&&f(m),role:"button",tabIndex:0,onKeyDown:x=>x.key==="Enter"&&f&&f(m),children:[g.jsx("div",{className:"step-dot"}),g.jsx("span",{className:"step-label",children:d})]},m)),g.jsx("div",{className:"progress-fill",style:{width:`${s/Math.max(c.length-1,1)*100}%`}})]})]}):null}const ay=`
   .overview-screen {
-    min-height: 100vh;
+    height: 100vh;
     background: #1a1a1a;
     display: flex;
     align-items: flex-start;

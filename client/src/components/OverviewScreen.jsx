@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 const styles = `
   .overview-screen {
-    min-height: 100vh;
+    height: 100vh;
     background: #1a1a1a;
     display: flex;
     align-items: flex-start;
