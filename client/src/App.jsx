@@ -108,7 +108,7 @@ function ReviewPage() {
   // When client navigates to a new image, notify Juanito with context so he can lead
   const lastNotifiedImage = useRef(null);
   useEffect(() => {
-    if (!project || !currentImage || !sessionId || phase !== 'walkthrough') return;
+    if (!project || !currentImage || phase !== 'walkthrough') return;
     const imageKey = `${currentGroup?.roomType}-${currentImage.id}`;
     if (lastNotifiedImage.current === imageKey) return;
     lastNotifiedImage.current = imageKey;

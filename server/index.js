@@ -44,8 +44,18 @@ async function ensureTable() {
     });
     if (res.ok) {
       console.log('design_review_sessions table ready');
-    } else {
-      console.log('design_review_sessions table not found (status', res.status, ') — create it in Supabase dashboard');
+      return;
+    }
+    // Table doesn't exist — create it via Supabase Management API
+    console.log('design_review_sessions not found — attempting to create...');
+    const createRes = await fetch(`${SUPABASE_URL}/rest/v1/rpc/create_design_review_sessions_if_not_exists`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+      body: '{}',
+    }).catch(() => null);
+    if (!createRes?.ok) {
+      // Fall back: make sessions work without DB (in-memory only)
+      console.log('Running without session persistence — create design_review_sessions table in Supabase');
     }
   } catch (e) {
     console.error('Table check failed:', e.message);
