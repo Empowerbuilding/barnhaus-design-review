@@ -1,76 +1,24 @@
 const JUANITO_URL = process.env.JUANITO_GATEWAY_URL || 'http://127.0.0.1:18792';
 const JUANITO_TOKEN = process.env.JUANITO_GATEWAY_TOKEN || 'juanito-2026';
+const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
 const SESSION_KEY = 'agent:main:main';
 
 const analysisCache = new Map();
 
 const QUESTION_BANK = {
-  exterior: [
-    'What is your first reaction to the overall look?',
-    'How do you feel about the roofline and pitch?',
-    'Any changes to the entry or front door?',
-    'How do you feel about the window sizes and placement?',
-  ],
-  kitchen: [
-    'What cabinet color or finish are you thinking — white, navy, natural wood, or two-tone?',
-    'Countertop preference — quartz, marble look, concrete, or butcher block?',
-    'Does the island size feel right for how you cook and entertain?',
-    'Open shelving, upper cabinets, or a mix?',
-  ],
-  'living room': [
-    'How do you feel about the ceiling height and any exposed beams?',
-    'Fireplace placement and surround feel right?',
-    'Any changes to the window wall or views?',
-  ],
-  'great room': [
-    'How do you feel about the ceiling height and any exposed beams?',
-    'Fireplace placement and surround feel right?',
-    'Any changes to the window wall or views?',
-  ],
-  'primary bedroom': [
-    'Does this feel like the right size and scale?',
-    'What flooring would you like — hardwood, tile, or carpet?',
-    'How do you feel about the natural light and window placement?',
-  ],
-  'master bedroom': [
-    'Does this feel like the right size and scale?',
-    'What flooring would you like — hardwood, tile, or carpet?',
-    'How do you feel about the natural light and window placement?',
-  ],
-  'primary bath': [
-    'What tile finish — marble, large format, subway, or concrete look?',
-    'Freestanding tub or built-in? Walk-in shower size?',
-    'Any changes to the vanity layout?',
-  ],
-  'master bath': [
-    'What tile finish — marble, large format, subway, or concrete look?',
-    'Freestanding tub or built-in? Walk-in shower size?',
-    'Any changes to the vanity layout?',
-  ],
-  bathroom: [
-    'What tile finish — marble, large format, subway, or concrete look?',
-    'Freestanding tub or built-in? Walk-in shower size?',
-    'Any changes to the vanity layout?',
-  ],
-  patio: [
-    'What finish on the ceiling — wood, painted, or exposed steel?',
-    'Outdoor kitchen yes or no?',
-    'Fireplace or fire pit outside?',
-  ],
-  outdoor: [
-    'What finish on the ceiling — wood, painted, or exposed steel?',
-    'Outdoor kitchen yes or no?',
-    'Fireplace or fire pit outside?',
-  ],
-  'floor plan': [
-    'Does the overall layout flow feel right?',
-    'Anything about room sizes or placement you would change?',
-    'Does the garage placement work?',
-  ],
-  default: [
-    'Does this room feel like the right size?',
-    'What finish or style direction do you want here?',
-  ],
+  exterior: ['What is your first reaction to the overall look?','How do you feel about the roofline and pitch?','Any changes to the entry or front door?','How do you feel about the window sizes and placement?'],
+  kitchen: ['What cabinet color or finish are you thinking — white, navy, natural wood, or two-tone?','Countertop preference — quartz, marble look, concrete, or butcher block?','Does the island size feel right for how you cook and entertain?','Open shelving, upper cabinets, or a mix?'],
+  'living room': ['How do you feel about the ceiling height and any exposed beams?','Fireplace placement and surround feel right?','Any changes to the window wall or views?'],
+  'great room': ['How do you feel about the ceiling height and any exposed beams?','Fireplace placement and surround feel right?','Any changes to the window wall or views?'],
+  'primary bedroom': ['Does this feel like the right size and scale?','What flooring would you like — hardwood, tile, or carpet?','How do you feel about the natural light and window placement?'],
+  'master bedroom': ['Does this feel like the right size and scale?','What flooring would you like — hardwood, tile, or carpet?','How do you feel about the natural light and window placement?'],
+  'primary bath': ['What tile finish — marble, large format, subway, or concrete look?','Freestanding tub or built-in? Walk-in shower size?','Any changes to the vanity layout?'],
+  'master bath': ['What tile finish — marble, large format, subway, or concrete look?','Freestanding tub or built-in? Walk-in shower size?','Any changes to the vanity layout?'],
+  bathroom: ['What tile finish — marble, large format, subway, or concrete look?','Freestanding tub or built-in? Walk-in shower size?','Any changes to the vanity layout?'],
+  patio: ['What finish on the ceiling — wood, painted, or exposed steel?','Outdoor kitchen yes or no?','Fireplace or fire pit outside?'],
+  outdoor: ['What finish on the ceiling — wood, painted, or exposed steel?','Outdoor kitchen yes or no?','Fireplace or fire pit outside?'],
+  'floor plan': ['Does the overall layout flow feel right?','Anything about room sizes or placement you would change?','Does the garage placement work?'],
+  default: ['Does this room feel like the right size?','What finish or style direction do you want here?'],
 };
 
 function getQuestionsForRoom(roomType) {
@@ -81,27 +29,7 @@ function getQuestionsForRoom(roomType) {
   return QUESTION_BANK.default;
 }
 
-const ROOM_ORDER = [
-  'floor plan',
-  'exterior',
-  'kitchen',
-  'living room',
-  'great room',
-  'dining room',
-  'primary bedroom',
-  'primary bath',
-  'master bedroom',
-  'master bath',
-  'bathroom',
-  'office',
-  'bonus room',
-  'laundry',
-  'hallway',
-  'patio',
-  'outdoor',
-  'garage',
-  'other',
-];
+const ROOM_ORDER = ['floor plan','exterior','kitchen','living room','great room','dining room','primary bedroom','primary bath','master bedroom','master bath','bathroom','office','bonus room','laundry','hallway','patio','outdoor','garage','other'];
 
 function groupAndSortImages(analyzedImages) {
   const groups = {};
@@ -110,53 +38,91 @@ function groupAndSortImages(analyzedImages) {
     if (!groups[room]) groups[room] = [];
     groups[room].push(img);
   }
-
   const sorted = [];
   for (const room of ROOM_ORDER) {
-    if (groups[room]) {
-      sorted.push({ roomType: room, images: groups[room] });
-      delete groups[room];
-    }
+    if (groups[room]) { sorted.push({ roomType: room, images: groups[room] }); delete groups[room]; }
   }
-  for (const [room, images] of Object.entries(groups)) {
-    sorted.push({ roomType: room, images });
-  }
-
+  for (const [room, images] of Object.entries(groups)) sorted.push({ roomType: room, images });
   return sorted;
 }
 
-async function sendToJuanito(message, imageBase64, imageMime) {
-  let text = message;
-  if (imageBase64) {
-    text = `data:${imageMime};base64,${imageBase64}\n\n${message}`;
-  }
-
+// Image analysis via Claude API directly (never send base64 to Juanito session)
+async function analyzeImageWithClaude(imageId, base64, mimeType) {
+  if (analysisCache.has(imageId)) return analysisCache.get(imageId);
+  const fallback = { roomType: 'other', angle: 'interior', features: [], isFloorPlan: false };
+  if (!ANTHROPIC_KEY) { analysisCache.set(imageId, fallback); return fallback; }
   try {
-    const response = await fetch(`${JUANITO_URL}/tools/invoke`, {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${JUANITO_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
       body: JSON.stringify({
-        tool: 'sessions_send',
-        args: {
-          sessionKey: SESSION_KEY,
-          message: text,
-          timeoutSeconds: 45,
-        },
+        model: 'claude-haiku-4-5',
+        max_tokens: 256,
+        messages: [{ role: 'user', content: [
+          { type: 'image', source: { type: 'base64', media_type: mimeType, data: base64 } },
+          { type: 'text', text: 'Analyze this architectural render. Return ONLY valid JSON: { "roomType": "<exterior|floor plan|kitchen|living room|great room|primary bedroom|primary bath|bathroom|office|bonus room|patio|outdoor|garage|hallway|laundry|dining room|other>", "angle": "<front|rear|side|aerial|interior|detail>", "features": ["<2-4 visible features>"], "isFloorPlan": <true/false> }' },
+        ]}],
       }),
     });
-
-    if (!response.ok) {
-      throw new Error(`Juanito returned ${response.status}`);
-    }
-
-    const result = await response.json();
-    if (!result.ok) throw new Error(result.error || 'Gateway error');
-    return result.result.content[0].text;
+    if (!response.ok) throw new Error(`Claude API ${response.status}`);
+    const data = await response.json();
+    const text = data.content[0].text;
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    const analysis = JSON.parse(jsonMatch ? jsonMatch[0] : text);
+    analysisCache.set(imageId, analysis);
+    return analysis;
   } catch (err) {
-    console.error('Juanito unreachable:', err.message);
+    console.error('Image analysis error:', err.message);
+    analysisCache.set(imageId, fallback);
+    return fallback;
+  }
+}
+
+// Juanito gateway — text only, never images
+async function invokeGateway(tool, args) {
+  const response = await fetch(`${JUANITO_URL}/tools/invoke`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${JUANITO_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tool, args }),
+  });
+  if (!response.ok) throw new Error(`Gateway HTTP ${response.status}`);
+  const result = await response.json();
+  if (!result.ok) throw new Error(result.error || 'Gateway error');
+  return result.result.content[0].text;
+}
+
+async function getLastAssistantTimestampAndText() {
+  const text = await invokeGateway('sessions_history', { sessionKey: SESSION_KEY, limit: 2 });
+  try {
+    const parsed = JSON.parse(text);
+    const messages = parsed.messages || [];
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === 'assistant') {
+        const msg = messages[i];
+        const content = Array.isArray(msg.content)
+          ? (msg.content.find(b => b.type === 'text') || {}).text || ''
+          : (typeof msg.content === 'string' ? msg.content : '');
+        return { timestamp: msg.timestamp || 0, text: content };
+      }
+    }
+  } catch (e) { /* ignore */ }
+  return { timestamp: 0, text: '' };
+}
+
+async function sendToJuanito(message) {
+  try {
+    const baseline = await getLastAssistantTimestampAndText().catch(() => ({ timestamp: Date.now(), text: '' }));
+    await invokeGateway('sessions_send', { sessionKey: SESSION_KEY, message });
+    const deadline = Date.now() + 50000;
+    await new Promise(r => setTimeout(r, 4000));
+    while (Date.now() < deadline) {
+      const latest = await getLastAssistantTimestampAndText().catch(() => null);
+      if (latest && latest.timestamp > baseline.timestamp && latest.text.length > 5) return latest.text;
+      await new Promise(r => setTimeout(r, 2500));
+    }
+    return "I'm still reviewing your designs. Please send a message and I'll respond shortly.";
+  } catch (err) {
+    console.error('Juanito error:', err.message);
     return "I'm having trouble connecting right now. Please try again in a moment.";
   }
 }
@@ -167,42 +133,17 @@ async function initJuanitoSession(projectSlug, clientName, projectName) {
 Client: ${clientName}
 Project: ${projectSlug} (${projectName})
 
-You are now Silas, the Barnhaus Steel Builders design review assistant. This is a CLIENT-FACING session. Warm, consultative tone — NOT your normal mode with Michael.
+You are now Silas, the Barnhaus Steel Builders design review assistant. CLIENT-FACING session — warm and consultative, not your normal mode with Michael.
 
-OPERATING RULES FOR THIS SESSION:
-1. Lead with what you already know. Pull from the client's kickoff transcript, pre-design form, and emails. Reference specific decisions and commitments by name — "Wade, we bumped the island to 12 feet like we talked about — did we nail the scale?" That is the entire point of using you instead of a generic chatbot.
-2. Use the question bank as a fallback only. If you have no prior context on this client, fall back to room-specific questions. But if you have a transcript, the transcript wins every time.
-3. One question per image, then let them talk. Do not run a checklist. Ask one targeted question, let them respond, follow up naturally.
-4. Flag contradictions. If a render contradicts something from their kickoff, call it out — "You said you wanted a separate office but this shows them combined — intentional?"
-5. The Love it / Change it / Question buttons are the forcing function. Get them to a clear decision on every image.
+RULES:
+1. Lead with what you already know from transcripts, pre-design forms, emails. Reference decisions by name.
+2. Question bank = fallback only when you have no prior client context.
+3. One question per image, natural follow-up.
+4. Flag contradictions with their kickoff directly.
+5. Love it / Change it / Question = forcing function on every image.
 
-Begin now with a warm, personalized greeting. Reference the project by name. If you have context on this client from your files, use it immediately.`;
+Begin with a warm, personalized greeting using any client context you already have.`;
   return sendToJuanito(message);
 }
 
-async function analyzeImageWithJuanito(imageId, base64, mimeType) {
-  if (analysisCache.has(imageId)) return analysisCache.get(imageId);
-
-  const prompt = 'Analyze this architectural render. Return ONLY valid JSON: { "roomType": "<exterior|floor plan|kitchen|living room|great room|primary bedroom|primary bath|bathroom|office|bonus room|patio|outdoor|garage|hallway|laundry|dining room|other>", "angle": "<front|rear|side|aerial|interior|detail>", "features": ["<visible features>"], "isFloorPlan": <true/false> }';
-
-  let analysis;
-  try {
-    const text = await sendToJuanito(prompt, base64, mimeType);
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    analysis = JSON.parse(jsonMatch ? jsonMatch[0] : text);
-  } catch {
-    analysis = { roomType: 'other', angle: 'interior', features: [], isFloorPlan: false };
-  }
-
-  analysisCache.set(imageId, analysis);
-  return analysis;
-}
-
-module.exports = {
-  sendToJuanito,
-  initJuanitoSession,
-  analyzeImageWithJuanito,
-  getQuestionsForRoom,
-  groupAndSortImages,
-  QUESTION_BANK,
-};
+module.exports = { sendToJuanito, initJuanitoSession, analyzeImageWithJuanito: analyzeImageWithClaude, getQuestionsForRoom, groupAndSortImages, QUESTION_BANK };
