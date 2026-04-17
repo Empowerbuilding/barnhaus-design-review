@@ -111,16 +111,32 @@ async function getLastAssistantTimestampAndText() {
 
 async function sendToJuanito(message) {
   try {
+    const response = await fetch(`${JUANITO_URL}/tools/invoke`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${JUANITO_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tool: 'sessions_send', args: { sessionKey: SESSION_KEY, message } }),
+    });
+    if (!response.ok) throw new Error(`Gateway HTTP ${response.status}`);
+    const result = await response.json();
+    if (!result.ok) throw new Error(result.error || 'Gateway error');
+
+    // Check for inline reply first (sessions_send returns reply field when available)
+    const outerText = result.result.content[0].text;
+    try {
+      const parsed = JSON.parse(outerText);
+      if (parsed.reply && parsed.reply.length > 5) return parsed.reply;
+    } catch (e) { /* not JSON, fall through */ }
+
+    // Fall back to polling sessions_history
     const baseline = await getLastAssistantTimestampAndText().catch(() => ({ timestamp: Date.now(), text: '' }));
-    await invokeGateway('sessions_send', { sessionKey: SESSION_KEY, message });
     const deadline = Date.now() + 50000;
-    await new Promise(r => setTimeout(r, 4000));
+    await new Promise(r => setTimeout(r, 3000));
     while (Date.now() < deadline) {
       const latest = await getLastAssistantTimestampAndText().catch(() => null);
       if (latest && latest.timestamp > baseline.timestamp && latest.text.length > 5) return latest.text;
       await new Promise(r => setTimeout(r, 2500));
     }
-    return "I'm still reviewing your designs. Please send a message and I'll respond shortly.";
+    return "I'm still thinking through your designs. Send a message and I'll respond.";
   } catch (err) {
     console.error('Juanito error:', err.message);
     return "I'm having trouble connecting right now. Please try again in a moment.";

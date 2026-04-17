@@ -174,12 +174,12 @@ function ReviewPage() {
     if (project && !initialGreetingSent.current) {
       initialGreetingSent.current = true;
       const greeting = `Hi, I'm ${clientName} and I'm here to review the ${project.projectName} ${draft || 'draft'} designs.`;
-      setMessages([{ role: 'user', content: greeting }]);
+      // Don't show the init message as a user bubble — just send it silently
       fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: [{ role: 'user', content: greeting }],
+          messages: [],
           projectName: project.projectName,
           clientName,
           currentRoom: project.groups?.[0]?.roomType || 'greeting',
