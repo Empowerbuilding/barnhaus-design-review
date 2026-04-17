@@ -172,7 +172,7 @@ app.patch('/api/session/:sessionId/transcript', async (req, res) => {
 app.post('/api/chat', async (req, res) => {
   const {
     messages, clientName, currentRoom, currentImage, currentImageId,
-    isImageChangeTrigger, triggerMessage, projectSlug,
+    isImageChangeTrigger, triggerMessage, projectSlug, currentImageFeatures,
   } = req.body;
 
   try {
@@ -188,7 +188,7 @@ app.post('/api/chat', async (req, res) => {
 
     // Fetch inspiration images in parallel with Silas response (image-change only)
     const inspirationPromise = (isImageChangeTrigger && currentRoom && currentRoom !== 'floor plan' && currentRoom !== 'other')
-      ? getInspirationImages(currentRoom, getProjectStyle(projectSlug || ''), 3)
+      ? getInspirationImages(currentRoom, getProjectStyle(projectSlug || ''), 3, currentImageFeatures || [])
       : Promise.resolve([]);
 
     const [reply, inspiration] = await Promise.all([

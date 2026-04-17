@@ -127,6 +127,7 @@ function ReviewPage() {
         currentRoom: roomLabel,
         currentImage: currentImage.name,
         currentImageId: currentImage.id,
+        currentImageFeatures: currentImage.analysis?.features || [],
         sessionId,
         currentImageIndexInSection: currentImageIdx,
         isImageChangeTrigger: true,

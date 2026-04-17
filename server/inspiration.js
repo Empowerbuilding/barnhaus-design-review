@@ -77,12 +77,17 @@ async function fetchPinterest(query, count = 3) {
   }
 }
 
-async function getInspirationImages(roomType, stylePrefix = '', count = 3) {
+async function getInspirationImages(roomType, stylePrefix = '', count = 3, features = []) {
   // Skip floor plans — visual inspiration doesn't apply
   if (!roomType || roomType === 'floor plan') return [];
 
   const baseQuery = ROOM_QUERIES[roomType.toLowerCase()] || ROOM_QUERIES.default;
-  const query = stylePrefix ? `${stylePrefix} ${baseQuery}` : baseQuery;
+  // Add specific features visible in the render to narrow the inspiration search
+  const featureStr = features
+    .filter(f => f && f.length > 2)
+    .slice(0, 3)
+    .join(' ');
+  const query = [stylePrefix, featureStr || baseQuery].filter(Boolean).join(' ') + (featureStr ? ` ${roomType} interior design` : '');
 
   // Pinterest first if available, then Pexels
   if (PINTEREST_TOKEN) {
