@@ -36,7 +36,7 @@ const styles = `
     background: #232323;
     border: 1px solid #2e2e2e;
     border-radius: 12px;
-    overflow: hidden;
+    overflow: visible;
   }
   .silas-tag {
     display: flex;
