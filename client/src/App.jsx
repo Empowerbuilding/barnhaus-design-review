@@ -39,6 +39,7 @@ function ReviewPage() {
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
   const [phase, setPhase] = useState('overview'); // 'overview' | 'walkthrough'
   const [inspirationImages, setInspirationImages] = useState([]);
+  const [roomInspirationPrompts, setRoomInspirationPrompts] = useState({}); // roomType → enhance prompt
   const [memo, setMemo] = useState(null);
   const [messages, setMessages] = useState([]);
   const [feedback, setFeedback] = useState({});
@@ -194,6 +195,11 @@ function ReviewPage() {
       const data = await res.json();
       if (data.reply) {
         setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+      }
+      if (data.description && currentGroup?.roomType) {
+        // Build an enhance prompt from the inspiration analysis
+        const enhancePrompt = `Transform this render to match the client's chosen inspiration style. ${data.description} Maintain the existing room layout and dimensions exactly.`;
+        setRoomInspirationPrompts(prev => ({ ...prev, [currentGroup.roomType]: enhancePrompt }));
       }
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: "Great choice — let me ask you a few more things about that direction." }]);
@@ -383,6 +389,7 @@ function ReviewPage() {
             isFloorPlan={isFloorPlan}
             enhancedUrl={enhancedImages[currentImage?.id]}
             roomType={currentGroup?.roomType}
+            autoEnhancePrompt={roomInspirationPrompts[currentGroup?.roomType] || null}
             onEnhanced={url => handleEnhanced(currentImage?.id, url)}
             feedback={feedback[currentImage?.id]}
             onFeedback={(status, notes) => handleFeedback(currentImage?.id, status, notes)}

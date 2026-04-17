@@ -1,12 +1,12 @@
 import { useState } from 'react';
 
-export default function EnhanceButton({ imageUrl, roomType, onEnhanced }) {
+export default function EnhanceButton({ imageUrl, roomType, onEnhanced, autoPrompt }) {
   const [loading, setLoading] = useState(false);
-  const [prompt, setPrompt] = useState('');
-  const [showInput, setShowInput] = useState(false);
+  const [manualPrompt, setManualPrompt] = useState('');
+  const [showManual, setShowManual] = useState(false);
 
-  const handleEnhance = async () => {
-    if (!prompt.trim()) return;
+  const runEnhance = async (promptText) => {
+    if (!promptText?.trim()) return;
     setLoading(true);
     try {
       const res = await fetch('/api/enhance', {
@@ -14,14 +14,14 @@ export default function EnhanceButton({ imageUrl, roomType, onEnhanced }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           imageUrl: window.location.origin + imageUrl,
-          prompt: `Photorealistic architectural render, luxury custom home, high-end finishes, bright daytime lighting, clear blue sky, natural sunlight. ${roomType.charAt(0).toUpperCase() + roomType.slice(1)}: ${prompt}. Sharp detail, professional architectural photography quality.`,
+          prompt: `Photorealistic architectural render, luxury custom home, high-end finishes, bright daytime lighting, natural sunlight. ${roomType.charAt(0).toUpperCase() + roomType.slice(1)}: ${promptText}. Sharp detail, professional architectural photography quality.`,
         }),
       });
       const data = await res.json();
       if (data.enhancedImage) {
         onEnhanced(data.enhancedImage);
-        setShowInput(false);
-        setPrompt('');
+        setShowManual(false);
+        setManualPrompt('');
       }
     } catch {
       alert('Enhancement failed. Please try again.');
@@ -33,27 +33,50 @@ export default function EnhanceButton({ imageUrl, roomType, onEnhanced }) {
   return (
     <div className="enhance-section">
       <style>{styles}</style>
-      {!showInput ? (
-        <button className="btn-enhance" onClick={() => setShowInput(true)}>
-          ✨ Visualize My Style
-        </button>
-      ) : (
-        <div className="enhance-input-group">
-          <input
-            type="text"
-            value={prompt}
-            onChange={e => setPrompt(e.target.value)}
-            placeholder={`Describe your finish preferences for this ${roomType}...`}
+
+      {/* Auto-prompt button — appears after client picks inspiration vibe */}
+      {autoPrompt && !showManual && (
+        <div className="enhance-auto-group">
+          <button
+            className="btn-enhance btn-enhance-auto"
+            onClick={() => runEnhance(autoPrompt)}
             disabled={loading}
-            onKeyDown={e => e.key === 'Enter' && handleEnhance()}
-          />
-          <button className="btn-enhance" onClick={handleEnhance} disabled={loading || !prompt.trim()}>
-            {loading ? <span className="enhance-spinner" /> : 'Apply'}
+          >
+            {loading ? <span className="enhance-spinner" /> : '✨ Visualize This Style'}
           </button>
-          <button className="btn-cancel" onClick={() => { setShowInput(false); setPrompt(''); }}>
-            Cancel
+          <button className="btn-manual-toggle" onClick={() => setShowManual(true)}>
+            Custom prompt
           </button>
         </div>
+      )}
+
+      {/* Manual prompt — always available if no autoPrompt, or via toggle */}
+      {(!autoPrompt || showManual) && (
+        showManual || !autoPrompt ? (
+          !showManual && !autoPrompt ? (
+            <button className="btn-enhance" onClick={() => setShowManual(true)}>
+              ✨ Visualize My Style
+            </button>
+          ) : (
+            <div className="enhance-input-group">
+              <input
+                type="text"
+                value={manualPrompt}
+                onChange={e => setManualPrompt(e.target.value)}
+                placeholder={`Describe your finish preferences for this ${roomType}...`}
+                disabled={loading}
+                onKeyDown={e => e.key === 'Enter' && runEnhance(manualPrompt)}
+                autoFocus
+              />
+              <button className="btn-enhance" onClick={() => runEnhance(manualPrompt)} disabled={loading || !manualPrompt.trim()}>
+                {loading ? <span className="enhance-spinner" /> : 'Apply'}
+              </button>
+              <button className="btn-cancel" onClick={() => { setShowManual(false); setManualPrompt(''); }}>
+                Cancel
+              </button>
+            </div>
+          )
+        ) : null
       )}
     </div>
   );
@@ -81,6 +104,32 @@ const styles = `
   }
   .btn-enhance:hover:not(:disabled) { opacity: 0.85; transform: scale(1.02); }
   .btn-enhance:disabled { opacity: 0.55; cursor: not-allowed; }
+  .enhance-auto-group {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+  .btn-enhance-auto {
+    background: linear-gradient(135deg, #1a3a1a, #2d5a2d);
+    color: #7ddc7d;
+    border: 1px solid #3a7a3a;
+  }
+  .btn-enhance-auto:hover:not(:disabled) {
+    background: linear-gradient(135deg, #2d5a2d, #3a7a3a);
+    opacity: 1;
+  }
+  .btn-manual-toggle {
+    background: transparent;
+    border: none;
+    color: #555;
+    font-size: 0.75rem;
+    cursor: pointer;
+    font-family: inherit;
+    text-decoration: underline;
+    padding: 0;
+  }
+  .btn-manual-toggle:hover { color: #888; }
   .btn-cancel {
     padding: 0.6rem 1rem;
     background: transparent;
