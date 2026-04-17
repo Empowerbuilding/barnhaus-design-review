@@ -14,17 +14,26 @@ function getDrive() {
   return driveClient;
 }
 
-async function searchFoldersIn(parentId, projectSlug) {
+async function searchFoldersIn(parentId, projectSlug, isSharedDriveRoot = false) {
   const drive = getDrive();
-  const res = await drive.files.list({
-    q: `'${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+  const sharedDriveId = process.env.SHARED_DRIVE_ID;
+  const params = {
     fields: 'files(id,name)',
     supportsAllDrives: true,
     includeItemsFromAllDrives: true,
-    driveId: process.env.SHARED_DRIVE_ID,
-    corpora: 'drive',
     pageSize: 200,
-  });
+  };
+  if (isSharedDriveRoot) {
+    // Searching shared drive root — use corpora=drive, no parent filter
+    params.q = `mimeType='application/vnd.google-apps.folder' and trashed=false`;
+    params.driveId = sharedDriveId;
+    params.corpora = 'drive';
+  } else {
+    params.q = `'${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+    params.driveId = sharedDriveId;
+    params.corpora = 'drive';
+  }
+  const res = await drive.files.list(params);
   const folders = res.data.files || [];
   if (!folders.length) return null;
   const fuse = new Fuse(folders, { keys: ['name'], threshold: 0.4 });
@@ -38,11 +47,12 @@ async function findProjectFolder(projectSlug) {
   const plansFolderId = process.env.PLANS_FOLDER_ID;
   const sharedDriveId = process.env.SHARED_DRIVE_ID;
   if (plansFolderId) {
-    const result = await searchFoldersIn(plansFolderId, projectSlug);
+    const result = await searchFoldersIn(plansFolderId, projectSlug, false);
     if (result) return result;
   }
   if (sharedDriveId) {
-    const result = await searchFoldersIn(sharedDriveId, projectSlug);
+    // Search shared drive root (all top-level folders)
+    const result = await searchFoldersIn(sharedDriveId, projectSlug, true);
     if (result) return result;
   }
   return null;
