@@ -411,7 +411,7 @@ export default function ImageViewer({
 
       <div className="image-controls">
         {!isFloorPlan && (
-          <EnhanceButton imageUrl={image.url} roomType={roomType} onEnhanced={onEnhanced} autoPrompt={autoEnhancePrompt} />
+          <EnhanceButton imageUrl={image.url} roomType={roomType} onEnhanced={onEnhanced} autoEnhancePrompt={autoEnhancePrompt} />
         )}
 
         {!isFloorPlan && (
