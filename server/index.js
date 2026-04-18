@@ -291,8 +291,9 @@ app.post('/api/feedback', async (req, res) => {
     ]);
     res.json({ success: true });
   } catch (err) {
-    console.error('Feedback submission error:', err.message);
-    res.status(500).json({ error: 'Submission failed' });
+    // Log but don't fail — client should always get success so they don't see error
+    console.error('Feedback submission error:', err.message, err.stack);
+    res.json({ success: true, warning: err.message });
   }
 });
 
