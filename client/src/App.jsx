@@ -5,7 +5,7 @@ import ChatDrawer from './components/ChatDrawer';
 import ImageViewer from './components/ImageViewer';
 import ProgressBar from './components/ProgressBar';
 import OverviewScreen from './components/OverviewScreen';
-import InspirationStrip from './components/InspirationStrip';
+import PlaygroundScreen from './components/PlaygroundScreen';
 import './App.css';
 
 const SECTION_LABELS = {
@@ -358,13 +358,10 @@ function ReviewPage() {
   const [error, setError] = useState(null);
   const [currentGroupIdx, setCurrentGroupIdx] = useState(0);
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
-  const [phase, setPhase] = useState('overview'); // 'overview' | 'walkthrough'
-  const [inspirationImages, setInspirationImages] = useState([]);
-  const [roomInspirationPrompts, setRoomInspirationPrompts] = useState({}); // roomType → enhance prompt
+  const [phase, setPhase] = useState('overview'); // 'overview' | 'walkthrough' | 'playground'
   const [memo, setMemo] = useState(null);
   const [messages, setMessages] = useState([]);
   const [feedback, setFeedback] = useState({});
-  const [enhancedImages, setEnhancedImages] = useState({});
   const [completed, setCompleted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [sessionId, setSessionId] = useState(null);
@@ -443,7 +440,30 @@ function ReviewPage() {
 
     const roomLabel = currentGroup?.roomType || 'other';
     const features = currentImage.analysis?.features?.join(', ') || '';
-    const trigger = `[IMAGE CHANGE] The client is now viewing image ${currentImageIdx + 1} of ${currentGroup?.images?.length} in the ${roomLabel} section. Image name: ${currentImage.name}. Visible features: ${features || 'not analyzed'}. Open the conversation for this image — ask one targeted question based on the room type and what you know about this client. Do not wait for them to speak first.`;
+    const isFirstImageInSection = currentImageIdx === 0;
+    const isLastImageInSection = currentImageIdx === (currentGroup?.images?.length || 1) - 1;
+
+    // Build a summary of what's already been discussed in this section
+    const sectionMessages = messages.filter(m => m.sectionKey === roomLabel);
+    const alreadyCovered = sectionMessages.length > 0
+      ? `\n\nSo far in this section you have already discussed:\n${sectionMessages.map(m => `${m.role === 'user' ? 'Client' : 'Silas'}: ${m.content}`).join('\n')}`
+      : '';
+
+    const sectionProgress = isFirstImageInSection
+      ? `This is the first image in the ${roomLabel} section.`
+      : isLastImageInSection
+        ? `This is the LAST image in the ${roomLabel} section. You should be wrapping up any remaining key questions for this room.`
+        : `This is image ${currentImageIdx + 1} of ${currentGroup?.images?.length} in the ${roomLabel} section.`;
+
+    const trigger = \`[IMAGE CHANGE] \${sectionProgress} Image name: \${currentImage.name}. Visible features: \${features || 'not analyzed'}.\${alreadyCovered}
+
+IMPORTANT INSTRUCTIONS FOR THIS SECTION:
+- You have a full question bank for the \${roomLabel} room. Work through those questions conversationally — do NOT just ask one question and go quiet.
+- When the client gives an answer, dig in with the next relevant question from the room's question bank.
+- Keep going until the key questions for this room are covered.
+- Do NOT push them to move on until you have covered the important decisions for this room.
+- When you have covered the room thoroughly, close it naturally: "I think I have everything I need on the \${roomLabel} — feel free to move to the next section when you're ready."
+- Output ONLY the message to send to the client. No internal reasoning, no meta-commentary.\`;
 
     fetch('/api/chat', {
       method: 'POST',
@@ -464,7 +484,7 @@ function ReviewPage() {
     })
       .then(r => r.json())
       .then(data => {
-        if (data.reply && data.reply !== 'NO_REPLY' && data.reply !== 'ANNOUNCE_SKIP') setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+        if (data.reply && data.reply !== 'NO_REPLY' && data.reply !== 'ANNOUNCE_SKIP') setMessages(prev => [...prev, { role: 'assistant', content: data.reply, sectionKey: currentGroup?.roomType }]);
         if (data.inspiration && data.inspiration.length > 0) setInspirationImages(data.inspiration);
         else setInspirationImages([]);
       })
@@ -496,7 +516,7 @@ function ReviewPage() {
 
   const sendChat = useCallback(
     async (userMessage) => {
-      const newMessages = [...messages, { role: 'user', content: userMessage }];
+      const newMessages = [...messages, { role: 'user', content: userMessage, sectionKey: currentGroup?.roomType }];
       setMessages(newMessages);
 
       if (sessionId) {
