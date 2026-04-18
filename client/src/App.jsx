@@ -366,6 +366,7 @@ function ReviewPage() {
   const [feedback, setFeedback] = useState({});
   const [enhancedImages, setEnhancedImages] = useState({});
   const [completed, setCompleted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [sessionId, setSessionId] = useState(null);
   const [chatOpen, setChatOpen] = useState(true);   // desktop: open by default
   const [drawerOpen, setDrawerOpen] = useState(false); // mobile drawer: closed by default
@@ -629,6 +630,8 @@ function ReviewPage() {
   }, []);
 
   const handleComplete = useCallback(async () => {
+    if (submitting || completed) return;
+    setSubmitting(true);
     const feedbackList = Object.values(feedback);
     try {
       const body = JSON.stringify({
@@ -649,8 +652,9 @@ function ReviewPage() {
     } catch (err) {
       console.error('Submit feedback error:', err);
       alert('Failed to submit feedback: ' + err.message);
+      setSubmitting(false);
     }
-  }, [feedback, project, clientName, sessionId, messages]);
+  }, [feedback, project, clientName, sessionId, messages, submitting, completed]);
 
   if (loading) {
     return (
