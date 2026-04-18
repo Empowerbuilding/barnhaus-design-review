@@ -1,71 +1,59 @@
-// Inspiration image fetcher — Google Custom Search (image search)
-// Searches curated design/architecture sites for relevant inspiration photos
-
 const SERPER_API_KEY = process.env.SERPER_API_KEY;
 
 const ROOM_QUERIES = {
-  'kitchen': 'kitchen interior design',
-  'living room': 'living room interior design',
-  'great room': 'great room open plan interior',
-  'master bedroom': 'primary bedroom interior design',
-  'primary bedroom': 'primary bedroom interior design',
-  'master bath': 'primary bathroom interior design',
-  'primary bath': 'primary bathroom interior design',
-  'exterior': 'home exterior architecture',
-  'floor plan': 'floor plan layout',
-  'dining room': 'dining room interior design',
-  'office': 'home office interior design',
-  'mudroom': 'mudroom laundry room design',
-  'garage': 'garage interior design',
-  'porch': 'covered porch outdoor living design',
-  'default': 'custom home interior design',
+  'exterior': 'modern farmhouse exterior house design houzz',
+  'floor plan': 'open concept luxury home floor plan layout',
+  'kitchen': 'luxury custom kitchen design houzz',
+  'pantry': "butler's pantry custom storage design houzz",
+  'great room': 'great room fireplace living room design houzz',
+  'living room': 'luxury living room interior design houzz',
+  'dining room': 'luxury dining room interior design houzz',
+  'primary bedroom': 'luxury master bedroom interior design houzz',
+  'master bedroom': 'luxury master bedroom interior design houzz',
+  'primary bath': 'luxury master bathroom design houzz',
+  'master bath': 'luxury master bathroom design houzz',
+  'bathroom': 'custom guest bathroom design houzz',
+  'guest bath': 'custom guest bathroom design houzz',
+  'mudroom': 'custom mudroom bench lockers storage design houzz',
+  'laundry': 'custom laundry room design houzz',
+  'office': 'custom home office built-in design houzz',
+  'garage': 'custom garage storage workshop design',
+  'porch': 'covered porch outdoor living design houzz',
+  'default': 'luxury custom home interior design houzz',
 };
 
-async function fetchGoogleImages(query, count = 10) {
-  if (!GOOGLE_API_KEY) {
-    console.warn('GOOGLE_SEARCH_API_KEY not set');
+async function getInspirationImages(roomType, stylePrefix = '', count = 10, features = []) {
+  if (!SERPER_API_KEY) {
+    console.warn('SERPER_API_KEY not set');
     return [];
   }
-  const fetchPage = async (start = 1) => {
-    const params = new URLSearchParams({
-      key: GOOGLE_API_KEY,
-      cx: GOOGLE_CX,
-      q: query,
-      searchType: 'image',
-      num: Math.min(count, 10),
-      start,
-      imgType: 'photo',
-      imgSize: 'large',
-      safe: 'off',
+  try {
+    const baseQuery = ROOM_QUERIES[roomType?.toLowerCase()] || ROOM_QUERIES.default;
+    const featureStr = features.filter(f => f && f.length > 2).slice(0, 2).join(' ');
+    const query = [stylePrefix, featureStr || '', baseQuery].filter(Boolean).join(' ').trim();
+
+    const res = await fetch('https://google.serper.dev/images', {
+      method: 'POST',
+      headers: {
+        'X-API-KEY': SERPER_API_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ q: query, num: count }),
     });
-    const res = await fetch(`https://www.googleapis.com/customsearch/v1?${params}`);
+
     if (!res.ok) {
-      const err = await res.text();
-      console.error('Google Search error:', res.status, err.slice(0, 200));
+      console.error('Serper error:', res.status, await res.text());
       return [];
     }
+
     const data = await res.json();
-    return (data.items || []).map(item => ({
-      url: item.link,
-      thumb: item.image?.thumbnailLink || item.link,
-      title: item.title,
-      source: item.displayLink,
+    return (data.images || []).map(img => ({
+      url: img.imageUrl,
+      thumb: img.thumbnailUrl || img.imageUrl,
+      title: img.title,
+      source: img.source,
+      contextUrl: img.link,
     }));
-  };
-
-  if (count <= 10) return fetchPage(1);
-  // Fetch two pages in parallel for >10 results
-  const [p1, p2] = await Promise.all([fetchPage(1), fetchPage(11)]);
-  return [...p1, ...p2].slice(0, count);
-}
-
-async function getInspirationImages(roomType, stylePrefix = '', count = 3, features = []) {
-  const baseQuery = ROOM_QUERIES[roomType.toLowerCase()] || ROOM_QUERIES.default;
-  const featureStr = features.filter(f => f && f.length > 2).slice(0, 3).join(' ');
-  const query = [stylePrefix, featureStr || '', baseQuery].filter(Boolean).join(' ').trim();
-
-  try {
-    return await fetchGoogleImages(query, count);
   } catch (err) {
     console.error('Inspiration fetch error:', err.message);
     return [];
