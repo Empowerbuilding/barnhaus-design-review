@@ -1,8 +1,7 @@
 // Inspiration image fetcher — Google Custom Search (image search)
 // Searches curated design/architecture sites for relevant inspiration photos
 
-const GOOGLE_API_KEY = process.env.GOOGLE_SEARCH_API_KEY;
-const GOOGLE_CX = process.env.GOOGLE_SEARCH_CX || '707c8de58964749d1';
+const SERPER_API_KEY = process.env.SERPER_API_KEY;
 
 const ROOM_QUERIES = {
   'kitchen': 'kitchen interior design',
