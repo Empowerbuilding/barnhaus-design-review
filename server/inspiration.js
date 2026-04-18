@@ -22,34 +22,42 @@ const ROOM_QUERIES = {
   'default': 'custom home interior design',
 };
 
-async function fetchGoogleImages(query, count = 3) {
+async function fetchGoogleImages(query, count = 10) {
   if (!GOOGLE_API_KEY) {
     console.warn('GOOGLE_SEARCH_API_KEY not set');
     return [];
   }
-  const params = new URLSearchParams({
-    key: GOOGLE_API_KEY,
-    cx: GOOGLE_CX,
-    q: query,
-    searchType: 'image',
-    num: count,
-    imgType: 'photo',
-    imgSize: 'large',
-    safe: 'off',
-  });
-  const res = await fetch(`https://www.googleapis.com/customsearch/v1?${params}`);
-  if (!res.ok) {
-    const err = await res.text();
-    console.error('Google Search error:', res.status, err.slice(0, 200));
-    return [];
-  }
-  const data = await res.json();
-  return (data.items || []).map(item => ({
-    url: item.link,
-    thumb: item.image?.thumbnailLink || item.link,
-    title: item.title,
-    source: item.displayLink,
-  }));
+  const fetchPage = async (start = 1) => {
+    const params = new URLSearchParams({
+      key: GOOGLE_API_KEY,
+      cx: GOOGLE_CX,
+      q: query,
+      searchType: 'image',
+      num: Math.min(count, 10),
+      start,
+      imgType: 'photo',
+      imgSize: 'large',
+      safe: 'off',
+    });
+    const res = await fetch(`https://www.googleapis.com/customsearch/v1?${params}`);
+    if (!res.ok) {
+      const err = await res.text();
+      console.error('Google Search error:', res.status, err.slice(0, 200));
+      return [];
+    }
+    const data = await res.json();
+    return (data.items || []).map(item => ({
+      url: item.link,
+      thumb: item.image?.thumbnailLink || item.link,
+      title: item.title,
+      source: item.displayLink,
+    }));
+  };
+
+  if (count <= 10) return fetchPage(1);
+  // Fetch two pages in parallel for >10 results
+  const [p1, p2] = await Promise.all([fetchPage(1), fetchPage(11)]);
+  return [...p1, ...p2].slice(0, count);
 }
 
 async function getInspirationImages(roomType, stylePrefix = '', count = 3, features = []) {

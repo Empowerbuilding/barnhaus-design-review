@@ -1,4 +1,5 @@
-export default function InspirationStrip({ images, onPick }) {
+import { useState } from 'react';
+
 const styles = `
   .inspiration-strip {
     padding: 0.75rem 1rem;
@@ -6,139 +7,178 @@ const styles = `
     border-top: 1px solid #2a2a2a;
     flex-shrink: 0;
   }
-  .strip-label {
-    font-size: 0.7rem;
-    letter-spacing: 0.12em;
+  .inspiration-label {
+    font-size: 0.65rem;
     text-transform: uppercase;
-    color: #B8860B;
-    margin-bottom: 0.6rem;
-    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: #666;
+    margin-bottom: 0.5rem;
   }
-  .strip-images {
+  .inspiration-row {
     display: flex;
-    gap: 0.6rem;
+    gap: 0.5rem;
     overflow-x: auto;
     padding-bottom: 0.25rem;
     scrollbar-width: thin;
     scrollbar-color: #333 transparent;
   }
-  .strip-images::-webkit-scrollbar { height: 3px; }
-  .strip-images::-webkit-scrollbar-track { background: transparent; }
-  .strip-images::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
-
-  .strip-card {
+  .inspiration-thumb {
     flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    width: 130px;
-  }
-  .strip-img-wrap {
-    width: 130px;
-    height: 88px;
+    width: 90px;
+    height: 90px;
     border-radius: 6px;
     overflow: hidden;
-    background: #2a2a2a;
-    border: 1px solid #333;
-  }
-  .strip-img-wrap img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.2s;
-  }
-  .strip-img-wrap:hover img { transform: scale(1.04); }
-
-  .strip-pick-btn {
-    width: 100%;
-    padding: 0.35rem 0;
-    background: transparent;
-    border: 1px solid #B8860B55;
-    border-radius: 5px;
-    color: #B8860B;
-    font-size: 0.72rem;
-    font-family: inherit;
-    font-weight: 500;
     cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
-    letter-spacing: 0.02em;
+    border: 2px solid transparent;
+    transition: border-color 0.15s, transform 0.15s;
+    position: relative;
   }
-  .strip-pick-btn:hover {
-    background: #B8860B15;
-    border-color: #B8860B;
+  .inspiration-thumb:hover { border-color: #B8860B; transform: scale(1.03); }
+  .inspiration-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .inspiration-thumb .pick-overlay {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.15s;
+    font-size: 0.7rem; color: #fff; font-weight: 600;
+    flex-direction: column; gap: 3px;
   }
-  .strip-pick-none {
-    border-color: #333;
-    color: #555;
-  }
-  .strip-pick-none:hover {
-    background: #222;
-    border-color: #444;
-    color: #888;
-  }
-
-  .strip-none {
-    width: 90px;
-  }
-  .strip-none-inner {
-    width: 90px;
-    height: 88px;
+  .inspiration-thumb:hover .pick-overlay { opacity: 1; }
+  .pick-icon { font-size: 1.1rem; }
+  .inspiration-skip {
+    flex-shrink: 0;
+    width: 90px; height: 90px;
     border-radius: 6px;
-    border: 1px dashed #2e2e2e;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #3a3a3a;
-    font-size: 0.75rem;
-    text-align: center;
-    line-height: 1.4;
+    border: 2px dashed #333;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: #555; font-size: 0.7rem;
+    transition: border-color 0.15s, color 0.15s;
+    flex-direction: column; gap: 4px;
   }
+  .inspiration-skip:hover { border-color: #555; color: #888; }
 
-  @media (max-width: 768px) {
-    .strip-card { width: 110px; }
-    .strip-img-wrap { width: 110px; height: 74px; }
-    .strip-none { width: 78px; }
-    .strip-none-inner { width: 78px; height: 74px; }
+  /* Lightbox */
+  .inspo-lightbox {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,0.92);
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
   }
+  .inspo-lb-img {
+    max-width: 80vw; max-height: 70vh;
+    border-radius: 8px;
+    object-fit: contain;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  }
+  .inspo-lb-nav {
+    display: flex; align-items: center; gap: 1.5rem;
+  }
+  .inspo-lb-arrow {
+    background: rgba(255,255,255,0.1); border: none;
+    color: #fff; font-size: 1.5rem;
+    width: 44px; height: 44px; border-radius: 50%;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .inspo-lb-arrow:hover { background: rgba(255,255,255,0.2); }
+  .inspo-lb-arrow:disabled { opacity: 0.3; cursor: default; }
+  .inspo-lb-actions {
+    display: flex; gap: 0.75rem;
+  }
+  .inspo-lb-pick {
+    background: #B8860B; color: #fff; border: none;
+    padding: 0.5rem 1.25rem; border-radius: 20px;
+    font-size: 0.85rem; font-weight: 600; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .inspo-lb-pick:hover { background: #d4a017; }
+  .inspo-lb-skip {
+    background: transparent; color: #888; border: 1px solid #444;
+    padding: 0.5rem 1rem; border-radius: 20px;
+    font-size: 0.85rem; cursor: pointer; transition: color 0.15s;
+  }
+  .inspo-lb-skip:hover { color: #aaa; }
+  .inspo-lb-close {
+    position: absolute; top: 1rem; right: 1.25rem;
+    background: none; border: none; color: #888;
+    font-size: 1.5rem; cursor: pointer; line-height: 1;
+  }
+  .inspo-lb-counter { color: #555; font-size: 0.75rem; }
+  .inspo-lb-source { color: #444; font-size: 0.65rem; }
 `;
+
+export default function InspirationStrip({ images, onPick }) {
+  const [lightboxIdx, setLightboxIdx] = useState(null);
+
   if (!images || images.length === 0) return null;
 
+  const openLightbox = (i) => setLightboxIdx(i);
+  const closeLightbox = () => setLightboxIdx(null);
+
+  const prev = () => setLightboxIdx(i => Math.max(0, i - 1));
+  const next = () => setLightboxIdx(i => Math.min(images.length - 1, i + 1));
+
+  const handlePick = (idx) => {
+    closeLightbox();
+    onPick(images[idx], idx + 1);
+  };
+
+  const handleSkip = () => {
+    closeLightbox();
+    onPick(null, 0);
+  };
+
   return (
-    <div className="inspiration-strip">
+    <>
       <style>{styles}</style>
-      <div className="strip-label">Pick a vibe →</div>
-      <div className="strip-images">
-        {images.map((img, i) => (
-          <div key={i} className="strip-card">
-            <div className="strip-img-wrap">
-              <img
-                src={img.thumb || img.url}
-                alt={`Inspiration ${i + 1}`}
-                loading="lazy"
-                onError={e => { e.target.style.display = 'none'; }}
-              />
+      <div className="inspiration-strip">
+        <div className="inspiration-label">Pick a vibe →</div>
+        <div className="inspiration-row">
+          {images.map((img, i) => (
+            <div key={i} className="inspiration-thumb" onClick={() => openLightbox(i)}>
+              <img src={img.thumb || img.url} alt={img.title || `Option ${i + 1}`} loading="lazy" />
+              <div className="pick-overlay">
+                <span className="pick-icon">🔍</span>
+                <span>View</span>
+              </div>
             </div>
-            <button
-              className="strip-pick-btn"
-              onClick={() => onPick(img, i + 1)}
-            >
-              This vibe ✓
-            </button>
+          ))}
+          <div className="inspiration-skip" onClick={handleSkip}>
+            <span>Skip →</span>
+            <span>None fit</span>
           </div>
-        ))}
-        <div className="strip-card strip-none">
-          <div className="strip-none-inner">
-            <span>None of<br />these</span>
-          </div>
-          <button
-            className="strip-pick-btn strip-pick-none"
-            onClick={() => onPick(null, 0)}
-          >
-            Skip →
-          </button>
         </div>
       </div>
-    </div>
+
+      {lightboxIdx !== null && (
+        <div className="inspo-lightbox" onClick={closeLightbox}>
+          <button className="inspo-lb-close" onClick={closeLightbox}>✕</button>
+          <div onClick={e => e.stopPropagation()}>
+            <img
+              className="inspo-lb-img"
+              src={images[lightboxIdx].url}
+              alt={images[lightboxIdx].title || `Option ${lightboxIdx + 1}`}
+            />
+          </div>
+          <div className="inspo-lb-nav" onClick={e => e.stopPropagation()}>
+            <button className="inspo-lb-arrow" onClick={prev} disabled={lightboxIdx === 0}>‹</button>
+            <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'0.5rem'}}>
+              <div className="inspo-lb-actions">
+                <button className="inspo-lb-pick" onClick={() => handlePick(lightboxIdx)}>
+                  ✓ This vibe
+                </button>
+                <button className="inspo-lb-skip" onClick={handleSkip}>None fit</button>
+              </div>
+              <div className="inspo-lb-counter">{lightboxIdx + 1} of {images.length}</div>
+              {images[lightboxIdx].source && (
+                <div className="inspo-lb-source">via {images[lightboxIdx].source}</div>
+              )}
+            </div>
+            <button className="inspo-lb-arrow" onClick={next} disabled={lightboxIdx === images.length - 1}>›</button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
-

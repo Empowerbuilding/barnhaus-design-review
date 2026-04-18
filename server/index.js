@@ -198,7 +198,7 @@ app.post('/api/chat', async (req, res) => {
 
     // Fetch inspiration images in parallel with Silas response (image-change only)
     const inspirationPromise = (isImageChangeTrigger && currentRoom && currentRoom !== 'floor plan' && currentRoom !== 'other')
-      ? getInspirationImages(currentRoom, getProjectStyle(projectSlug || ''), 3, currentImageFeatures || [])
+      ? getInspirationImages(currentRoom, getProjectStyle(projectSlug || ''), 10, currentImageFeatures || [])
       : Promise.resolve([]);
 
     const [reply, inspiration] = await Promise.all([
