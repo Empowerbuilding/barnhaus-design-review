@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import EnhanceButton from './EnhanceButton';
 import Lightbox from './Lightbox';
 import FeedbackButtons from './FeedbackButtons';
 const styles = `
@@ -291,10 +290,7 @@ export default function ImageViewer({
   currentIndex,
   onSelectImage,
   isFloorPlan,
-  enhancedUrl,
   roomType,
-  onEnhanced,
-  autoEnhancePrompt,
   feedback,
   onFeedback,
   onNext,
@@ -304,9 +300,7 @@ export default function ImageViewer({
 }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
-  const [showEnhanced, setShowEnhanced] = useState(true);
   useEffect(() => { setImgLoaded(false); }, [image?.id]);
-  useEffect(() => { setShowEnhanced(true); }, [enhancedUrl]);
 
   if (!image) {
     return (
@@ -366,28 +360,6 @@ export default function ImageViewer({
         )}
       </div>
 
-      {enhancedUrl && (
-        <div className="enhanced-container">
-          <div className="enhanced-toggle-row">
-            <button
-              className={`toggle-btn ${!showEnhanced ? 'active' : ''}`}
-              onClick={() => setShowEnhanced(false)}
-            >Original</button>
-            <button
-              className={`toggle-btn ${showEnhanced ? 'active' : ''}`}
-              onClick={() => setShowEnhanced(true)}
-            >✨ Visualized</button>
-          </div>
-          <img
-            src={showEnhanced ? enhancedUrl : image.url}
-            alt={showEnhanced ? 'Visualized render' : 'Original render'}
-            className="enhanced-image"
-            onClick={() => setLightboxOpen(true)}
-            style={{ cursor: 'zoom-in' }}
-          />
-        </div>
-      )}
-
       {hasMultiple && (
         <div className="thumbnails">
           <div className="thumb-scroll-hint">
@@ -411,10 +383,6 @@ export default function ImageViewer({
 
       <div className="image-controls">
         {!isFloorPlan && (
-          <EnhanceButton imageUrl={image.url} roomType={roomType} onEnhanced={onEnhanced} autoEnhancePrompt={autoEnhancePrompt} />
-        )}
-
-        {!isFloorPlan && (
           <FeedbackButtons
             imageId={image.id}
             feedback={feedback}
@@ -434,7 +402,7 @@ export default function ImageViewer({
       </div>
     {lightboxOpen && (
       <Lightbox
-        src={enhancedUrl || image.url}
+        src={image.url}
         alt={image.name}
         onClose={() => setLightboxOpen(false)}
       />

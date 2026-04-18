@@ -375,7 +375,6 @@ function ReviewPage() {
     return () => window.removeEventListener('resize', handler);
   }, []);
   const [unread, setUnread] = useState(false);
-  const initialGreetingSent = useRef(false);
   const prevMessageCount = useRef(0);
   const drawerAutoOpened = useRef(false);
 
@@ -424,7 +423,7 @@ function ReviewPage() {
     ? SECTION_LABELS[project.groups[currentGroupIdx + 1].roomType] || project.groups[currentGroupIdx + 1].roomType
     : null;
 
-  // When client navigates to a new image, notify Juanito with context so he can lead
+  // When client navigates to a new image, notify Silas with context so he can lead
   const lastNotifiedImage = useRef(null);
   const triggerAbortRef = useRef(null);
   useEffect(() => {
@@ -440,30 +439,7 @@ function ReviewPage() {
 
     const roomLabel = currentGroup?.roomType || 'other';
     const features = currentImage.analysis?.features?.join(', ') || '';
-    const isFirstImageInSection = currentImageIdx === 0;
-    const isLastImageInSection = currentImageIdx === (currentGroup?.images?.length || 1) - 1;
-
-    // Build a summary of what's already been discussed in this section
-    const sectionMessages = messages.filter(m => m.sectionKey === roomLabel);
-    const alreadyCovered = sectionMessages.length > 0
-      ? `\n\nSo far in this section you have already discussed:\n${sectionMessages.map(m => `${m.role === 'user' ? 'Client' : 'Silas'}: ${m.content}`).join('\n')}`
-      : '';
-
-    const sectionProgress = isFirstImageInSection
-      ? `This is the first image in the ${roomLabel} section.`
-      : isLastImageInSection
-        ? `This is the LAST image in the ${roomLabel} section. You should be wrapping up any remaining key questions for this room.`
-        : `This is image ${currentImageIdx + 1} of ${currentGroup?.images?.length} in the ${roomLabel} section.`;
-
-    const trigger = \`[IMAGE CHANGE] \${sectionProgress} Image name: \${currentImage.name}. Visible features: \${features || 'not analyzed'}.\${alreadyCovered}
-
-IMPORTANT INSTRUCTIONS FOR THIS SECTION:
-- You have a full question bank for the \${roomLabel} room. Work through those questions conversationally — do NOT just ask one question and go quiet.
-- When the client gives an answer, dig in with the next relevant question from the room's question bank.
-- Keep going until the key questions for this room are covered.
-- Do NOT push them to move on until you have covered the important decisions for this room.
-- When you have covered the room thoroughly, close it naturally: "I think I have everything I need on the \${roomLabel} — feel free to move to the next section when you're ready."
-- Output ONLY the message to send to the client. No internal reasoning, no meta-commentary.\`;
+    const trigger = `[IMAGE CHANGE] The client is now viewing image ${currentImageIdx + 1} of ${currentGroup?.images?.length} in the ${roomLabel} section. Image name: ${currentImage.name}. Visible features: ${features || 'not analyzed'}. Open the conversation for this image — ask one targeted question based on the room type and what you know about this client. Do not wait for them to speak first.`;
 
     fetch('/api/chat', {
       method: 'POST',
@@ -484,9 +460,9 @@ IMPORTANT INSTRUCTIONS FOR THIS SECTION:
     })
       .then(r => r.json())
       .then(data => {
-        if (data.reply && data.reply !== 'NO_REPLY' && data.reply !== 'ANNOUNCE_SKIP') setMessages(prev => [...prev, { role: 'assistant', content: data.reply, sectionKey: currentGroup?.roomType }]);
-        if (data.inspiration && data.inspiration.length > 0) setInspirationImages(data.inspiration);
-        else setInspirationImages([]);
+        if (data.reply && data.reply !== 'NO_REPLY' && data.reply !== 'ANNOUNCE_SKIP') {
+          setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+        }
       })
       .catch(() => {});
   }, [currentGroup, currentImage, currentGroupIdx, currentImageIdx, project, sessionId, clientName, phase]);
@@ -516,7 +492,7 @@ IMPORTANT INSTRUCTIONS FOR THIS SECTION:
 
   const sendChat = useCallback(
     async (userMessage) => {
-      const newMessages = [...messages, { role: 'user', content: userMessage, sectionKey: currentGroup?.roomType }];
+      const newMessages = [...messages, { role: 'user', content: userMessage }];
       setMessages(newMessages);
 
       if (sessionId) {
@@ -564,52 +540,10 @@ IMPORTANT INSTRUCTIONS FOR THIS SECTION:
     },
     [messages, project, clientName, currentGroup, currentImage, currentImageIdx, nextSectionLabel, sessionId]
   );
-  const handleStart = useCallback(async (inspirationUploads) => {
-    // If client uploaded inspirations, notify Juanito via the session endpoint
-    // (already handled by OverviewScreen component — just transition)
+
+  const handleStart = useCallback(() => {
     setPhase('walkthrough');
   }, []);
-  const handleVibePick = useCallback(async (img, index) => {
-    setInspirationImages([]); // dismiss strip immediately
-
-    if (!img) {
-      // Client skipped — send plain text
-      await sendChat("None of those quite fit — let me describe what I have in mind.");
-      return;
-    }
-
-    // Show the pick as a user bubble immediately
-    setMessages(prev => [...prev, { role: 'user', content: `I like the look of option ${index}.` }]);
-
-    try {
-      const res = await fetch('/api/inspiration/pick', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          imageUrl: img.url,
-          imageIndex: index,
-          roomType: currentGroup?.roomType || 'this room',
-          clientName,
-          sessionId,
-        }),
-      });
-      const data = await res.json();
-      if (data.reply) {
-        setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
-      }
-      if (data.description && currentGroup?.roomType) {
-        // Build an enhance prompt from the inspiration analysis
-        const enhancePrompt = `Transform this render to match the client's chosen inspiration style. ${data.description} Maintain the existing room layout and dimensions exactly.`;
-        setRoomInspirationPrompts(prev => ({ ...prev, [currentGroup.roomType]: enhancePrompt }));
-      }
-    } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: "Great choice — let me ask you a few more things about that direction." }]);
-    }
-  }, [currentGroup, clientName, sessionId, sendChat]);
-
-
-
-  // Greeting for first image is now triggered by image-change effect on walkthrough entry
 
   const handleNextImage = useCallback(() => {
     if (!currentGroup) return;
@@ -624,7 +558,6 @@ IMPORTANT INSTRUCTIONS FOR THIS SECTION:
   const handleSectionChange = useCallback((idx) => {
     setCurrentGroupIdx(idx);
     setCurrentImageIdx(0);
-    setInspirationImages([]);
   }, []);
 
   const handleFeedback = useCallback(
@@ -638,25 +571,26 @@ IMPORTANT INSTRUCTIONS FOR THIS SECTION:
           status,
           notes,
           originalUrl: currentImage?.url,
-          enhancedUrl: enhancedImages[imageId] || null,
         },
       }));
     },
-    [currentImage, currentGroup, enhancedImages]
+    [currentImage, currentGroup]
   );
 
-  const handleEnhanced = useCallback((imageId, enhancedUrl) => {
-    setEnhancedImages(prev => ({ ...prev, [imageId]: enhancedUrl }));
+  // Phase 1 complete → go to Playground (no Discord post yet)
+  const handleComplete = useCallback(() => {
+    setPhase('playground');
   }, []);
 
-  const handleComplete = useCallback(async () => {
-    if (submitting || completed) return;
+  // Phase 2 complete → post to Discord and show completion screen
+  const handleSendToMichael = useCallback(async () => {
+    if (submitting) return;
     setSubmitting(true);
     const feedbackList = Object.values(feedback);
     try {
       const body = JSON.stringify({
         projectName: project?.projectName,
-        projectSlug: projectSlug,
+        projectSlug,
         clientName,
         feedback: feedbackList,
         sessionId,
@@ -674,7 +608,7 @@ IMPORTANT INSTRUCTIONS FOR THIS SECTION:
       alert('Failed to submit feedback: ' + err.message);
       setSubmitting(false);
     }
-  }, [feedback, project, clientName, sessionId, messages, submitting, completed]);
+  }, [feedback, project, clientName, sessionId, messages, projectSlug, submitting]);
 
   if (loading) {
     return (
@@ -712,6 +646,18 @@ IMPORTANT INSTRUCTIONS FOR THIS SECTION:
     );
   }
 
+  if (phase === 'playground') {
+    return (
+      <PlaygroundScreen
+        feedback={feedback}
+        clientName={clientName}
+        projectSlug={projectSlug}
+        sessionId={sessionId}
+        onSendToMichael={handleSendToMichael}
+      />
+    );
+  }
+
   return (
     <div className="review-page">
       <header className="review-header">
@@ -741,10 +687,7 @@ IMPORTANT INSTRUCTIONS FOR THIS SECTION:
             currentIndex={currentImageIdx}
             onSelectImage={setCurrentImageIdx}
             isFloorPlan={isFloorPlan}
-            enhancedUrl={enhancedImages[currentImage?.id]}
             roomType={currentGroup?.roomType}
-            autoEnhancePrompt={roomInspirationPrompts[currentGroup?.roomType] || null}
-            onEnhanced={url => handleEnhanced(currentImage?.id, url)}
             feedback={feedback[currentImage?.id]}
             onFeedback={(status, notes) => handleFeedback(currentImage?.id, status, notes)}
             onNext={handleNextImage}
@@ -758,8 +701,6 @@ IMPORTANT INSTRUCTIONS FOR THIS SECTION:
               currentImageIdx === (currentGroup?.images?.length || 0) - 1
             }
           />
-
-
         </div>
 
         {/* Desktop chat panel */}
@@ -769,7 +710,6 @@ IMPORTANT INSTRUCTIONS FOR THIS SECTION:
             onSend={sendChat}
             isComplete={completed}
           />
-          <InspirationStrip images={inspirationImages} onPick={handleVibePick} />
         </div>
       </div>
 
@@ -796,8 +736,6 @@ IMPORTANT INSTRUCTIONS FOR THIS SECTION:
         messages={messages}
         onSend={sendChat}
         isComplete={completed}
-        inspirationImages={inspirationImages}
-        onVibePick={handleVibePick}
       />
     </div>
   );
@@ -826,5 +764,3 @@ export default function App() {
     </>
   );
 }
-
-

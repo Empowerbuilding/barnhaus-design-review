@@ -1,6 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
 import ChatWindow from './ChatWindow';
-import InspirationStrip from './InspirationStrip';
 const styles = `
   .chat-drawer-backdrop {
     display: none;
@@ -91,7 +90,7 @@ const styles = `
   }
 `;
 
-export default function ChatDrawer({ open, onClose, messages, onSend, isComplete, inspirationImages, onVibePick }) {
+export default function ChatDrawer({ open, onClose, messages, onSend, isComplete }) {
   const dragStartY = useRef(null);
   const [dragging, setDragging] = useState(false);
   const [translateY, setTranslateY] = useState(0);
@@ -144,7 +143,6 @@ export default function ChatDrawer({ open, onClose, messages, onSend, isComplete
         </div>
         <div className="chat-drawer-body">
           <ChatWindow messages={messages} onSend={onSend} isComplete={isComplete} />
-          <InspirationStrip images={inspirationImages || []} onPick={onVibePick || (() => {})} />
         </div>
       </div>
     </>
