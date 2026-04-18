@@ -633,7 +633,7 @@ function ReviewPage() {
     try {
       const body = JSON.stringify({
         projectName: project?.projectName,
-        projectSlug: slug,
+        projectSlug: projectSlug,
         clientName,
         feedback: feedbackList,
         sessionId,
