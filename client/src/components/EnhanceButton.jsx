@@ -90,10 +90,18 @@ const styles = `
   }
 `;
 
-export default function EnhanceButton({ imageUrl, roomType, onEnhanced, autoPrompt }) {
+export default function EnhanceButton({ imageUrl, roomType, onEnhanced, autoEnhancePrompt }) {
   const [loading, setLoading] = useState(false);
   const [manualPrompt, setManualPrompt] = useState('');
   const [showManual, setShowManual] = useState(false);
+
+  // Auto-populate prompt when vibe is picked
+  React.useEffect(() => {
+    if (autoEnhancePrompt) {
+      setManualPrompt(autoEnhancePrompt);
+      setShowManual(true);
+    }
+  }, [autoEnhancePrompt]);
 
   const runEnhance = async (promptText) => {
     if (!promptText?.trim()) return;
@@ -125,11 +133,11 @@ export default function EnhanceButton({ imageUrl, roomType, onEnhanced, autoProm
       <style>{styles}</style>
 
       {/* Auto-prompt button — appears after client picks inspiration vibe */}
-      {autoPrompt && !showManual && (
+      {autoEnhancePrompt && !showManual && (
         <div className="enhance-auto-group">
           <button
             className="btn-enhance btn-enhance-auto"
-            onClick={() => runEnhance(autoPrompt)}
+            onClick={() => runEnhance(autoEnhancePrompt)}
             disabled={loading}
           >
             {loading ? <span className="enhance-spinner" /> : '✨ Visualize This Style'}
@@ -140,10 +148,10 @@ export default function EnhanceButton({ imageUrl, roomType, onEnhanced, autoProm
         </div>
       )}
 
-      {/* Manual prompt — always available if no autoPrompt, or via toggle */}
-      {(!autoPrompt || showManual) && (
-        showManual || !autoPrompt ? (
-          !showManual && !autoPrompt ? (
+      {/* Manual prompt — always available if no autoEnhancePrompt, or via toggle */}
+      {(!autoEnhancePrompt || showManual) && (
+        showManual || !autoEnhancePrompt ? (
+          !showManual && !autoEnhancePrompt ? (
             <button className="btn-enhance" onClick={() => setShowManual(true)}>
               ✨ Visualize My Style
             </button>
