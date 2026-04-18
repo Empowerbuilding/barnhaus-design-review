@@ -4,9 +4,9 @@ const path = require('path');
 const { WebSocketServer } = require('ws');
 const http = require('http');
 const { getProjectRenders, streamImage, getImageBase64 } = require('./drive');
-const { sendToJuanito, initJuanitoSession } = require('./juanito');
+const { sendToJuanito, initJuanitoSession, generateDesignBrief } = require('./juanito');
 const { analyzeImage, groupAndSortImages, analyzeInspirationImage } = require('./claude');
-const { notifyDiscord, writeToCRM, enhanceImage } = require('./notify');
+const { notifyDiscord, notifyDiscordBrief, writeToCRM, enhanceImage } = require('./notify');
 const multer = require('multer');
 const { getInspirationImages, setProjectStyle, getProjectStyle } = require('./inspiration');
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } });
@@ -270,7 +270,14 @@ Acknowledge their pick and continue with targeted detail questions.`;
 app.post('/api/feedback', async (req, res) => {
   const { projectName, clientName, feedback, sessionId, chatTranscript } = req.body;
   try {
+    // Generate AI design brief first (Silas summarizes decisions for Michael)
+    const projectSlug = req.body.projectSlug || projectName?.toLowerCase().replace(/\s+/g, '-') || 'unknown';
+    const briefPromise = generateDesignBrief(projectSlug, clientName, chatTranscript, feedback)
+      .then(brief => brief ? notifyDiscordBrief(projectName, clientName, brief) : null)
+      .catch(err => console.error('Brief generation error:', err.message));
+
     await Promise.allSettled([
+      briefPromise,
       notifyDiscord(projectName, clientName, feedback, chatTranscript),
       writeToCRM(projectName, clientName, feedback, chatTranscript),
       sessionId ? supabaseFetch(`/rest/v1/design_review_sessions?id=eq.${sessionId}`, {

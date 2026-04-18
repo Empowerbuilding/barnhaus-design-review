@@ -636,6 +636,7 @@ function ReviewPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           projectName: project?.projectName,
+          projectSlug: slug,
           clientName,
           feedback: feedbackList,
           sessionId,
