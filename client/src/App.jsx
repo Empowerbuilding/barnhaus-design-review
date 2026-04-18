@@ -631,23 +631,26 @@ function ReviewPage() {
   const handleComplete = useCallback(async () => {
     const feedbackList = Object.values(feedback);
     try {
-      await fetch('/api/feedback', {
+      const body = JSON.stringify({
+        projectName: project?.projectName,
+        projectSlug: slug,
+        clientName,
+        feedback: feedbackList,
+        sessionId,
+        chatTranscript: messages,
+      });
+      const res = await fetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          projectName: project?.projectName,
-          projectSlug: slug,
-          clientName,
-          feedback: feedbackList,
-          sessionId,
-          chatTranscript: messages,
-        }),
+        body,
       });
+      if (!res.ok) throw new Error('Server error ' + res.status);
       setCompleted(true);
-    } catch {
-      alert('Failed to submit feedback. Please try again.');
+    } catch (err) {
+      console.error('Submit feedback error:', err);
+      alert('Failed to submit feedback: ' + err.message);
     }
-  }, [feedback, project, clientName, sessionId]);
+  }, [feedback, project, clientName, sessionId, messages]);
 
   if (loading) {
     return (
