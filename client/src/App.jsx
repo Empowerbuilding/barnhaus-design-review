@@ -428,11 +428,17 @@ function ReviewPage() {
 
   // When client navigates to a new image, notify Juanito with context so he can lead
   const lastNotifiedImage = useRef(null);
+  const triggerAbortRef = useRef(null);
   useEffect(() => {
     if (!project || !currentImage || phase !== 'walkthrough') return;
     const imageKey = `${currentGroup?.roomType}-${currentImage.id}`;
     if (lastNotifiedImage.current === imageKey) return;
     lastNotifiedImage.current = imageKey;
+
+    // Cancel any in-flight trigger from previous image/section
+    if (triggerAbortRef.current) triggerAbortRef.current.abort();
+    const controller = new AbortController();
+    triggerAbortRef.current = controller;
 
     const roomLabel = currentGroup?.roomType || 'other';
     const features = currentImage.analysis?.features?.join(', ') || '';
@@ -687,7 +693,7 @@ function ReviewPage() {
         </div>
       </header>
 
-      <ProgressBar sections={sectionLabels} currentIndex={currentGroupIdx} onSelect={handleSectionChange} />
+      <ProgressBar sections={sectionLabels} currentIndex={currentGroupIdx} onSelect={handleSectionChange} locked={phase === 'walkthrough'} />
 
       <div className="review-content">
         {/* Image panel — full width on mobile, 65% on desktop */}

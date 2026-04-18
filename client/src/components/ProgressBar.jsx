@@ -1,4 +1,4 @@
-export default function ProgressBar({ sections, currentIndex, onSelect }) {
+export default function ProgressBar({ sections, currentIndex, onSelect, locked = false }) {
 const styles = `
   .progress-bar-container {
     padding: 0.5rem 1.5rem;
