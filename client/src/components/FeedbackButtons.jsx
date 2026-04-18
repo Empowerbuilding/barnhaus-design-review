@@ -65,6 +65,7 @@ const styles = `
   }
   .btn-next:hover { opacity: 0.85; }
   .btn-submit { padding: 0.55rem 2rem; }
+  .next-btn-row { margin-top: 0.75rem; }
 
   @media (max-width: 768px) {
     .feedback-buttons {
@@ -123,21 +124,22 @@ export default function FeedbackButtons({ imageId, feedback, onFeedback, onNext,
       </div>
 
       {selected && (
-        <>
-          <textarea
-            className="feedback-notes"
-            value={notes}
-            onChange={handleNotes}
-            placeholder="Add any notes or details..."
-            rows={2}
-          />
-          {isLastImage ? (
-            <button className="btn-next btn-submit" onClick={onComplete}>Finish Review →</button>
-          ) : hasNext ? (
-            <button className="btn-next" onClick={onNext}>Next Image →</button>
-          ) : null}
-        </>
+        <textarea
+          className="feedback-notes"
+          value={notes}
+          onChange={handleNotes}
+          placeholder="Add any notes or details..."
+          rows={2}
+        />
       )}
+
+      <div className="next-btn-row">
+        {isLastImage ? (
+          <button className="btn-next btn-submit" onClick={onComplete}>Finish Review →</button>
+        ) : hasNext ? (
+          <button className="btn-next" onClick={onNext}>Next →</button>
+        ) : null}
+      </div>
     </div>
   );
 }
