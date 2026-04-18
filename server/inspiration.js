@@ -73,4 +73,14 @@ async function getInspirationImages(roomType, stylePrefix = '', count = 3, featu
   }
 }
 
-module.exports = { getInspirationImages };
+const projectStyles = {};
+
+function setProjectStyle(projectSlug, style) {
+  projectStyles[projectSlug] = style;
+}
+
+function getProjectStyle(projectSlug) {
+  return projectStyles[projectSlug] || '';
+}
+
+module.exports = { getInspirationImages, setProjectStyle, getProjectStyle };
