@@ -227,6 +227,166 @@ Ask: "Does this baseline work for you, or do you want to change anything?"`,
     ]
   },
 
+  'foyer': {
+    opening: `Show a high-end entryway image matching the aesthetic. Only ask if a foyer exists on the floor plan.`,
+    questions: [
+      "VIBE CHECK FIRST: Show a high-end entryway image matching their style.",
+      "Storage: built-in coat closet, or a clean entry bench with art/mirrors on the wall?",
+      "Sightline: keep it completely open, or add architectural framing (archway) to transition into the great room?",
+      "Lighting: statement chandelier or recessed lighting?",
+      "Front entry approach: wide tiered concrete steps up to the front door, or a continuous ramped walkway?"
+    ]
+  },
+
+  'entryway': {
+    opening: `Same as foyer — show inspiration image, confirm storage and lighting.`,
+    questions: [
+      "VIBE CHECK FIRST: Show a high-end entryway image.",
+      "Built-in coat closet or entry bench with mirrors?",
+      "Statement chandelier or recessed lighting?",
+      "Front steps or ramped approach from the driveway?"
+    ]
+  },
+
+  'guest bedroom': {
+    opening: `Confirm ceilings, bunk details if applicable, and guest closets. Design one closet, apply to all.`,
+    questions: [
+      "Ceiling: Michael's standard is flat 10-foot for guest rooms to save on HVAC. Want to vault any of them?",
+      "Bunk room (if applicable): VIBE CHECK — show custom built-in bunks with stairs/cubbies vs freestanding frames. Which direction?",
+      "Guest closets: show a simple walk-in layout — 2-row hanging, shoe rack, simple cubbies. Does this work? Michael will apply this to all guest closets.",
+      "Guest closet: full custom built-ins, or simple rods and shelves?"
+    ]
+  },
+
+  'bunk room': {
+    opening: `Show Pinterest images of custom built-in bunk rooms with stairs and cubbies vs freestanding frames.`,
+    questions: [
+      "VIBE CHECK FIRST: Custom built-in bunks with stairs vs freestanding frames — which direction?",
+      "How many bunks — twin over twin, twin over full, or full over full?",
+      "Built-in stairs with storage cubbies, or a simple ladder?",
+      "Individual reading lights and outlets at each bunk?",
+      "Ceiling height confirmed for top bunk clearance?"
+    ]
+  },
+
+  'half bath': {
+    opening: `The powder room is a statement piece — treat it separately from the guest baths. Show a dramatic powder room image (moody, floating vanity, backlit mirror).`,
+    questions: [
+      "VIBE CHECK FIRST: Show a dramatic high-end powder room. 'Bold statement piece, or clean and light like the guest baths?'",
+      "Vanity: floating wall-mounted, or a vessel sink on a custom wood console?",
+      "Mirror: round statement mirror, backlit rectangular, or framed art mirror?",
+      "Cabinet over the toilet: yes or no?",
+      "Any floating shelves for decor or storage?"
+    ]
+  },
+
+  'powder room': {
+    opening: `Same as half bath — show dramatic inspiration image, treat as a statement piece.`,
+    questions: [
+      "VIBE CHECK FIRST: Show a dramatic powder room image.",
+      "Bold statement or clean and light like the guest baths?",
+      "Vanity style: floating, vessel sink, or console?",
+      "Mirror: round, backlit, or framed art?"
+    ]
+  },
+
+  'pool': {
+    opening: `Pool is practically a second design contract. Only trigger if on Draft 1 or explicitly requested. Start with a big vibe check — 3 pool images.`,
+    questions: [
+      "VIBE CHECK FIRST: Show 3 pool styles — modern geometric, infinity edge, natural rock/freeform. Which feels right?",
+      "Hot tub: raised overflow hot tub spilling into the pool, or flush with the deck?",
+      "Shallow tanning ledge for loungers — yes or no?",
+      "How deep are we going?",
+      "Built-in sunken fire pit by the pool, or concrete pad for a freestanding fire pit?",
+      "Outdoor kitchen/bar: out by the pool under a separate pavilion, or keep it attached to the main house patio?",
+      "How much deck/flatwork concrete around the pool?"
+    ]
+  },
+
+  'safe room': {
+    opening: `Only trigger if a safe room, gun vault, or storm shelter is on the floor plan or explicitly requested.`,
+    questions: [
+      "Is the current square footage sufficient for your needs?",
+      "Security level: heavy vault door with cinder block reinforced walls, or a standard steel door in a framed room?",
+      "Built-in shelving and gun racks, or bringing your own freestanding safes?",
+      "Ventilation and climate control needed inside?"
+    ]
+  },
+
+  'loft': {
+    opening: `Only ask if a loft exists on the floor plan. Show a Pinterest image of an open loft overlooking a great room.`,
+    questions: [
+      "VIBE CHECK FIRST: Show an open loft overlooking a great room.",
+      "Open to the great room with a clean metal or wood railing, or a solid half-wall for more privacy?",
+      "What is the loft used for — sitting area, office, kids play area, sleeping?"
+    ]
+  },
+
+  'kitchenette': {
+    opening: `Ask exactly what appliances are needed — don't over-engineer it.`,
+    questions: [
+      "Full-size fridge or just an under-counter beverage fridge?",
+      "Sink and microwave — yes or no?",
+      "Full range or just a two-burner cooktop?",
+      "How much cabinet storage is needed here?",
+      "Counter material: match the main kitchen or something simpler?"
+    ]
+  },
+
+  'game room': {
+    opening: `Confirm the game room function. Only ask if on the floor plan.`,
+    questions: [
+      "VIBE CHECK FIRST: Show a high-end game room image.",
+      "Built-in bar or wet bar in here?",
+      "Custom storage for games/equipment?",
+      "Built-in seating?",
+      "Ceiling: vault, flat, or coffered?"
+    ]
+  },
+
+  'media room': {
+    opening: `Confirm theater/media room setup. Show a high-end media room image first.`,
+    questions: [
+      "VIBE CHECK FIRST: Show a high-end media room.",
+      "Stepped platform seating for a stadium effect, or flat floor with furniture?",
+      "Built-in media wall with screen and integrated speaker bays?",
+      "Ceiling: coffered, flat, or specialized acoustic treatment?"
+    ]
+  },
+
+  'theater': {
+    opening: `Same as media room.`,
+    questions: [
+      "VIBE CHECK FIRST: Show a high-end home theater image.",
+      "Stepped platform seating yes or no?",
+      "Built-in media wall for the screen?",
+      "Acoustic panels or sound treatment on walls/ceiling?"
+    ]
+  },
+
+  'bar': {
+    opening: `Show a high-end wet bar or wine nook image first — presents a fully designed concept, not open-ended questions.`,
+    questions: [
+      "VIBE CHECK FIRST: Show a high-end bar/wine nook matching their aesthetic.",
+      "Wine fridge, under-counter beverage fridge, or both?",
+      "Floating shelves with LED backlight for bottle display, or full upper cabinetry?",
+      "Wet bar sink — yes or no?",
+      "Dedicated under-counter ice machine?",
+      "Bar overhang for seating?"
+    ]
+  },
+
+  'winery': {
+    opening: `Same as bar — show high-end winery inspiration first.`,
+    questions: [
+      "VIBE CHECK FIRST: Show a high-end wine room image.",
+      "Built-in wine fridge, secondary beverage cooler, or both?",
+      "Floating wood shelves backlit with LED strips, or enclosed cabinetry?",
+      "Quartz counter and prep sink?",
+      "Bar seating overhang?"
+    ]
+  },
+
   'default': {
     opening: `Confirm the space function and any built-ins or special features. Start with 'What were you most excited about in this room from your kickoff conversation?'`,
     questions: [
@@ -282,7 +442,7 @@ function getQuestionsForRoom(roomType) {
   return QUESTION_BANK.default;
 }
 
-const ROOM_ORDER = ['floor plan','exterior','kitchen','pantry','living room','great room','dining room','primary bedroom','primary bath','master bedroom','master bath','bathroom','guest bath','office','bonus room','mudroom','laundry','garage','porch','hallway','other'];
+const ROOM_ORDER = ['floor plan','exterior','foyer','entryway','kitchen','pantry','dining room','great room','living room','bar','winery','master bedroom','primary bedroom','master bath','primary bath','master closet','guest bedroom','bunk room','bedroom','guest bath','bathroom','half bath','powder room','office','game room','media room','theater','loft','kitchenette','mudroom','laundry','safe room','pool','porch','patio','garage','shop','hallway','other'];
 
 function groupAndSortImages(analyzedImages) {
   const groups = {};
