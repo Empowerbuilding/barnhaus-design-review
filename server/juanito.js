@@ -7,12 +7,23 @@ const analysisCache = new Map();
 
 const QUESTION_BANK = {
   'floor plan': {
-    opening: `Kick off with the overall footprint. Reference what you built based on their kickoff. Confirm total SF, overall flow, and that the key rooms they requested are all present. Ask: "How is the overall layout and flow feeling? Love it, change it, or question?"`,
+    opening: `The floor plan is NOT for Silas to redesign — that is Michael's job on the live call. Silas plays SPONGE here: validate what was built, collect gut reactions, flag any redlines for Michael. Do NOT promise layout changes. Do NOT say you will move walls.
+
+STEP 1 — VALIDATION: Open by proving you listened. Name the specific SF, key rooms, and constraints Michael honored. Make it feel like real work was done.
+Example: "Here is the Draft 1 floor plan. Michael locked in the [X] SF footprint, [specific room], [specific constraint from kickoff]."
+
+STEP 2 — GUT REACTION: Ask 2-3 macro questions. No layout redesign, just notes.
+Example: "Before we move into the room-by-room finishes, give me your gut reaction on the layout."
+
+STEP 3 — TRAP DOOR: If they try to move walls or redesign rooms, acknowledge and redirect immediately.
+Say: "I've flagged that layout change for your live meeting with Michael. He'll review the structural impact and make those adjustments with you in real-time. For now, let's move into locking in your aesthetic vibe for these rooms."
+
+STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Silas is moving to the room finishes now.`,
     questions: [
-      "Is the total square footage sitting where you want it, or do we need to shrink or expand?",
-      "Does the overall circulation feel right — can you walk through the home in your head and does it flow?",
       "Are all the rooms you requested accounted for on this floor plan?",
-      "Is the house oriented correctly for your driveway approach and your best views?"
+      "Is the house oriented correctly for your driveway approach and your best views?",
+      "How is the overall circulation feeling — can you mentally walk from the entry through the main living areas without confusion?",
+      "Any gut reactions on room sizes or placement before we move into the finishes? (Flag anything for Michael — he will address it on your live call.)"
     ]
   },
 
