@@ -1013,7 +1013,7 @@ Please change the parent <Route path="${Y}"> to <Route path="${Y==="/"?"*":`${Y}
       height: 8px;
     }
   }
-`;return u.length?g.jsxs("div",{className:"progress-bar-container",children:[g.jsx("style",{children:d}),g.jsxs("div",{className:"progress-track",children:[u.map((h,b)=>g.jsxs("div",{className:`progress-step ${b<f?"done":""} ${b===f?"active":""}`,onClick:()=>s&&s(b),role:"button",tabIndex:0,onKeyDown:j=>j.key==="Enter"&&s&&s(b),children:[g.jsx("div",{className:"step-dot"}),g.jsx("span",{className:"step-label",children:h})]},b)),g.jsx("div",{className:"progress-fill",style:{width:`${f/Math.max(u.length-1,1)*100}%`}})]})]}):null}const ny=`
+`;return u.length?g.jsxs("div",{className:"progress-bar-container",style:r?{cursor:"not-allowed"}:{},children:[g.jsx("style",{children:d}),g.jsxs("div",{className:"progress-track",children:[u.map((h,b)=>g.jsxs("div",{className:`progress-step ${b<f?"done":""} ${b===f?"active":""}`,style:r&&b!==f?{cursor:"not-allowed",opacity:b>f?.4:1}:{},onClick:()=>!r&&s&&s(b),role:"button",tabIndex:0,onKeyDown:j=>j.key==="Enter"&&!r&&s&&s(b),children:[g.jsx("div",{className:"step-dot"}),g.jsx("span",{className:"step-label",children:h})]},b)),g.jsx("div",{className:"progress-fill",style:{width:`${f/Math.max(u.length-1,1)*100}%`}})]})]}):null}const ny=`
   .overview-screen {
     height: 100vh;
     background: #1a1a1a;
