@@ -6,178 +6,260 @@ const SESSION_KEY = 'agent:main:main';
 const analysisCache = new Map();
 
 const QUESTION_BANK = {
-  exterior: ['What is your first reaction to the overall look?','How do you feel about the roofline and pitch?','Any changes to the entry or front door?','How do you feel about the window sizes and placement?'],
-  kitchen: ['What cabinet color or finish are you thinking — white, navy, natural wood, or two-tone?','Countertop preference — quartz, marble look, concrete, or butcher block?','Does the island size feel right for how you cook and entertain?','Open shelving, upper cabinets, or a mix?'],
-  'living room': ['How do you feel about the ceiling height and any exposed beams?','Fireplace placement and surround feel right?','Any changes to the window wall or views?'],
-  'great room': ['How do you feel about the ceiling height and any exposed beams?','Fireplace placement and surround feel right?','Any changes to the window wall or views?'],
-  'primary bedroom': ['Does this feel like the right size and scale?','What flooring would you like — hardwood, tile, or carpet?','How do you feel about the natural light and window placement?'],
-  'master bedroom': ['Does this feel like the right size and scale?','What flooring would you like — hardwood, tile, or carpet?','How do you feel about the natural light and window placement?'],
-  'primary bath': ['What tile finish — marble, large format, subway, or concrete look?','Freestanding tub or built-in? Walk-in shower size?','Any changes to the vanity layout?'],
-  'master bath': ['What tile finish — marble, large format, subway, or concrete look?','Freestanding tub or built-in? Walk-in shower size?','Any changes to the vanity layout?'],
-  bathroom: ['What tile finish — marble, large format, subway, or concrete look?','Freestanding tub or built-in? Walk-in shower size?','Any changes to the vanity layout?'],
-  patio: ['What finish on the ceiling — wood, painted, or exposed steel?','Outdoor kitchen yes or no?','Fireplace or fire pit outside?'],
-  outdoor: ['What finish on the ceiling — wood, painted, or exposed steel?','Outdoor kitchen yes or no?','Fireplace or fire pit outside?'],
-  'floor plan': ['Does the overall layout flow feel right?','Anything about room sizes or placement you would change?','Does the garage placement work?'],
-  default: ['Does this room feel like the right size?','What finish or style direction do you want here?'],
+  'floor plan': {
+    opening: `Kick off with the overall footprint. Reference what you built based on their kickoff. Confirm total SF, overall flow, and that the key rooms they requested are all present. Ask: "How is the overall layout and flow feeling? Love it, change it, or question?"`,
+    questions: [
+      "Is the total square footage sitting where you want it, or do we need to shrink or expand?",
+      "Does the overall circulation feel right — can you walk through the home in your head and does it flow?",
+      "Are all the rooms you requested accounted for on this floor plan?",
+      "Is the house oriented correctly for your driveway approach and your best views?"
+    ]
+  },
+
+  'exterior': {
+    opening: `Start with a vibe check — show 3 inspiration images before asking anything functional. Reference their specific kickoff style direction. Frame the AI renders honestly if they show distorted proportions.`,
+    baseline: `Standard Barnhaus exterior baseline: corrugated or standing seam metal roof, board-and-batten or metal panel siding, black window frames, stone or brick wainscoting at base. Auto-approve this baseline, only dig in if they want changes.`,
+    questions: [
+      "Does this color blocking and material palette match the vision you had in mind? (vibe check first)",
+      "Are the rooflines and roof pitches hitting the mark, or do we need to adjust the pitch or form?",
+      "Siding: are we confirmed on the siding type — corrugated vs standing seam, board and batten, or mixed materials?",
+      "Window frames: black, white, or another color?",
+      "Do we need more natural light in any specific rooms — bigger windows anywhere?",
+      "Porches and patios: are the overhang depths sufficient, or do we need to extend the covered outdoor living?",
+      "Window grids: no grids (clean modern look), simple modern grids (2x2 or single horizontal), or traditional multi-pane grids?",
+      "Any black metal awnings over windows, or keep the lines clean?",
+      "Stone or brick wainscoting across the base — confirmed, or adjust the height?"
+    ]
+  },
+
+  'kitchen': {
+    opening: `Start with The Recommended Function List. Present the baseline and get them to approve it before drilling into aesthetics. This saves 45 minutes of questioning.`,
+    baseline: `Michael's standard high-end kitchen baseline — auto-approve unless they request changes:
+✅ Built-in panel-ready refrigerator
+✅ Drawers for all base cabinets (not doors)
+✅ Dishwasher and dedicated trash pull-out directly beside the main sink
+✅ Skinny pull-out spice & tray cabinets flanking both sides of the range
+Ask: "Does this baseline work for you, or do you want to change anything?"`,
+    questions: [
+      "BASELINE FIRST: Present the standard function list and get Love it / Change it before aesthetics.",
+      "Island: what size feels right? Do you want a waterfall stone edge, or a standard square overhang?",
+      "Island seating: which side, and how many seats?",
+      "Microwave: Michael usually tucks it into a drawer in the island — does that work, or do you want it elsewhere?",
+      "Range hood: custom plaster, exposed metal/steel, or built-in to match the cabinets?",
+      "Upper cabinets vs open floating shelves flanking the hood — which do you prefer?",
+      "Kitchen ceiling: vault it with the great room, keep it flat and high, or drop it flat and start the vault at the edge of the kitchen?",
+      "Sink placement confirmed? Any secondary sink (island or butler's pantry side)?",
+      "Range placement and fridge placement — are we happy with where those land?",
+      "Double-stacked wall oven — do you want this, or stick with the main range?",
+      "Warming drawers — do you want these?",
+      "Backsplash: tile, stone, or slab behind the range?",
+      "Any extras: ice machine, beverage fridge, wine cooler, additional sink?"
+    ]
+  },
+
+  'pantry': {
+    opening: `Show a beautiful butler's pantry image first — the sexy hook. Standard setup: deep countertops, open shelving on top, base storage on bottom. Almost everyone loves this.`,
+    baseline: `Standard Barnhaus butler's pantry: thick wood open shelving on top, deep countertops for appliances, base storage (open shelves with baskets is cheaper and looks great). Show the image and get approval first.`,
+    questions: [
+      "VIBE CHECK FIRST: Show a high-end butler's pantry image. 'Does this vibe match what you're envisioning?'",
+      "Base storage: open shelves with baskets (lower cost, great look), or full custom drawers and cabinet faces on the bottom?",
+      "What small appliances are living back here — air fryer, toaster, coffee maker?",
+      "Can those appliances sit on the counter, or do you want them built-in or hidden behind an appliance garage door?",
+      "Coffee station: how will it function? Do you need a water line run for a plumbed-in espresso machine?",
+      "Secondary fridge back here? Dedicated ice machine? Wine cooler?",
+      "Prep sink in the pantry?"
+    ]
+  },
+
+  'great room': {
+    opening: `Fireplace is the centerpiece — start with 3 inspiration images. The right image answers almost every question at once. Standard setup: stone or tile surround, base cabinets flanking both sides, thick open floating shelves above the cabinets, heavy mantle for the TV.`,
+    baseline: `Standard Barnhaus fireplace setup: stone or tile surround, base cabinets flanking the firebox for storage, thick open floating shelves above those cabinets, and a heavy solid wood mantle sized for the TV. Almost nobody says no to this layout.`,
+    questions: [
+      "VIBE CHECK FIRST: Show 3 fireplace inspiration images that match their style. 'Which of these hits closest to your vision?'",
+      "Fireplace type: gas or wood-burning? (affects framing for flue/chase)",
+      "TV: are you planning to mount the TV above the mantle?",
+      "Flanking cabinets: match the wood finish of the floating shelves above, or paint them to match the kitchen cabinets?",
+      "Hearth: raised hearth bench at the base, or firebox flush to the floor?",
+      "Ceiling in the great room: vault confirmed, or any changes to the height or form?"
+    ]
+  },
+
+  'living room': {
+    opening: `Same as great room — vibe check first, then confirm the fireplace and built-in details if applicable.`,
+    questions: [
+      "Is there a fireplace in this room? (if yes, run the great room fireplace flow)",
+      "Built-in shelving or entertainment center on any wall?",
+      "Ceiling: vault, flat high, or coffered?",
+      "Natural light: are we happy with the window placement in this room?"
+    ]
+  },
+
+  'primary bedroom': {
+    opening: `Confirm the suite setup — privacy, ceiling, and any built-ins. Michael separates the master from the rest of the house whenever possible.`,
+    questions: [
+      "Does the bedroom fit your furniture — king bed plus nightstands on both sides with comfortable clearance?",
+      "Ceiling: vault, tray, or flat? Any tongue and groove?",
+      "Is the privacy entrance or separation from the guest wing working for you?",
+      "Any built-ins — window seat, built-in bench, reading nook?",
+      "Fireplace in the master — do you want one?"
+    ]
+  },
+
+  'primary bath': {
+    opening: `Master bath is all about the luxury fixtures. Show images — freestanding tub, massive walk-in shower, double vanity. This one is worth spending time on.`,
+    questions: [
+      "VIBE CHECK FIRST: Show 3 high-end master bath images. 'Which overall vibe matches your vision?'",
+      "Freestanding soaking tub or no tub — Michael recommends against a traditional tub drop-in for luxury builds. Freestanding or skip the tub entirely?",
+      "Walk-in shower: how large? Rain head, wall heads, handheld — all three?",
+      "Separate shower valves or a single all-in-one unit?",
+      "Double vanity confirmed? How long — 72 inches, 84 inches, longer?",
+      "Vanity style: floating modern, or traditional base cabinet to the floor?",
+      "Mirror: one massive slab mirror, individual mirrors per sink, or backlit LED mirrors?",
+      "Lighting: flanking wall sconces vs overhead bar — or both?",
+      "Shower niche: horizontal niche under the window sill, or vertical niche on the side wall?",
+      "Wet room (shower and tub in same wet zone with no door) — is this something you want to explore?",
+      "Heated floors in the master bath?",
+      "Any water closet (private toilet room with a door) or open layout?"
+    ]
+  },
+
+  'master bedroom': {
+    opening: `Same as primary bedroom — confirm suite layout, privacy, ceiling, and any built-ins.`,
+    questions: [
+      "Does the bedroom fit your furniture — king bed plus nightstands with comfortable clearance?",
+      "Ceiling: vault, tray, flat, or tongue and groove?",
+      "Privacy entrance or separation from guest wing — is that working?",
+      "Any built-ins or fireplace in the master?"
+    ]
+  },
+
+  'master bath': {
+    opening: `Same as primary bath — luxury fixtures, show images first.`,
+    questions: [
+      "VIBE CHECK FIRST: Show 3 high-end master bath images.",
+      "Freestanding soaking tub, or no tub?",
+      "Walk-in shower size and fixtures — rain head, wall heads, handheld?",
+      "Double vanity: size and style (floating vs traditional)?",
+      "Mirror setup: slab, individual, or backlit?",
+      "Shower niche placement and orientation?",
+      "Wet room option?",
+      "Heated floors?"
+    ]
+  },
+
+  'garage': {
+    opening: `Confirm the practical stuff — door sizes, storage, any special needs like a workshop or utility bay.`,
+    questions: [
+      "Door sizes confirmed — do the openings fit your largest vehicle (dually, tall truck, boat trailer)?",
+      "How many cars is this designed for — is that count still correct?",
+      "Any dedicated workshop space or utility bay inside the garage?",
+      "Built-in storage wall or just open walls?",
+      "Utility sink in the garage?",
+      "EV charger rough-in?"
+    ]
+  },
+
+  'mudroom': {
+    opening: `Show a great mudroom image first — bench, lockers, storage. This space depends heavily on whether laundry is combined or separate.`,
+    baseline: `Standard Barnhaus mudroom: heavy wood bench with open shoe cubbies underneath, coat hooks or locker doors above, built-in storage. Show the image and ask which vibe they prefer before drilling into details.`,
+    questions: [
+      "VIBE CHECK FIRST: Show mudroom inspiration images — open hooks vs closed locker doors. 'Which style for the drop zone?'",
+      "Open coat hooks or closed locker doors to hide the mess?",
+      "Dog wash station or just a deep utility mop sink for boots and gear?",
+      "Is laundry combined in this room or in a separate laundry room? (This determines the counter layout)"
+    ]
+  },
+
+  'laundry': {
+    opening: `Laundry room details — start with machine type since that determines everything else.`,
+    questions: [
+      "Front-load or top-load machines? (Front-load = continuous countertop over the top. Top-load = counters only on the side.)",
+      "Do you want the washer and dryer elevated on pedestals so you don't have to bend over?",
+      "Continuous folding countertop running across the top of the machines?",
+      "How much counter space do you need for folding clothes?",
+      "Hanging rod and open shelves above for drying clothes?",
+      "Utility sink in the laundry room?",
+      "Broom closet: tall built-in cabinet, or a framed closet with a door?",
+      "Soap and supply storage: closed upper cabinets above the machines, or open floating shelves?"
+    ]
+  },
+
+  'office': {
+    opening: `Confirm the office function — built-in desk, storage, any specialty needs.`,
+    questions: [
+      "Built-in desk with upper cabinets and shelving, or keep it open for furniture?",
+      "Any built-in bookcase or display wall?",
+      "Ceiling: vault or flat?",
+      "Murphy bed for flex use as a guest room?"
+    ]
+  },
+
+  'porch': {
+    opening: `Outdoor living is a big deal — confirm the coverage, ceiling, and outdoor kitchen or grill setup.`,
+    questions: [
+      "Is the depth of the covered porch sufficient — do you have enough shade in the afternoon?",
+      "Outdoor kitchen: full built-in grill and counter setup, or just a gas hookup and space for a freestanding grill?",
+      "Outdoor fireplace or fire pit?",
+      "Tongue and groove or bead board on the porch ceiling?",
+      "Ceiling fans — how many?",
+      "TV hookup rough-in on the porch?"
+    ]
+  },
+
+  'dining room': {
+    opening: `Confirm the dining setup — formal vs casual, built-ins, ceiling.`,
+    questions: [
+      "Formal dining room or more of a casual everyday dining space?",
+      "Built-in buffet or china cabinet on any wall?",
+      "Ceiling: coffered, tray, or flat?",
+      "Chandelier rough-in centered over the table?"
+    ]
+  },
+
+  'default': {
+    opening: `Confirm the space function and any built-ins or special features. Start with 'What were you most excited about in this room from your kickoff conversation?'`,
+    questions: [
+      "Is this space sized correctly for how you plan to use it?",
+      "Any built-ins or specialty millwork in this room?",
+      "Ceiling treatment — vault, tray, or flat?",
+      "Natural light — are we happy with the window count and placement?"
+    ]
+  }
 };
 
-function getQuestionsForRoom(roomType) {
-  const key = roomType.toLowerCase();
-  for (const [k, questions] of Object.entries(QUESTION_BANK)) {
-    if (key.includes(k) || k.includes(key)) return questions;
-  }
-  return QUESTION_BANK.default;
-}
+// Special sections not classified as rooms but tracked separately
+const CLOSET_QUESTIONS = {
+  opening: `Show a master closet inspiration image first. If his & hers are separate, show a luxury 'her' closet and a more masculine 'his' closet. If it's one shared walk-in, show a large shared built-in layout.`,
+  baseline: `Standard Barnhaus master closet: two rows of hanging (one section reserved for long hanging — dresses, coats), built-in dresser drawers, open cubbies for folded items, angled shoe rack at the bottom, open shelving on top. Almost everyone wants this.`,
+  questions: [
+    "VIBE CHECK FIRST: Show closet inspiration image. 'Are you looking for full custom built-ins like this, or simpler shelves and hanging rods?'",
+    "If his & hers are separate: show the masculine version for his. Does he want closed cabinetry for hunting/outdoor gear or gun safe integration?",
+    "Center island in the closet: do you want a stone top (to match the bath) or wood?",
+    "Long hanging zone for dresses and coats — one dedicated section on the ladies' side?",
+    "Drawers: built-in dresser drawers in the wall panels, or open cubbies for folded items?",
+    "Shoes: angled display rack at the bottom, or flat open shelving?"
+  ]
+};
 
-const ROOM_ORDER = ['floor plan','exterior','kitchen','living room','great room','dining room','primary bedroom','primary bath','master bedroom','master bath','bathroom','office','bonus room','laundry','hallway','patio','outdoor','garage','other'];
+const BAR_QUESTIONS = {
+  opening: `Show a high-end wet bar or wine nook image. Usually triggers excitement.`,
+  questions: [
+    "VIBE CHECK FIRST: Show a high-end wet bar image. 'Is this the direction you want for the bar/wine area?'",
+    "Wine fridge, under-counter beverage fridge, or both?",
+    "Floating shelves above the counter for display, or full upper cabinetry?",
+    "Sink at the bar — yes or no?",
+    "Ice machine dedicated under the counter?"
+  ]
+};
 
-function groupAndSortImages(analyzedImages) {
-  const groups = {};
-  for (const img of analyzedImages) {
-    const room = img.analysis.roomType || 'other';
-    if (!groups[room]) groups[room] = [];
-    groups[room].push(img);
-  }
-  const sorted = [];
-  for (const room of ROOM_ORDER) {
-    if (groups[room]) { sorted.push({ roomType: room, images: groups[room] }); delete groups[room]; }
-  }
-  for (const [room, images] of Object.entries(groups)) sorted.push({ roomType: room, images });
-  return sorted;
-}
+const STAIRCASE_QUESTIONS = {
+  questions: [
+    "Treads: wood (matches floors), or carpet?",
+    "Railing: metal (cable, rod, or flat bar), wood, or combination?",
+    "Open risers (floating modern look) or closed risers?",
+    "Angled/straight run or L-shaped?"
+  ]
+};
 
-// Image analysis via Claude API directly (never send base64 to Juanito session)
-async function analyzeImageWithClaude(imageId, base64, mimeType) {
-  if (analysisCache.has(imageId)) return analysisCache.get(imageId);
-  const fallback = { roomType: 'other', angle: 'interior', features: [], isFloorPlan: false };
-  if (!ANTHROPIC_KEY) { analysisCache.set(imageId, fallback); return fallback; }
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251022',
-        max_tokens: 256,
-        messages: [{ role: 'user', content: [
-          { type: 'image', source: { type: 'base64', media_type: mimeType, data: base64 } },
-          { type: 'text', text: 'Analyze this architectural render. Return ONLY valid JSON: { "roomType": "<exterior|floor plan|kitchen|living room|great room|primary bedroom|primary bath|bathroom|office|bonus room|patio|outdoor|garage|hallway|laundry|dining room|other>", "angle": "<front|rear|side|aerial|interior|detail>", "features": ["<2-4 visible features>"], "isFloorPlan": <true/false> }' },
-        ]}],
-      }),
-    });
-    if (!response.ok) throw new Error(`Claude API ${response.status}`);
-    const data = await response.json();
-    const text = data.content[0].text;
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    const analysis = JSON.parse(jsonMatch ? jsonMatch[0] : text);
-    analysisCache.set(imageId, analysis);
-    return analysis;
-  } catch (err) {
-    console.error('Image analysis error:', err.message);
-    analysisCache.set(imageId, fallback);
-    return fallback;
-  }
-}
-
-// Juanito gateway — text only, never images
-async function invokeGateway(tool, args) {
-  const response = await fetch(`${JUANITO_URL}/tools/invoke`, {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${JUANITO_TOKEN}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ tool, args }),
-  });
-  if (!response.ok) throw new Error(`Gateway HTTP ${response.status}`);
-  const result = await response.json();
-  if (!result.ok) throw new Error(result.error || 'Gateway error');
-  return result.result.content[0].text;
-}
-
-async function getLastAssistantTimestampAndText() {
-  const text = await invokeGateway('sessions_history', { sessionKey: SESSION_KEY, limit: 2 });
-  try {
-    const parsed = JSON.parse(text);
-    const messages = parsed.messages || [];
-    for (let i = messages.length - 1; i >= 0; i--) {
-      if (messages[i].role === 'assistant') {
-        const msg = messages[i];
-        const content = Array.isArray(msg.content)
-          ? (msg.content.find(b => b.type === 'text') || {}).text || ''
-          : (typeof msg.content === 'string' ? msg.content : '');
-        return { timestamp: msg.timestamp || 0, text: content };
-      }
-    }
-  } catch (e) { /* ignore */ }
-  return { timestamp: 0, text: '' };
-}
-
-function stripThinkBlocks(text) {
-  // Remove <think>...</think> reasoning blocks that shouldn't reach the client
-  return text.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/<final>([\s\S]*?)<\/final>/i, '$1').trim();
-}
-
-async function sendToJuanito(message) {
-  try {
-    const response = await fetch(`${JUANITO_URL}/tools/invoke`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${JUANITO_TOKEN}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        tool: 'sessions_send',
-        args: { sessionKey: SESSION_KEY, message, timeoutSeconds: 55 },
-      }),
-    });
-    if (!response.ok) throw new Error(`Gateway HTTP ${response.status}`);
-    const result = await response.json();
-    if (!result.ok) throw new Error(result.error || 'Gateway error');
-
-    const outerText = result.result.content[0].text;
-    try {
-      const parsed = JSON.parse(outerText);
-      if (parsed.reply && parsed.reply.length > 5) {
-      const clean = stripThinkBlocks(parsed.reply);
-      if (clean === 'NO_REPLY' || clean === 'ANNOUNCE_SKIP' || clean === 'HEARTBEAT_OK') return null;
-      return clean;
-    }
-    } catch (e) { /* not JSON */ }
-
-    // outerText itself might be the reply
-    if (outerText && outerText.length > 5 && !outerText.startsWith('{')) {
-      const clean = stripThinkBlocks(outerText);
-      if (clean === 'NO_REPLY' || clean === 'ANNOUNCE_SKIP' || clean === 'HEARTBEAT_OK') return null;
-      return clean;
-    }
-
-    return "I'm still reviewing your designs — send a message and I'll respond.";
-  } catch (err) {
-    console.error('Juanito error:', err.message);
-    return "I'm having trouble connecting right now. Please try again in a moment.";
-  }
-}
-
-async function initJuanitoSession(projectSlug, clientName, projectName, rooms) {
-  const roomList = rooms && rooms.length > 0 ? rooms.join(', ') : 'to be determined from the renders';
-  const message = `DESIGN REVIEW SESSION STARTING — GENERATE DRAFT OVERVIEW MEMO.
-
-Client: ${clientName}
-Project: ${projectSlug} (${projectName})
-Rooms in this draft: ${roomList}
-
-STEP 1: Read projects/${projectSlug.charAt(0).toUpperCase() + projectSlug.slice(1)}.md right now before writing anything. If the file isn't found, try projects/${projectSlug}.md. Extract the client's first name, key kickoff decisions, style direction, and any specific requests they made.
-
-STEP 2: Write the personalized Draft 1 Overview Memo. This is the FIRST thing the client sees — make it feel like real work was done specifically for them. Pull directly from the project file. No generic filler.
-
-### Welcome
-Warm, 2-sentence greeting using the client's actual first name. Reference one specific thing from their project — a room they were excited about, a design constraint, a vibe they described. Make it personal.
-
-### What We Built
-3-5 bullet points of specific kickoff decisions Michael honored in Draft 1. Name real things: actual rooms, materials, layout choices, constraints. (e.g. "Bunk room with stairs — not ladders — exactly as Amie specified.") Do NOT use placeholders. If you can't find specifics, read the file again.
-
-### What We'll Cover Today
-One line intro then a bullet list of the actual rooms in this draft (${roomList}). Tell them what Silas will ask about so there are no surprises.
-
-### What Happens Next
-1-2 sentences: their answers go straight to Michael for Draft 2. He'll review everything and reach out to schedule the next step.
-
-Output the memo text only. No extra commentary, no questions.`;
-  return sendToJuanito(message);
-}
 
 module.exports = { sendToJuanito, initJuanitoSession, analyzeImageWithJuanito: analyzeImageWithClaude, getQuestionsForRoom, groupAndSortImages, QUESTION_BANK };
