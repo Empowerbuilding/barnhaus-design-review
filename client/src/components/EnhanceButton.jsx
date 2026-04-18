@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 const styles = `
   .enhance-section {
     padding: 0.75rem 0 0.25rem;
@@ -96,7 +96,7 @@ export default function EnhanceButton({ imageUrl, roomType, onEnhanced, autoEnha
   const [showManual, setShowManual] = useState(false);
 
   // Auto-populate prompt when vibe is picked
-  React.useEffect(() => {
+  useEffect(() => {
     if (autoEnhancePrompt) {
       setManualPrompt(autoEnhancePrompt);
       setShowManual(true);
