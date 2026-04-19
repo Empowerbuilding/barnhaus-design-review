@@ -324,9 +324,10 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
     // Use Silas's parsed OPTIONS as the source of truth for buttons.
     // Fall back to question bank options only if Silas didn't output any.
     const silasOptions = Array.isArray(silasResult?.options) ? silasResult.options : [];
-    // Never fall back to bank options — if Silas didn't output OPTIONS, show no buttons.
-    // Bank options shown when Silas is mid-follow-up cause button/question desync.
-    const options = silasOptions;
+    // Use Silas's OPTIONS if he output any.
+    // For image-change trigger (opening message), fall back to bank options so first buttons show.
+    // For follow-ups, never fall back — avoids stale button desync.
+    const options = silasOptions.length > 0 ? silasOptions : (isImageChangeTrigger ? bankOptions : []);
     let finalImages = inspirationImages;
     if (!finalImages.length && searchQuery) {
       finalImages = await getInspirationForQuestion(searchQuery, getProjectStyle(projectSlug || ''), 4).catch(() => []);
