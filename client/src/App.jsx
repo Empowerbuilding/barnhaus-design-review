@@ -465,6 +465,7 @@ function ReviewPage() {
         currentImageId: currentImage.id,
         currentImageFeatures: currentImage.analysis?.features || [],
         sessionId,
+        isInspirationSelection,
         currentImageIndexInSection: currentImageIdx,
         isImageChangeTrigger: true,
         triggerMessage: trigger,
@@ -584,10 +585,10 @@ function ReviewPage() {
         if (!data.reply || data.reply === 'NO_REPLY' || data.reply === 'ANNOUNCE_SKIP') return;
         const updatedMessages = [...newMessages, { role: 'assistant', content: data.reply }];
         setMessages(updatedMessages);
-        if (data.options) setChatOptions(data.options);
+        if (!isInspirationSelection && data.options) setChatOptions(data.options);
         if (data.inspirationImages) { setInspirationImages(data.inspirationImages); setInspirationOffset(0); }
         if (data.searchQuery) setCurrentSearchQuery(data.searchQuery);
-        if (data.roomProgress) {
+        if (data.roomProgress && !isInspirationSelection) {
           const roomLabel = currentGroup?.roomType || 'other';
           setQuestionProgress(prev => ({
             ...prev,
@@ -652,7 +653,8 @@ function ReviewPage() {
   }, [currentSearchQuery, inspirationOffset, projectSlug]);
 
   const handleInspirationSelect = useCallback((message) => {
-    sendChat(message);
+    // Inspiration selections are context-only — do NOT advance question index or clear buttons
+    sendChat(message, { isInspirationSelection: true });
   }, [sendChat]);
 
   const handleComplete = useCallback(async () => {

@@ -186,6 +186,7 @@ app.post('/api/chat', async (req, res) => {
   const {
     messages, clientName, currentRoom, currentImage, currentImageId,
     isImageChangeTrigger, triggerMessage, projectSlug, currentImageFeatures, sessionId,
+    isInspirationSelection,
   } = req.body;
 
   try {
@@ -257,8 +258,8 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
 [NEXT QUESTION TO ASK: ${qText} — ask this now in your own words, naturally.]`;
     }
 
-    // Advance question index when client answers (not on image change triggers)
-    if (!isImageChangeTrigger) {
+    // Advance question index only on real answers — not image changes or inspiration picks
+    if (!isImageChangeTrigger && !isInspirationSelection) {
       roomQuestionIndexes.set(roomKey, Math.min(qIdx + 1, allQuestions.length - 1));
     }
 
@@ -296,7 +297,14 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
       finalImages = await getInspirationForQuestion(searchQuery, getProjectStyle(projectSlug || ''), 4).catch(() => []);
     }
 
-    res.json({ reply, options, inspirationImages: finalImages, searchQuery: serperContext || searchQuery || null, questionIndex: qIdx, roomProgress });
+    res.json({
+      reply,
+      options: isInspirationSelection ? null : options,
+      inspirationImages: finalImages,
+      searchQuery: serperContext || searchQuery || null,
+      questionIndex: qIdx,
+      roomProgress: isInspirationSelection ? null : roomProgress,
+    });
   } catch (err) {
     console.error('Chat error:', err.message);
     res.status(500).json({ error: 'Chat failed' });
