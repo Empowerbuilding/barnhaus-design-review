@@ -446,11 +446,23 @@ function ReviewPage() {
   // When client navigates to a new image, notify Silas with context so he can lead
   const lastNotifiedImage = useRef(null);
   const triggerAbortRef = useRef(null);
+  const hasInputOnCurrentImage = useRef(false); // track if client interacted with current image
   useEffect(() => {
     if (!project || !currentImage || phase !== 'walkthrough') return;
     const imageKey = `${currentGroup?.roomType}-${currentImage.id}`;
     if (lastNotifiedImage.current === imageKey) return;
+
+    const isFirstInSection = currentImageIdx === 0;
+    // Only auto-trigger Silas on first image of each section
+    // For subsequent images, wait for client input
+    if (!isFirstInSection) {
+      lastNotifiedImage.current = imageKey;
+      hasInputOnCurrentImage.current = false;
+      return;
+    }
+
     lastNotifiedImage.current = imageKey;
+    hasInputOnCurrentImage.current = false;
 
     // Cancel any in-flight trigger from previous image/section
     if (triggerAbortRef.current) triggerAbortRef.current.abort();
@@ -510,8 +522,53 @@ function ReviewPage() {
   };
   const closeDrawer = () => setDrawerOpen(false);
 
+  const triggerSilasForCurrentImage = useCallback(() => {
+    if (!currentImage || !currentGroup || phase !== 'walkthrough') return;
+    const imageKey = `${currentGroup.roomType}-${currentImage.id}`;
+    if (lastNotifiedImage.current === imageKey) return; // already triggered
+    lastNotifiedImage.current = imageKey;
+
+    const roomLabel = currentGroup.roomType || 'other';
+    const features = currentImage.analysis?.features?.join(', ') || '';
+    const isLastInSection = currentImageIdx === (currentGroup.images?.length || 1) - 1;
+    const sectionMessages = messages.filter(m => m.sectionKey === roomLabel);
+    const alreadyCovered = sectionMessages.length > 0
+      ? `\n\nSo far in this section you have already discussed:\n${sectionMessages.map(m => `${m.role === 'user' ? 'Client' : 'Silas'}: ${m.content}`).join('\n')}`
+      : '';
+    const trigger = `[IMAGE CHANGE] Image ${currentImageIdx + 1} of ${currentGroup.images?.length} in the ${roomLabel} section. Image name: ${currentImage.name}. Visible features: ${features || 'not analyzed'}.${alreadyCovered}${isLastInSection ? '\n\nThis is the LAST image in this section — wrap up any remaining key questions.' : ''}\n\nContinue the conversation naturally for this image. Output ONLY the message to the client.`;
+
+    fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [],
+        clientName,
+        projectSlug,
+        currentRoom: roomLabel,
+        currentImage: currentImage.name,
+        currentImageId: currentImage.id,
+        currentImageFeatures: currentImage.analysis?.features || [],
+        sessionId,
+        currentImageIndexInSection: currentImageIdx,
+        isImageChangeTrigger: true,
+        triggerMessage: trigger,
+      }),
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (data.reply && data.reply !== 'NO_REPLY' && data.reply !== 'ANNOUNCE_SKIP')
+          setMessages(prev => [...prev, { role: 'assistant', content: data.reply, sectionKey: roomLabel }]);
+      })
+      .catch(() => {});
+  }, [currentImage, currentGroup, currentImageIdx, messages, clientName, projectSlug, sessionId, phase]);
+
   const sendChat = useCallback(
     async (userMessage) => {
+      // If client types on a non-triggered image, trigger Silas first
+      if (!hasInputOnCurrentImage.current) {
+        hasInputOnCurrentImage.current = true;
+        triggerSilasForCurrentImage();
+      }
       const newMessages = [...messages, { role: 'user', content: userMessage }];
       setMessages(newMessages);
 
@@ -588,6 +645,10 @@ function ReviewPage() {
 
   const handleFeedback = useCallback(
     (imageId, status, notes) => {
+      if (!hasInputOnCurrentImage.current) {
+        hasInputOnCurrentImage.current = true;
+        triggerSilasForCurrentImage();
+      }
       setFeedback(prev => ({
         ...prev,
         [imageId]: {
