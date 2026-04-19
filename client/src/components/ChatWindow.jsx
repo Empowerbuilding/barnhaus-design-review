@@ -340,7 +340,7 @@ export default function ChatWindow({ messages, onSend, isComplete, options, isTy
         <div className="chat-options">
           {options.map((opt, i) => {
             const isFlag = /flag|items to flag/i.test(opt);
-            const isDissatisfied = /change something|something feels off|needs adjustment|adjust|something else|has some confusion|need more|need larger|missing|feels off/i.test(opt) && !/michael|flag/i.test(opt);
+            const isDissatisfied = /change something|something feels off|needs adjustment|adjust|something else|has some confusion|need more|need larger|missing|feels off|i have concerns|concerns|not right|doesn't feel|doesnt feel|something wrong|needs work/i.test(opt) && !/michael|flag/i.test(opt);
             return (
               <button
                 key={i}
