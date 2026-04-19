@@ -281,9 +281,9 @@ export default function ChatWindow({ messages, onSend, isComplete, options, isTy
     if (textMode) inputRef.current?.focus();
   }, [messages, textMode]);
 
-  // When new options arrive, exit text mode
+  // When options change, reset mode appropriately
   useEffect(() => {
-    if (hasOptions) { setTextMode(false); setFlagMode(false); setFlagNote(''); setChangeMode(false); setChangeOpt(''); setChangeNote(''); }
+    setTextMode(false); setFlagMode(false); setFlagNote(''); setChangeMode(false); setChangeOpt(''); setChangeNote('');
   }, [options]);
 
   const handleSend = async (text) => {
