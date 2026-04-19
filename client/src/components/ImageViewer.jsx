@@ -294,6 +294,8 @@ export default function ImageViewer({
   const [imgLoaded, setImgLoaded] = useState(false);
   const [selectedInspiration, setSelectedInspiration] = useState(null);
   const [inspirationLightbox, setInspirationLightbox] = useState(null); // {img, idx}
+  const [likedNote, setLikedNote] = useState('');
+  const [likedNoteMode, setLikedNoteMode] = useState(false); // show "why did you like it?" step
   useEffect(() => { setImgLoaded(false); }, [image?.id]);
   useEffect(() => { setSelectedInspiration(null); }, [image?.id]);
 
@@ -319,13 +321,20 @@ export default function ImageViewer({
   };
 
   const handleInspirationConfirm = () => {
+    setLikedNoteMode(true);
+    setLikedNote('');
+  };
+
+  const handleInspirationSubmit = () => {
     if (!inspirationLightbox) return;
     const { img, idx } = inspirationLightbox;
     setSelectedInspiration(idx);
+    const noteText = likedNote.trim() ? ` — What I like about it: ${likedNote.trim()}` : '';
+    const msg = `[Selected inspiration: ${img.title || 'image ' + (idx + 1)}]${noteText}`;
     setInspirationLightbox(null);
-    if (onInspirationSelect) {
-      onInspirationSelect(`[Selected inspiration: ${img.title || 'image ' + (idx + 1)}]`);
-    }
+    setLikedNoteMode(false);
+    setLikedNote('');
+    if (onInspirationSelect) onInspirationSelect(msg);
   };
 
   return (
@@ -452,7 +461,7 @@ export default function ImageViewer({
       {/* Inspiration image lightbox */}
       {inspirationLightbox && (
         <div
-          onClick={() => setInspirationLightbox(null)}
+          onClick={() => { setInspirationLightbox(null); setLikedNoteMode(false); setLikedNote(''); }}
           style={{
             position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)',
             zIndex: 9999, display: 'flex', flexDirection: 'column',
@@ -469,7 +478,7 @@ export default function ImageViewer({
           >
             {/* X button */}
             <button
-              onClick={() => setInspirationLightbox(null)}
+              onClick={() => { setInspirationLightbox(null); setLikedNoteMode(false); setLikedNote(''); }}
               style={{
                 position: 'absolute', top: '0.75rem', right: '0.75rem',
                 background: 'rgba(0,0,0,0.6)', border: 'none', color: '#fff',
@@ -486,32 +495,80 @@ export default function ImageViewer({
               style={{ width: '100%', maxHeight: '65vh', objectFit: 'cover', display: 'block' }}
             />
 
-            {/* Title + confirm */}
-            <div style={{ padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
-              <div>
-                <div style={{ color: '#eee', fontSize: '0.9rem', fontWeight: 500 }}>
-                  {inspirationLightbox.img.title || 'Reference image'}
-                </div>
-                {inspirationLightbox.img.source && (
-                  <div style={{ color: '#666', fontSize: '0.75rem', marginTop: '0.2rem' }}>
-                    {inspirationLightbox.img.source}
+            {/* Title + confirm / note step */}
+            <div style={{ padding: '1rem 1.25rem' }}>
+              {!likedNoteMode ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+                  <div>
+                    <div style={{ color: '#eee', fontSize: '0.9rem', fontWeight: 500 }}>
+                      {inspirationLightbox.img.title || 'Reference image'}
+                    </div>
+                    {inspirationLightbox.img.source && (
+                      <div style={{ color: '#666', fontSize: '0.75rem', marginTop: '0.2rem' }}>
+                        {inspirationLightbox.img.source}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              <button
-                onClick={handleInspirationConfirm}
-                style={{
-                  background: '#B8860B', color: '#fff', border: 'none',
-                  borderRadius: '8px', padding: '0.6rem 1.4rem',
-                  fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer',
-                  whiteSpace: 'nowrap', flexShrink: 0,
-                  transition: 'background 0.2s',
-                }}
-                onMouseEnter={e => e.target.style.background = '#DAA520'}
-                onMouseLeave={e => e.target.style.background = '#B8860B'}
-              >
-                Yes, I like this direction
-              </button>
+                  <button
+                    onClick={handleInspirationConfirm}
+                    style={{
+                      background: '#B8860B', color: '#fff', border: 'none',
+                      borderRadius: '8px', padding: '0.6rem 1.4rem',
+                      fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer',
+                      whiteSpace: 'nowrap', flexShrink: 0,
+                    }}
+                    onMouseEnter={e => e.target.style.background = '#DAA520'}
+                    onMouseLeave={e => e.target.style.background = '#B8860B'}
+                  >
+                    Yes, I like this direction
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                  <div style={{ color: '#DAA520', fontSize: '0.85rem', fontWeight: 600 }}>
+                    What specifically do you like about this?
+                  </div>
+                  <div style={{ color: '#888', fontSize: '0.78rem' }}>
+                    Optional — helps Michael understand your taste. Hit send or skip.
+                  </div>
+                  <textarea
+                    autoFocus
+                    rows={2}
+                    value={likedNote}
+                    onChange={e => setLikedNote(e.target.value)}
+                    placeholder="e.g. love the contrast of the dark trim against the white siding..."
+                    style={{
+                      background: '#1a1a1a', border: '1px solid #3a3a3a',
+                      borderRadius: '8px', color: '#eee', fontSize: '0.85rem',
+                      padding: '0.5rem 0.75rem', resize: 'none', outline: 'none',
+                      fontFamily: 'inherit', width: '100%', boxSizing: 'border-box',
+                    }}
+                    onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleInspirationSubmit(); } }}
+                  />
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button
+                      onClick={handleInspirationSubmit}
+                      style={{
+                        flex: 1, background: '#B8860B', color: '#fff', border: 'none',
+                        borderRadius: '8px', padding: '0.55rem 1rem',
+                        fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer',
+                      }}
+                    >
+                      Send to Silas
+                    </button>
+                    <button
+                      onClick={() => { setLikedNote(''); handleInspirationSubmit(); }}
+                      style={{
+                        background: 'transparent', border: '1px solid #3a3a3a',
+                        color: '#888', borderRadius: '8px', padding: '0.55rem 1rem',
+                        fontSize: '0.85rem', cursor: 'pointer',
+                      }}
+                    >
+                      Skip
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
