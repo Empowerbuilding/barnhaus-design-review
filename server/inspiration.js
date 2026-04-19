@@ -231,7 +231,9 @@ async function getInspirationPerOption(serperContext, options, projectStyle) {
     .map(opt => cleanOption(opt))
     .filter(opt => opt.length > 2)
     .map(opt => {
-      const q = style ? `${style} ${opt} ${serperContext}` : `${opt} ${serperContext}`;
+      // Don't prepend project style — option label is specific enough
+      // Style prefix narrows results and often hurts image relevance
+      const q = `${opt} ${serperContext}`;
       return q.replace(/\s+/g, ' ').trim();
     });
 
