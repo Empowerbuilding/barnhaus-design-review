@@ -200,4 +200,17 @@ function getProjectStyle(projectSlug) {
   return projectStyles[projectSlug] || '';
 }
 
-module.exports = { getInspirationImages, setProjectStyle, getProjectStyle };
+async function getInspirationForQuestion(serperContext, projectStyle, count) {
+  count = count || 4;
+  projectStyle = projectStyle || '';
+  if (!SERPER_API_KEY || !serperContext) return [];
+  const query = projectStyle ? (projectStyle + ' ' + serperContext) : serperContext;
+  try {
+    return await fetchSerper(query, count);
+  } catch (err) {
+    console.error('Inspiration question fetch error:', err.message);
+    return [];
+  }
+}
+
+module.exports = { getInspirationImages, getInspirationForQuestion, setProjectStyle, getProjectStyle };

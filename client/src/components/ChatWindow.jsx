@@ -127,6 +127,49 @@ const styles = `
     0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
     30% { opacity: 1; transform: translateY(-3px); }
   }
+
+  /* Fast-click option buttons */
+  .chat-options {
+    padding: 0.5rem 1rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex-shrink: 0;
+  }
+  .option-btn {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    background: #1a1a1a;
+    border: 1px solid #B8860B;
+    border-radius: 8px;
+    color: #DAA520;
+    font-size: 0.85rem;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s, color 0.15s;
+  }
+  .option-btn:hover:not(:disabled) {
+    background: rgba(184, 134, 11, 0.12);
+    color: #f0f0f0;
+  }
+  .option-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .custom-question-link {
+    font-size: 0.76rem;
+    color: #666;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem 0;
+    font-family: 'Inter', sans-serif;
+    text-decoration: underline;
+    align-self: flex-start;
+    margin-left: 0.25rem;
+  }
+  .custom-question-link:hover { color: #aaa; }
+
+  /* Text input area */
   .chat-input-area {
     display: flex;
     gap: 0.5rem;
@@ -166,6 +209,19 @@ const styles = `
   }
   .send-btn:hover:not(:disabled) { opacity: 0.85; transform: scale(1.05); }
   .send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .back-to-options-link {
+    font-size: 0.76rem;
+    color: #666;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0 1rem 0.5rem;
+    font-family: 'Inter', sans-serif;
+    text-decoration: underline;
+    display: block;
+    background: #2a2a2a;
+  }
+  .back-to-options-link:hover { color: #aaa; }
 
   @media (max-width: 768px) {
     .chat-window {
@@ -187,7 +243,7 @@ const styles = `
       padding: 0.75rem 1rem;
     }
     .chat-input-area input {
-      font-size: 16px; /* prevents iOS zoom */
+      font-size: 16px;
       min-height: 44px;
       padding: 0.65rem 1rem;
     }
@@ -197,31 +253,45 @@ const styles = `
       min-width: 44px;
       min-height: 44px;
     }
-    .msg-bubble {
+    .msg-bubble { font-size: 0.9rem; }
+    .option-btn {
+      min-height: 44px;
       font-size: 0.9rem;
     }
+    .chat-options { padding: 0.5rem 0.75rem 0.75rem; }
   }
 `;
 
-export default function ChatWindow({ messages, onSend, isComplete }) {
+export default function ChatWindow({ messages, onSend, isComplete, options }) {
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
+  const [textMode, setTextMode] = useState(false);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
 
+  const hasOptions = options && options.length > 0;
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-    inputRef.current?.focus();
-  }, [messages]);
+    if (textMode) inputRef.current?.focus();
+  }, [messages, textMode]);
 
-  const handleSend = async () => {
-    if (!input.trim() || sending) return;
-    const text = input.trim();
+  // When new options arrive, exit text mode
+  useEffect(() => {
+    if (hasOptions) setTextMode(false);
+  }, [options]);
+
+  const handleSend = async (text) => {
+    const msg = (text || input).trim();
+    if (!msg || sending) return;
     setInput('');
+    setTextMode(false);
     setSending(true);
-    await onSend(text);
+    await onSend(msg);
     setSending(false);
   };
+
+  const showTextInput = !hasOptions || textMode || isComplete;
 
   return (
     <div className="chat-window">
@@ -253,31 +323,60 @@ export default function ChatWindow({ messages, onSend, isComplete }) {
           <div className="chat-msg assistant">
             <div className="msg-avatar silas-bubble">S</div>
             <div className="msg-bubble completion-note">
-              Your feedback has been sent to the Barnhaus team. We'll be in touch shortly with next steps. 🏡
+              Your feedback has been sent to the Barnhaus team. We'll be in touch shortly with next steps.
             </div>
           </div>
         )}
         <div ref={bottomRef} />
       </div>
-      <div className="chat-input-area">
-        <input
-          ref={inputRef}
-          autoFocus
-          type="text"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleSend()}
-          placeholder={isComplete ? 'Review complete!' : 'Type your response...'}
-          disabled={sending || isComplete}
-        />
-        <button onClick={handleSend} disabled={!input.trim() || sending || isComplete} className="send-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="22" y1="2" x2="11" y2="13" />
-            <polygon points="22 2 15 22 11 13 2 9 22 2" />
-          </svg>
-        </button>
-      </div>
+
+      {/* Button mode */}
+      {hasOptions && !textMode && !isComplete && (
+        <div className="chat-options">
+          {options.map((opt, i) => (
+            <button
+              key={i}
+              className="option-btn"
+              disabled={sending}
+              onClick={() => handleSend(opt)}
+            >
+              {opt}
+            </button>
+          ))}
+          <button className="custom-question-link" onClick={() => setTextMode(true)}>
+            I have a custom question
+          </button>
+        </div>
+      )}
+
+      {/* Text input mode */}
+      {showTextInput && (
+        <>
+          {hasOptions && textMode && (
+            <button className="back-to-options-link" onClick={() => setTextMode(false)}>
+              ← Back to quick answers
+            </button>
+          )}
+          <div className="chat-input-area">
+            <input
+              ref={inputRef}
+              autoFocus={textMode}
+              type="text"
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSend()}
+              placeholder={isComplete ? 'Review complete!' : 'Type your response...'}
+              disabled={sending || isComplete}
+            />
+            <button onClick={() => handleSend()} disabled={!input.trim() || sending || isComplete} className="send-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13" />
+                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+              </svg>
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
-

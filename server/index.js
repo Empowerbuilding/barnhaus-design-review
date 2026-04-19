@@ -4,11 +4,11 @@ const path = require('path');
 const { WebSocketServer } = require('ws');
 const http = require('http');
 const { getProjectRenders, streamImage, getImageBase64 } = require('./drive');
-const { sendToJuanito, initJuanitoSession, generateDesignBrief, getQuestionsForRoom } = require('./juanito');
+const { sendToJuanito, initJuanitoSession, generateDesignBrief, getQuestionsForRoom, QUESTION_BANK } = require('./juanito');
 const { analyzeImage, groupAndSortImages, analyzeInspirationImage } = require('./claude');
-const { notifyDiscord, notifyDiscordBrief, writeToCRM, enhanceImage } = require('./notify');
+const { notifyDiscord, notifyDiscordBrief, writeToCRM } = require('./notify');
 const multer = require('multer');
-const { getInspirationImages, setProjectStyle, getProjectStyle } = require('./inspiration');
+const { getInspirationImages, getInspirationForQuestion, setProjectStyle, getProjectStyle } = require('./inspiration');
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } });
 
 const app = express();
@@ -19,6 +19,7 @@ app.use(express.json({ limit: '50mb' }));
 
 const PORT = process.env.PORT || 3000;
 const projectCache = new Map();
+const roomQuestionIndexes = new Map(); // key: `${sessionId}:${roomType}` → index
 
 const SUPABASE_URL = 'https://ejsnbluvkqocuchifdvp.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVqc25ibHV2a3FvY3VjaGlmZHZwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjgwMTQ5NywiZXhwIjoyMDgyMzc3NDk3fQ.ZUTMAnnrwi7KPYYhkWL4Gexbn7ClrxOkG_CGWl2Q5X8';
@@ -182,17 +183,25 @@ app.patch('/api/session/:sessionId/transcript', async (req, res) => {
 app.post('/api/chat', async (req, res) => {
   const {
     messages, clientName, currentRoom, currentImage, currentImageId,
-    isImageChangeTrigger, triggerMessage, projectSlug, currentImageFeatures,
+    isImageChangeTrigger, triggerMessage, projectSlug, currentImageFeatures, sessionId,
   } = req.body;
 
   try {
     let fullMessage;
+    const roomKey = `${sessionId || 'anon'}:${currentRoom || 'default'}`;
 
     if (isImageChangeTrigger && triggerMessage) {
-      // Append the question bank for this room so Silas always has it in context
       const roomQuestions = getQuestionsForRoom(currentRoom || 'default');
-      const questionList = roomQuestions?.questions?.map((q, i) => `${i+1}. ${q}`).join('\n') || '';
-      const openingNote = roomQuestions?.opening ? `\n\nROOM GUIDANCE:\n${roomQuestions.opening}` : '';
+      const questionList = roomQuestions?.questions?.map((q, i) => {
+        const text = typeof q === 'string' ? q : (q.text || '');
+        return `${i+1}. ${text}`;
+      }).join('\n') || '';
+      const baselineText = roomQuestions?.baseline
+        ? (typeof roomQuestions.baseline === 'string' ? roomQuestions.baseline : roomQuestions.baseline.text)
+        : '';
+      const openingNote = roomQuestions?.opening
+        ? `\n\nROOM GUIDANCE:\n${roomQuestions.opening}${baselineText ? '\n\nBASELINE: ' + baselineText : ''}`
+        : '';
       const behaviorRules = `
 
 RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
@@ -207,38 +216,50 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
         + openingNote
         + (questionList ? `\n\nQUESTION BANK FOR ${(currentRoom || 'this room').toUpperCase()} — work through these conversationally, one at a time:\n${questionList}` : '')
         + behaviorRules;
+
+      // Reset question index for this room on new image trigger
+      roomQuestionIndexes.set(roomKey, 0);
     } else {
       const lastUserMessage = [...messages].reverse().find(m => m.role === 'user')?.content || '';
       const contextPrefix = `[CONTEXT: room=${currentRoom}, image=${currentImage}, client=${clientName}]`;
       fullMessage = `${contextPrefix}\n\n${lastUserMessage}`;
+
+      // Advance question index on each user response
+      const curIdx = roomQuestionIndexes.get(roomKey) || 0;
+      roomQuestionIndexes.set(roomKey, curIdx + 1);
     }
 
-    // Fetch inspiration images in parallel with Silas response (image-change only)
-    const inspirationPromise = (isImageChangeTrigger && currentRoom && currentRoom !== 'floor plan' && currentRoom !== 'other')
-      ? getInspirationImages(currentRoom, getProjectStyle(projectSlug || ''), 10, currentImageFeatures || [])
-      : Promise.resolve([]);
+    // Determine current question for this room to get options + inspiration
+    const qIdx = roomQuestionIndexes.get(roomKey) || 0;
+    const roomBank = getQuestionsForRoom(currentRoom || 'default');
+    const allQuestions = roomBank?.questions || [];
+    const currentQuestion = allQuestions[qIdx];
 
-    const [reply, inspiration] = await Promise.all([
+    let options = currentQuestion?.options || [];
+    let inspirationFetch = Promise.resolve([]);
+
+    if (currentQuestion?.requiresImage && currentQuestion?.serperContext) {
+      inspirationFetch = getInspirationForQuestion(
+        currentQuestion.serperContext,
+        getProjectStyle(projectSlug || ''),
+        4
+      );
+    }
+
+    const roomProgress = {
+      current: Math.min(qIdx + 1, allQuestions.length),
+      total: allQuestions.length,
+    };
+
+    const [reply, inspirationImages] = await Promise.all([
       sendToJuanito(fullMessage),
-      inspirationPromise,
+      inspirationFetch,
     ]);
 
-    res.json({ reply, inspiration: inspiration || [] });
+    res.json({ reply, options, inspirationImages: inspirationImages || [], questionIndex: qIdx, roomProgress });
   } catch (err) {
     console.error('Chat error:', err.message);
     res.status(500).json({ error: 'Chat failed' });
-  }
-});
-
-// Enhance image
-app.post('/api/enhance', async (req, res) => {
-  const { imageUrl, prompt } = req.body;
-  try {
-    const result = await enhanceImage(imageUrl, prompt);
-    res.json(result);
-  } catch (err) {
-    console.error('Enhance error:', err.message);
-    res.status(500).json({ error: 'Enhancement failed' });
   }
 });
 

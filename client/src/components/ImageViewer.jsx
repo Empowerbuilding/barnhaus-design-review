@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import Lightbox from './Lightbox';
-import FeedbackButtons from './FeedbackButtons';
 const styles = `
   .image-viewer {
     display: flex;
@@ -152,51 +151,6 @@ const styles = `
     color: #fff;
     text-shadow: 0 1px 3px rgba(0,0,0,0.8);
   }
-  .enhanced-container {
-    margin-top: 0.75rem;
-    border: 1px solid rgba(184, 134, 11, 0.3);
-    border-radius: 8px;
-    overflow: hidden;
-    flex-shrink: 0;
-  }
-  .enhanced-label {
-    padding: 0.4rem 0.75rem;
-    background: rgba(184, 134, 11, 0.1);
-    font-size: 0.75rem;
-    color: #DAA520;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
-  .enhanced-toggle-row {
-    display: flex;
-    gap: 0.4rem;
-    margin-bottom: 0.6rem;
-  }
-  .toggle-btn {
-    flex: 1;
-    padding: 0.45rem 0.75rem;
-    border-radius: 20px;
-    border: 1px solid #3a3a3a;
-    background: #2a2a2a;
-    color: #888;
-    font-size: 0.8rem;
-    font-family: 'Inter', sans-serif;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .toggle-btn.active {
-    background: linear-gradient(135deg, #B8860B, #DAA520);
-    color: #1a1a1a;
-    font-weight: 600;
-    border-color: transparent;
-  }
-  .enhanced-image {
-    width: 100%;
-    max-height: 300px;
-    object-fit: contain;
-    background: #2a2a2a;
-  }
   .image-controls {
     flex-shrink: 0;
   }
@@ -212,8 +166,87 @@ const styles = `
     cursor: pointer;
     font-family: 'Inter', sans-serif;
     transition: opacity 0.2s;
+    width: 100%;
   }
   .btn-floor-next:hover { opacity: 0.85; }
+
+  /* Inspiration grid */
+  .inspiration-section {
+    flex-shrink: 0;
+    margin-top: 0.75rem;
+  }
+  .inspiration-label {
+    font-size: 0.72rem;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  .inspiration-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  .inspiration-thumb {
+    position: relative;
+    aspect-ratio: 4/3;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 2px solid #3a3a3a;
+    cursor: pointer;
+    background: #2a2a2a;
+    transition: border-color 0.2s, transform 0.15s;
+  }
+  .inspiration-thumb:hover { border-color: #B8860B; transform: scale(1.02); }
+  .inspiration-thumb.selected { border-color: #DAA520; box-shadow: 0 0 0 1px #B8860B; }
+  .inspiration-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .inspiration-thumb-title {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.3rem 0.4rem;
+    background: linear-gradient(transparent, rgba(0,0,0,0.75));
+    font-size: 0.65rem;
+    color: #fff;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Revit thumbnail strip when inspiration grid is shown */
+  .revit-mini {
+    flex-shrink: 0;
+    margin-top: 0.5rem;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #3a3a3a;
+    max-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #2a2a2a;
+    cursor: zoom-in;
+  }
+  .revit-mini img {
+    max-height: 100px;
+    max-width: 100%;
+    object-fit: contain;
+  }
+  .revit-mini-label {
+    font-size: 0.65rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 0.25rem;
+    flex-shrink: 0;
+  }
 
   @media (max-width: 768px) {
     .image-viewer {
@@ -221,33 +254,13 @@ const styles = `
       overflow-y: visible;
       padding: 0.75rem;
     }
-    .image-main-wrap {
-      flex: none;
-    }
-    .image-main {
-      max-height: 45vh;
-    }
-    .main-image {
-      max-height: 45vh;
-    }
-    .room-label {
-      font-size: 0.9rem;
-    }
-    .image-name {
-      max-width: 120px;
-      font-size: 0.72rem;
-    }
-    .thumb {
-      width: 80px;
-      height: 60px;
-      min-width: 80px;
-      min-height: 60px;
-    }
-    .nav-arrow {
-      width: 44px;
-      height: 44px;
-      font-size: 1.6rem;
-    }
+    .image-main-wrap { flex: none; }
+    .image-main { max-height: 45vh; }
+    .main-image { max-height: 45vh; }
+    .room-label { font-size: 0.9rem; }
+    .image-name { max-width: 120px; font-size: 0.72rem; }
+    .thumb { width: 80px; height: 60px; min-width: 80px; min-height: 60px; }
+    .nav-arrow { width: 44px; height: 44px; font-size: 1.6rem; }
     .btn-floor-next {
       width: 100%;
       padding: 0.75rem 1rem;
@@ -255,32 +268,7 @@ const styles = `
       min-height: 44px;
       margin-top: 0.75rem;
     }
-    .enhanced-toggle-row {
-    display: flex;
-    gap: 0.4rem;
-    margin-bottom: 0.6rem;
-  }
-  .toggle-btn {
-    flex: 1;
-    padding: 0.45rem 0.75rem;
-    border-radius: 20px;
-    border: 1px solid #3a3a3a;
-    background: #2a2a2a;
-    color: #888;
-    font-size: 0.8rem;
-    font-family: 'Inter', sans-serif;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .toggle-btn.active {
-    background: linear-gradient(135deg, #B8860B, #DAA520);
-    color: #1a1a1a;
-    font-weight: 600;
-    border-color: transparent;
-  }
-  .enhanced-image {
-      max-height: 200px;
-    }
+    .inspiration-grid { grid-template-columns: 1fr 1fr; gap: 0.4rem; }
   }
 `;
 
@@ -291,16 +279,18 @@ export default function ImageViewer({
   onSelectImage,
   isFloorPlan,
   roomType,
-  feedback,
-  onFeedback,
   onNext,
   hasNext,
   onComplete,
   isLastImage,
+  inspirationImages,
+  onInspirationSelect,
 }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [selectedInspiration, setSelectedInspiration] = useState(null);
   useEffect(() => { setImgLoaded(false); }, [image?.id]);
+  useEffect(() => { setSelectedInspiration(null); }, [image?.id]);
 
   if (!image) {
     return (
@@ -314,9 +304,17 @@ export default function ImageViewer({
   const displayLabel = roomType ? roomType.charAt(0).toUpperCase() + roomType.slice(1) : '';
   const totalImages = images.length;
   const hasMultiple = totalImages > 1;
+  const hasInspiration = inspirationImages && inspirationImages.length > 0;
 
   const goPrev = () => { if (currentIndex > 0) onSelectImage(currentIndex - 1); };
   const goNext = () => { if (currentIndex < totalImages - 1) onSelectImage(currentIndex + 1); };
+
+  const handleInspirationClick = (img, idx) => {
+    setSelectedInspiration(idx);
+    if (onInspirationSelect) {
+      onInspirationSelect(`[Selected inspiration: ${img.title || 'image ' + (idx + 1)}]`);
+    }
+  };
 
   return (
     <div className="image-viewer">
@@ -331,36 +329,62 @@ export default function ImageViewer({
         <span className="image-name">{image.name}</span>
       </div>
 
-      <div className="image-main-wrap">
-        {hasMultiple && currentIndex > 0 && (
-          <button className="nav-arrow nav-prev" onClick={goPrev} aria-label="Previous image">‹</button>
-        )}
-        <div className="image-main">
-          {!imgLoaded && (
-          <div style={{
-            width: '100%', minHeight: 300,
-            background: 'linear-gradient(90deg, #2a2a2a 25%, #333 50%, #2a2a2a 75%)',
-            backgroundSize: '200% 100%',
-            animation: 'shimmer 1.5s infinite',
-            borderRadius: 8,
-          }} />
-        )}
-        <img
-          src={image.url}
-          alt={image.name}
-          className="main-image"
-          onClick={() => setLightboxOpen(true)}
-          onLoad={() => setImgLoaded(true)}
-          style={{ cursor: 'zoom-in', display: imgLoaded ? 'block' : 'none' }}
-          title="Click to zoom"
-        />
-        </div>
-        {hasMultiple && currentIndex < totalImages - 1 && (
-          <button className="nav-arrow nav-next" onClick={goNext} aria-label="Next image">›</button>
-        )}
-      </div>
+      {/* When inspiration grid is shown, shrink Revit render to thumbnail */}
+      {hasInspiration ? (
+        <>
+          <div className="revit-mini" onClick={() => setLightboxOpen(true)} title="Click to zoom">
+            <img src={image.url} alt={image.name} onLoad={() => setImgLoaded(true)} />
+          </div>
+          <div className="revit-mini-label">Draft 1 render — click to zoom</div>
 
-      {hasMultiple && (
+          <div className="inspiration-section">
+            <div className="inspiration-label">Tap an image that matches your vision</div>
+            <div className="inspiration-grid">
+              {inspirationImages.slice(0, 4).map((img, i) => (
+                <div
+                  key={i}
+                  className={`inspiration-thumb ${selectedInspiration === i ? 'selected' : ''}`}
+                  onClick={() => handleInspirationClick(img, i)}
+                >
+                  <img src={img.url || img.thumb} alt={img.title || ''} loading="lazy" />
+                  {img.title && <div className="inspiration-thumb-title">{img.title}</div>}
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="image-main-wrap">
+          {hasMultiple && currentIndex > 0 && (
+            <button className="nav-arrow nav-prev" onClick={goPrev} aria-label="Previous image">‹</button>
+          )}
+          <div className="image-main">
+            {!imgLoaded && (
+              <div style={{
+                width: '100%', minHeight: 300,
+                background: 'linear-gradient(90deg, #2a2a2a 25%, #333 50%, #2a2a2a 75%)',
+                backgroundSize: '200% 100%',
+                animation: 'shimmer 1.5s infinite',
+                borderRadius: 8,
+              }} />
+            )}
+            <img
+              src={image.url}
+              alt={image.name}
+              className="main-image"
+              onClick={() => setLightboxOpen(true)}
+              onLoad={() => setImgLoaded(true)}
+              style={{ cursor: 'zoom-in', display: imgLoaded ? 'block' : 'none' }}
+              title="Click to zoom"
+            />
+          </div>
+          {hasMultiple && currentIndex < totalImages - 1 && (
+            <button className="nav-arrow nav-next" onClick={goNext} aria-label="Next image">›</button>
+          )}
+        </div>
+      )}
+
+      {!hasInspiration && hasMultiple && (
         <div className="thumbnails">
           <div className="thumb-scroll-hint">
             {totalImages} views — click to explore
@@ -382,32 +406,30 @@ export default function ImageViewer({
       )}
 
       <div className="image-controls">
-        {!isFloorPlan && (
-          <FeedbackButtons
-            imageId={image.id}
-            feedback={feedback}
-            onFeedback={onFeedback}
-            onNext={onNext}
-            hasNext={hasNext}
-            onComplete={onComplete}
-            isLastImage={isLastImage}
-          />
-        )}
-
         {isFloorPlan && hasNext && (
           <button className="btn-floor-next" onClick={onNext}>
             Continue to Next Section →
           </button>
         )}
+        {!isFloorPlan && isLastImage && (
+          <button className="btn-floor-next" style={{ marginTop: '0.75rem' }} onClick={onComplete}>
+            Send to Michael →
+          </button>
+        )}
+        {!isFloorPlan && !isLastImage && hasNext && currentIndex === totalImages - 1 && (
+          <button className="btn-floor-next" style={{ marginTop: '0.75rem', background: '#2a2a2a', border: '1px solid #B8860B', color: '#DAA520' }} onClick={onNext}>
+            Next Section →
+          </button>
+        )}
       </div>
-    {lightboxOpen && (
-      <Lightbox
-        src={image.url}
-        alt={image.name}
-        onClose={() => setLightboxOpen(false)}
-      />
-    )}
+
+      {lightboxOpen && (
+        <Lightbox
+          src={image.url}
+          alt={image.name}
+          onClose={() => setLightboxOpen(false)}
+        />
+      )}
     </div>
   );
 }
-

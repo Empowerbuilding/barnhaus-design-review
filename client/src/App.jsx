@@ -4,8 +4,8 @@ import ChatWindow from './components/ChatWindow';
 import ChatDrawer from './components/ChatDrawer';
 import ImageViewer from './components/ImageViewer';
 import ProgressBar from './components/ProgressBar';
+import ProgressSidebar from './components/ProgressSidebar';
 import OverviewScreen from './components/OverviewScreen';
-import PlaygroundScreen from './components/PlaygroundScreen';
 import './App.css';
 
 const SECTION_LABELS = {
@@ -68,7 +68,6 @@ const appStyles = `
   }
   .landing-card p { color: #666; max-width: 400px; }
 
-  /* Visibility helpers */
   .desktop-only { display: flex; }
   .mobile-only { display: none !important; }
 
@@ -93,9 +92,7 @@ const appStyles = `
     align-items: center;
     gap: 0.25rem;
   }
-  .header-logo {
-    height: 44px;
-  }
+  .header-logo { height: 44px; }
   .header-subtitle {
     font-size: 0.7rem;
     letter-spacing: 0.25em;
@@ -103,54 +100,24 @@ const appStyles = `
     text-transform: uppercase;
     font-weight: 400;
   }
+  .review-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
   .review-content {
     display: flex;
     flex: 1;
     overflow: hidden;
     position: relative;
   }
-
-  /* Image panel */
   .image-panel {
     flex: 1;
     height: 100%;
     overflow: hidden;
     position: relative;
     transition: flex 0.3s ease;
-  }
-
-  .playground-container {
-    display: flex;
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
-  }
-  .playground-image-area {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* Playground scrollable mode */
-  .review-page.playground-mode {
-    height: 100vh;
-    overflow: hidden;
-  }
-  .review-page.playground-mode .review-content {
-    overflow: hidden;
-    flex: 1;
-    min-height: 0;
-  }
-  .review-page.playground-mode .image-panel {
-    overflow-y: auto;
-    flex: 1;
-    height: 0;
-    min-height: 0;
-  }
-  .pg-wrap {
-    width: 100%;
   }
 
   /* Desktop chat toggle button */
@@ -221,27 +188,12 @@ const appStyles = `
   }
   .mobile-chat-fab:hover { transform: scale(1.03); }
   .mobile-chat-fab:active { transform: scale(0.97); }
-  .fab-icon { font-size: 1.1rem; }
-  .fab-unread-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #ff4444;
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    border: 2px solid #1a1a1a;
-    animation: pulse 1.5s infinite;
-  }
   @keyframes pulse {
     0%, 100% { transform: scale(1); opacity: 1; }
     50% { transform: scale(1.2); opacity: 0.8; }
   }
 
-  /* Mobile sticky chat bar */
-  .mobile-chat-bar {
-    display: none;
-  }
+  .mobile-chat-bar { display: none; }
 
   @media (max-width: 768px) {
     .desktop-only { display: none !important; }
@@ -310,6 +262,10 @@ const appStyles = `
       min-height: 100vh;
       overflow: visible;
     }
+    .review-body {
+      flex-direction: column;
+      overflow: visible;
+    }
     .review-content {
       flex-direction: column;
       overflow: visible;
@@ -320,20 +276,10 @@ const appStyles = `
       flex: none;
       padding-bottom: 60px;
     }
-    .header-logo {
-      height: 36px;
-    }
-    .header-subtitle {
-      font-size: 0.65rem;
-    }
-    .landing-card {
-      padding: 2rem 1.5rem;
-    }
-    .mobile-chat-fab {
-      display: flex !important;
-      bottom: 80px;
-      right: 1rem;
-    }
+    .header-logo { height: 36px; }
+    .header-subtitle { font-size: 0.65rem; }
+    .landing-card { padding: 2rem 1.5rem; }
+    .mobile-chat-fab { display: flex !important; bottom: 80px; right: 1rem; }
   }
 `;
 
@@ -355,10 +301,7 @@ const completionStyles = `
     max-width: 480px;
     width: 100%;
   }
-  .completion-logo {
-    height: 44px;
-    margin-bottom: 2rem;
-  }
+  .completion-logo { height: 44px; margin-bottom: 2rem; }
   .completion-checkmark {
     width: 64px;
     height: 64px;
@@ -379,11 +322,7 @@ const completionStyles = `
     margin-bottom: 1rem;
     letter-spacing: 0.05em;
   }
-  .completion-message {
-    color: var(--text-dim);
-    font-size: 1rem;
-    line-height: 1.6;
-  }
+  .completion-message { color: var(--text-dim); font-size: 1rem; line-height: 1.6; }
 `;
 
 function ReviewPage() {
@@ -393,23 +332,25 @@ function ReviewPage() {
   const [error, setError] = useState(null);
   const [currentGroupIdx, setCurrentGroupIdx] = useState(0);
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
-  const [phase, setPhase] = useState('overview'); // 'overview' | 'walkthrough' | 'playground'
+  const [phase, setPhase] = useState('overview'); // 'overview' | 'walkthrough'
   const [memo, setMemo] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [feedback, setFeedback] = useState({});
   const [completed, setCompleted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [enhancedUrls, setEnhancedUrls] = useState({});
   const [sessionId, setSessionId] = useState(null);
-  const [chatOpen, setChatOpen] = useState(true);   // desktop: open by default
-  const [drawerOpen, setDrawerOpen] = useState(false); // mobile drawer: closed by default
+  const [chatOpen, setChatOpen] = useState(true);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
+  const [chatOptions, setChatOptions] = useState([]);
+  const [inspirationImages, setInspirationImages] = useState([]);
+  const [questionProgress, setQuestionProgress] = useState({});
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handler);
     return () => window.removeEventListener('resize', handler);
   }, []);
+
   const [unread, setUnread] = useState(false);
   const prevMessageCount = useRef(0);
   const drawerAutoOpened = useRef(false);
@@ -453,29 +394,22 @@ function ReviewPage() {
   const currentGroup = project?.groups?.[currentGroupIdx];
   const currentImage = currentGroup?.images?.[currentImageIdx];
   const isFloorPlan = currentGroup?.roomType?.toLowerCase() === 'floor plan';
-  const baseSectionLabels = project?.groups?.map(g => SECTION_LABELS[g.roomType] || g.roomType) || [];
-  const sectionLabels = [...baseSectionLabels, 'Visualize'];
-  const progressIndex = phase === 'playground' ? sectionLabels.length - 1 : currentGroupIdx;
-  const playgroundFeedback = Object.fromEntries(
-    Object.entries(feedback).filter(([, item]) => item.roomType?.toLowerCase() !== 'floor plan')
-  );
+  const sectionLabels = project?.groups?.map(g => SECTION_LABELS[g.roomType] || g.roomType) || [];
 
   const nextSectionLabel = project?.groups?.[currentGroupIdx + 1]
     ? SECTION_LABELS[project.groups[currentGroupIdx + 1].roomType] || project.groups[currentGroupIdx + 1].roomType
     : null;
 
-  // When client navigates to a new image, notify Silas with context so he can lead
   const lastNotifiedImage = useRef(null);
   const triggerAbortRef = useRef(null);
-  const hasInputOnCurrentImage = useRef(false); // track if client interacted with current image
+  const hasInputOnCurrentImage = useRef(false);
+
   useEffect(() => {
     if (!project || !currentImage || phase !== 'walkthrough') return;
     const imageKey = `${currentGroup?.roomType}-${currentImage.id}`;
     if (lastNotifiedImage.current === imageKey) return;
 
     const isFirstInSection = currentImageIdx === 0;
-    // Only auto-trigger Silas on first image of each section
-    // For subsequent images, wait for client input
     if (!isFirstInSection) {
       lastNotifiedImage.current = imageKey;
       hasInputOnCurrentImage.current = false;
@@ -485,7 +419,6 @@ function ReviewPage() {
     lastNotifiedImage.current = imageKey;
     hasInputOnCurrentImage.current = false;
 
-    // Cancel any in-flight trigger from previous image/section
     if (triggerAbortRef.current) triggerAbortRef.current.abort();
     const controller = new AbortController();
     triggerAbortRef.current = controller;
@@ -516,16 +449,22 @@ function ReviewPage() {
         if (data.reply && data.reply !== 'NO_REPLY' && data.reply !== 'ANNOUNCE_SKIP') {
           setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
         }
+        if (data.options) setChatOptions(data.options);
+        if (data.inspirationImages) setInspirationImages(data.inspirationImages);
+        if (data.roomProgress) {
+          setQuestionProgress(prev => ({
+            ...prev,
+            [SECTION_LABELS[roomLabel] || roomLabel]: data.roomProgress,
+          }));
+        }
       })
       .catch(() => {});
   }, [currentGroup, currentImage, currentGroupIdx, currentImageIdx, project, sessionId, clientName, phase]);
 
-  // Detect new assistant messages → set unread badge when drawer is closed
   useEffect(() => {
     const lastMsg = messages[messages.length - 1];
     if (lastMsg && lastMsg.role === 'assistant' && messages.length > prevMessageCount.current) {
       if (!drawerOpen) {
-        // Auto-open on first greeting message on mobile
         if (!drawerAutoOpened.current && isMobile) {
           drawerAutoOpened.current = true;
           setDrawerOpen(true);
@@ -537,26 +476,18 @@ function ReviewPage() {
     prevMessageCount.current = messages.length;
   }, [messages, drawerOpen, isMobile]);
 
-  const openDrawer = () => {
-    setDrawerOpen(true);
-    setUnread(false);
-  };
+  const openDrawer = () => { setDrawerOpen(true); setUnread(false); };
   const closeDrawer = () => setDrawerOpen(false);
 
   const triggerSilasForCurrentImage = useCallback(() => {
     if (!currentImage || !currentGroup || phase !== 'walkthrough') return;
     const imageKey = `${currentGroup.roomType}-${currentImage.id}`;
-    if (lastNotifiedImage.current === imageKey) return; // already triggered
+    if (lastNotifiedImage.current === imageKey) return;
     lastNotifiedImage.current = imageKey;
 
     const roomLabel = currentGroup.roomType || 'other';
     const features = currentImage.analysis?.features?.join(', ') || '';
-    const isLastInSection = currentImageIdx === (currentGroup.images?.length || 1) - 1;
-    const sectionMessages = messages.filter(m => m.sectionKey === roomLabel);
-    const alreadyCovered = sectionMessages.length > 0
-      ? `\n\nSo far in this section you have already discussed:\n${sectionMessages.map(m => `${m.role === 'user' ? 'Client' : 'Silas'}: ${m.content}`).join('\n')}`
-      : '';
-    const trigger = `[IMAGE CHANGE] Image ${currentImageIdx + 1} of ${currentGroup.images?.length} in the ${roomLabel} section. Image name: ${currentImage.name}. Visible features: ${features || 'not analyzed'}.${alreadyCovered}${isLastInSection ? '\n\nThis is the LAST image in this section — wrap up any remaining key questions.' : ''}\n\nContinue the conversation naturally for this image. Output ONLY the message to the client.`;
+    const trigger = `[IMAGE CHANGE] Image ${currentImageIdx + 1} of ${currentGroup.images?.length} in the ${roomLabel} section. Image name: ${currentImage.name}. Visible features: ${features || 'not analyzed'}.\n\nContinue the conversation naturally for this image. Output ONLY the message to the client.`;
 
     fetch('/api/chat', {
       method: 'POST',
@@ -578,20 +509,23 @@ function ReviewPage() {
       .then(r => r.json())
       .then(data => {
         if (data.reply && data.reply !== 'NO_REPLY' && data.reply !== 'ANNOUNCE_SKIP')
-          setMessages(prev => [...prev, { role: 'assistant', content: data.reply, sectionKey: roomLabel }]);
+          setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+        if (data.options) setChatOptions(data.options);
+        if (data.inspirationImages) setInspirationImages(data.inspirationImages);
       })
       .catch(() => {});
-  }, [currentImage, currentGroup, currentImageIdx, messages, clientName, projectSlug, sessionId, phase]);
+  }, [currentImage, currentGroup, currentImageIdx, clientName, projectSlug, sessionId, phase]);
 
   const sendChat = useCallback(
     async (userMessage) => {
-      // If client types on a non-triggered image, trigger Silas first
       if (!hasInputOnCurrentImage.current) {
         hasInputOnCurrentImage.current = true;
         triggerSilasForCurrentImage();
       }
       const newMessages = [...messages, { role: 'user', content: userMessage }];
       setMessages(newMessages);
+      setChatOptions([]);
+      setInspirationImages([]);
 
       if (sessionId) {
         fetch(`/api/session/${sessionId}/transcript`, {
@@ -615,12 +549,22 @@ function ReviewPage() {
             totalImagesInSection: currentGroup?.images?.length || 1,
             currentImageIndexInSection: currentImageIdx,
             nextSectionName: currentImageIdx === (currentGroup?.images?.length || 1) - 1 ? nextSectionLabel : null,
+            sessionId,
           }),
         });
         const data = await res.json();
         if (!data.reply || data.reply === 'NO_REPLY' || data.reply === 'ANNOUNCE_SKIP') return;
         const updatedMessages = [...newMessages, { role: 'assistant', content: data.reply }];
         setMessages(updatedMessages);
+        if (data.options) setChatOptions(data.options);
+        if (data.inspirationImages) setInspirationImages(data.inspirationImages);
+        if (data.roomProgress) {
+          const roomLabel = currentGroup?.roomType || 'other';
+          setQuestionProgress(prev => ({
+            ...prev,
+            [SECTION_LABELS[roomLabel] || roomLabel]: data.roomProgress,
+          }));
+        }
 
         if (sessionId) {
           fetch(`/api/session/${sessionId}/transcript`, {
@@ -636,15 +580,15 @@ function ReviewPage() {
         ]);
       }
     },
-    [messages, project, clientName, currentGroup, currentImage, currentImageIdx, nextSectionLabel, sessionId]
+    [messages, project, clientName, currentGroup, currentImage, currentImageIdx, nextSectionLabel, sessionId, triggerSilasForCurrentImage]
   );
 
-  const handleStart = useCallback(() => {
-    setPhase('walkthrough');
-  }, []);
+  const handleStart = useCallback(() => { setPhase('walkthrough'); }, []);
 
   const handleNextImage = useCallback(() => {
     if (!currentGroup) return;
+    setChatOptions([]);
+    setInspirationImages([]);
     if (currentImageIdx < currentGroup.images.length - 1) {
       setCurrentImageIdx(prev => prev + 1);
     } else if (currentGroupIdx < project.groups.length - 1) {
@@ -654,86 +598,32 @@ function ReviewPage() {
   }, [currentGroup, currentGroupIdx, currentImageIdx, project]);
 
   const handleSectionChange = useCallback((idx) => {
-    if (idx === baseSectionLabels.length) {
-      // Visualize tab clicked
-      setPhase('playground');
-      triggerPlaygroundIntro();
-    } else {
-      if (phase === 'playground') setPhase('walkthrough');
-      setCurrentGroupIdx(idx);
-      setCurrentImageIdx(0);
-    }
-  }, [baseSectionLabels.length, phase]);
+    setChatOptions([]);
+    setInspirationImages([]);
+    setCurrentGroupIdx(idx);
+    setCurrentImageIdx(0);
+  }, []);
 
-  const handleFeedback = useCallback(
-    (imageId, status, notes) => {
-      if (!hasInputOnCurrentImage.current) {
-        hasInputOnCurrentImage.current = true;
-        triggerSilasForCurrentImage();
-      }
-      setFeedback(prev => ({
-        ...prev,
-        [imageId]: {
-          imageId,
-          imageName: currentImage?.name,
-          roomType: currentGroup?.roomType,
-          status,
-          notes,
-          originalUrl: currentImage?.url,
-        },
-      }));
-    },
-    [currentImage, currentGroup]
-  );
+  const handleInspirationSelect = useCallback((message) => {
+    sendChat(message);
+  }, [sendChat]);
 
-
-  const triggerPlaygroundIntro = useCallback(() => {
-    fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: [],
-        clientName,
-        projectSlug,
-        currentRoom: 'playground',
-        isImageChangeTrigger: true,
-        triggerMessage: `[PLAYGROUND MODE] The client has finished the review and is now in the Make It Yours section. Send a short, friendly intro (2-3 sentences max) explaining: 1) They can browse the inspiration images below each render, 2) clicking a vibe image updates the enhance prompt, 3) hitting the Enhance button generates an AI version of the render. Keep it warm and excited — this is the fun part. Output ONLY the message to send.`,
-        sessionId,
-      }),
-    })
-      .then(r => r.json())
-      .then(data => {
-        if (data.reply && data.reply !== 'NO_REPLY' && data.reply !== 'ANNOUNCE_SKIP')
-          setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
-      })
-      .catch(() => {});
-  }, [clientName, projectSlug, sessionId]);
-
-  // Phase 1 complete → go to Playground (no Discord post yet)
-  const handleComplete = useCallback(() => {
-    setPhase('playground');
-    triggerPlaygroundIntro();
-  }, [triggerPlaygroundIntro]);
-
-  // Phase 2 complete → post to Discord and show completion screen
-  const handleSendToMichael = useCallback(async () => {
+  const handleComplete = useCallback(async () => {
     if (submitting) return;
     setSubmitting(true);
-    const feedbackList = Object.values(feedback);
     try {
-      const body = JSON.stringify({
-        projectName: project?.projectName,
-        projectSlug,
-        clientName,
-        feedback: feedbackList,
-        sessionId,
-        chatTranscript: messages,
-        enhancedUrls,
-      });
       const res = await fetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body,
+        body: JSON.stringify({
+          projectName: project?.projectName,
+          projectSlug,
+          clientName,
+          feedback: [],
+          sessionId,
+          chatTranscript: messages,
+          enhancedUrls: {},
+        }),
       });
       if (!res.ok) throw new Error('Server error ' + res.status);
       setCompleted(true);
@@ -742,7 +632,7 @@ function ReviewPage() {
       alert('Failed to submit feedback: ' + err.message);
       setSubmitting(false);
     }
-  }, [feedback, project, clientName, sessionId, messages, projectSlug, submitting]);
+  }, [project, clientName, sessionId, messages, projectSlug, submitting]);
 
   if (loading) {
     return (
@@ -780,8 +670,17 @@ function ReviewPage() {
     );
   }
 
+  const isLastImage =
+    currentGroupIdx === (project?.groups?.length || 0) - 1 &&
+    currentImageIdx === (currentGroup?.images?.length || 0) - 1;
+
+  const hasNext =
+    currentImageIdx < (currentGroup?.images?.length || 0) - 1 ||
+    currentGroupIdx < (project?.groups?.length || 0) - 1;
+
   return (
-    <div className={`review-page${phase === 'playground' ? ' playground-mode' : ''}`}>
+    <div className="review-page">
+      <style>{appStyles}</style>
       <header className="review-header">
         <div className="header-inner">
           <img src="https://barnhaussteelbuilders.com/assets/images/logo-BbjiAVC6.png" alt="Barnhaus Steel Builders" className="header-logo" />
@@ -789,79 +688,54 @@ function ReviewPage() {
         </div>
       </header>
 
-      <ProgressBar sections={sectionLabels} currentIndex={progressIndex} onSelect={handleSectionChange} locked={false} />
+      <ProgressBar sections={sectionLabels} currentIndex={currentGroupIdx} onSelect={handleSectionChange} locked={false} />
 
-      {phase === 'playground' && (
-        <div className="playground-container">
-          <div className="playground-image-area">
-            <PlaygroundScreen
-              feedback={playgroundFeedback}
-              project={project}
-              clientName={clientName}
-              projectSlug={projectSlug}
-              sessionId={sessionId}
-              onSendToMichael={handleSendToMichael}
-              enhancedUrls={enhancedUrls}
-              onEnhanced={setEnhancedUrls}
+      <div className="review-body">
+        {/* Left sidebar — desktop only */}
+        <ProgressSidebar
+          sections={sectionLabels}
+          currentSection={currentGroupIdx}
+          questionProgress={questionProgress}
+          onSelect={handleSectionChange}
+        />
+
+        <div className="review-content">
+          <div className="image-panel">
+            <button
+              className="chat-toggle-btn desktop-only"
+              onClick={() => setChatOpen(o => !o)}
+              aria-label={chatOpen ? 'Hide chat' : 'Show chat'}
+            >
+              💬 {chatOpen ? 'Hide Silas' : 'Silas'}
+            </button>
+
+            <ImageViewer
+              image={currentImage}
+              images={currentGroup?.images || []}
+              currentIndex={currentImageIdx}
+              onSelectImage={setCurrentImageIdx}
+              isFloorPlan={isFloorPlan}
+              roomType={currentGroup?.roomType}
+              onNext={handleNextImage}
+              hasNext={hasNext}
+              onComplete={handleComplete}
+              isLastImage={isLastImage}
+              inspirationImages={inspirationImages}
+              onInspirationSelect={handleInspirationSelect}
             />
           </div>
-          <div className={`chat-panel desktop-only ${chatOpen ? 'chat-panel-open' : 'chat-panel-closed'}`}>
-            <ChatWindow messages={messages} onSend={sendChat} isComplete={completed} />
-          </div>
-        </div>
-      )}
 
-      <div className="review-content" style={phase === 'playground' ? {display:'none'} : {}}>
-        {/* Image panel — full width on mobile, 65% on desktop */}
-        <div className="image-panel">
-          {phase !== 'playground' && (
-            <>
-              {/* Desktop chat toggle button */}
-              <button
-                className="chat-toggle-btn desktop-only"
-                onClick={() => setChatOpen(o => !o)}
-                aria-label={chatOpen ? 'Hide chat' : 'Show chat'}
-              >
-                💬 {chatOpen ? 'Hide Silas' : 'Silas'}
-              </button>
-
-              <ImageViewer
-                image={currentImage}
-                images={currentGroup?.images || []}
-                currentIndex={currentImageIdx}
-                onSelectImage={setCurrentImageIdx}
-                isFloorPlan={isFloorPlan}
-                roomType={currentGroup?.roomType}
-                feedback={feedback[currentImage?.id]}
-                onFeedback={(status, notes) => handleFeedback(currentImage?.id, status, notes)}
-                onNext={handleNextImage}
-                hasNext={
-                  currentImageIdx < (currentGroup?.images?.length || 0) - 1 ||
-                  currentGroupIdx < (project?.groups?.length || 0) - 1
-                }
-                onComplete={handleComplete}
-                isLastImage={
-                  currentGroupIdx === (project?.groups?.length || 0) - 1 &&
-                  currentImageIdx === (currentGroup?.images?.length || 0) - 1
-                }
-              />
-            </>
-          )}
-        </div>
-
-        {/* Desktop chat panel */}
-        {(
           <div className={`chat-panel desktop-only ${chatOpen ? 'chat-panel-open' : 'chat-panel-closed'}`}>
             <ChatWindow
               messages={messages}
               onSend={sendChat}
               isComplete={completed}
+              options={chatOptions}
             />
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Mobile sticky bottom bar */}
       {isMobile && (
         <div className="mobile-chat-bar" onClick={openDrawer}>
           <div className="mobile-chat-bar-inner">
@@ -877,16 +751,14 @@ function ReviewPage() {
         </div>
       )}
 
-      {/* Mobile slide-up drawer */}
-      {(
-        <ChatDrawer
-          open={drawerOpen}
-          onClose={closeDrawer}
-          messages={messages}
-          onSend={sendChat}
-          isComplete={completed}
-        />
-      )}
+      <ChatDrawer
+        open={drawerOpen}
+        onClose={closeDrawer}
+        messages={messages}
+        onSend={sendChat}
+        isComplete={completed}
+        options={chatOptions}
+      />
     </div>
   );
 }
@@ -894,6 +766,7 @@ function ReviewPage() {
 function LandingPage() {
   return (
     <div className="landing-page">
+      <style>{appStyles}</style>
       <div className="landing-card">
         <img src="https://barnhaussteelbuilders.com/assets/images/logo-BbjiAVC6.png" alt="Barnhaus Steel Builders" style={{ height: '44px', marginBottom: '1.5rem' }} />
         <h2>Design Review Portal</h2>
@@ -906,7 +779,6 @@ function LandingPage() {
 export default function App() {
   return (
     <>
-      <style>{appStyles}</style>
       <Routes>
         <Route path="/review/:projectSlug/:draft" element={<ReviewPage />} />
         <Route path="*" element={<LandingPage />} />
