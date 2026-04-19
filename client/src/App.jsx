@@ -485,7 +485,7 @@ function ReviewPage() {
           setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
         }
         if (data.options) setChatOptions(data.options);
-        if (data.inspirationImages) { setInspirationImages(data.inspirationImages); setInspirationOffset(0); }
+        if (data.inspirationImages?.length) { setInspirationImages(data.inspirationImages); setInspirationOffset(0); } else if (!isInspirationSelection) { setInspirationImages([]); setInspirationOffset(0); }
         if (data.searchQuery) setCurrentSearchQuery(data.searchQuery);
         // Don't update roomProgress from image change trigger — only client answers drive the counter
       })
@@ -587,7 +587,7 @@ function ReviewPage() {
         const updatedMessages = [...newMessages, { role: 'assistant', content: data.reply }];
         setMessages(updatedMessages);
         if (!isInspirationSelection && data.options) setChatOptions(data.options);
-        if (data.inspirationImages) { setInspirationImages(data.inspirationImages); setInspirationOffset(0); }
+        if (data.inspirationImages?.length) { setInspirationImages(data.inspirationImages); setInspirationOffset(0); } else if (!isInspirationSelection) { setInspirationImages([]); setInspirationOffset(0); }
         if (data.searchQuery) setCurrentSearchQuery(data.searchQuery);
         if (data.roomProgress && !isInspirationSelection) {
           const roomLabel = currentGroup?.roomType || 'other';
