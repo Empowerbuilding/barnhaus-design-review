@@ -460,7 +460,7 @@ export default function ImageViewer({
             Send to Michael →
           </button>
         )}
-        {!isFloorPlan && !isLastImage && hasNext && currentIndex === totalImages - 1 && (
+        {!isFloorPlan && !isLastImage && hasNext && (
           <button className="btn-floor-next" style={{ marginTop: '0.75rem', background: '#2a2a2a', border: '1px solid #B8860B', color: '#DAA520' }} onClick={onNext}>
             Next Section →
           </button>

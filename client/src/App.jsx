@@ -578,7 +578,7 @@ function ReviewPage() {
             currentImageId: currentImage?.id || null,
             totalImagesInSection: currentGroup?.images?.length || 1,
             currentImageIndexInSection: currentImageIdx,
-            nextSectionName: currentImageIdx === (currentGroup?.images?.length || 1) - 1 ? nextSectionLabel : null,
+            nextSectionName: nextSectionLabel || null,
             sessionId,
           }),
         });
