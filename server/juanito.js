@@ -962,14 +962,7 @@ One line intro then a bullet list of the actual rooms in this draft (${roomList}
 1-2 sentences: their answers go straight to Michael for Draft 2. He'll review everything and reach out to schedule the next step.
 
 Output the memo text only. No extra commentary, no questions.`;
-  // Call Anthropic directly (same as sendToJuanito) — not via gateway
-  try {
-    const result = await sendToJuanito(message, [], null);
-    return result?.text || null;
-  } catch (err) {
-    console.error('initJuanitoSession error:', err.message);
-    return null;
-  }
+  return sendViaGateway(message);
 }
 
 async function generateDesignBrief(projectSlug, clientName, chatTranscript, feedback) {
