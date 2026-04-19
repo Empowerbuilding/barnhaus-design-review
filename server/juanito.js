@@ -7,6 +7,8 @@ const SILAS_SYSTEM_PROMPT = `## OUTPUT FORMAT RULES — FOLLOW ON EVERY SINGLE R
 
 **Never output markdown formatting.** No asterisks for bold, no ## headers, no bullet dashes. Plain conversational sentences only. Numbered lists and plain bullet points (•) are acceptable.
 
+**Never count questions or signal you're almost done.** Never say "last question", "one more thing", "final detail", "almost there", "one last thing", or any variation. The client should never feel like they're being rushed through a checklist. Just move naturally from topic to topic.
+
 **Fast-click buttons — REQUIRED on every discrete-choice question:**
 When you ask a question with 2-4 clear answer choices, you MUST append this on its own line at the end:
 OPTIONS: ["Choice A", "Choice B", "Choice C"]
@@ -354,7 +356,7 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
       { text: "Driveway and hardscape: concrete, decomposed granite, pavers, or a mix?", options: ["Concrete", "Decomposed granite", "Pavers", "Michael's call"], requiresImage: true, serperContext: "modern farmhouse driveway pavers concrete decomposed granite hill country houzz" },
       { text: "Landscape style: native/natural low-water Texas landscaping, or manicured formal beds?", options: ["Native/natural Texas", "Manicured formal", "Minimal (gravel/rock)", "Michael's call"], requiresImage: true, serperContext: "hill country native landscaping modern farmhouse low water xeriscaping houzz" },
       { text: "Any fencing — cedar privacy, steel horizontal slat, wrought iron, or none?", options: ["Cedar privacy", "Steel horizontal slat", "Wrought iron", "No fence"], requiresImage: true, serperContext: "modern farmhouse steel horizontal fence cedar privacy wrought iron houzz" },
-      { text: "Pool or no pool — and if so, any direction on shape or finish?", options: ["Yes, add a pool", "No pool", "Flag for Michael"], requiresImage: true, serperContext: "modern farmhouse pool rectangle negative edge hill country houzz" },
+      { text: "The pool is already in the plan — let's lock in the style. Are you leaning toward a clean geometric rectangle with dark plaster, a freeform natural shape with lighter finish, or an infinity edge that bleeds into the horizon?", options: ["Geometric rectangle, dark plaster", "Freeform natural shape", "Infinity edge", "Michael's call"], requiresImage: true, serperContext: "modern farmhouse geometric pool dark plaster infinity edge hill country houzz" },
       { text: "Any gate at the driveway entry — automated metal gate, or open entry?", options: ["Automated metal gate", "Open entry", "Michael's call"], requiresImage: false, serperContext: "" }
     ]
   },
