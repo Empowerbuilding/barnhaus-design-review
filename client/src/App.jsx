@@ -486,7 +486,7 @@ function ReviewPage() {
         }
         if (data.options) setChatOptions(data.options);
         if (data.inspirationImages?.length) { setInspirationImages(data.inspirationImages); setInspirationOffset(0); } else if (!isInspirationSelection) { setInspirationImages([]); setInspirationOffset(0); }
-        if (data.searchQuery) setCurrentSearchQuery(data.searchQuery);
+        if (data.searchQuery) setCurrentSearchQuery(data.searchQuery || currentSearchQuery);
         // Don't update roomProgress from image change trigger — only client answers drive the counter
       })
       .catch(() => { setSilasTyping(false); });
@@ -588,7 +588,7 @@ function ReviewPage() {
         setMessages(updatedMessages);
         if (!isInspirationSelection && data.options) setChatOptions(data.options);
         if (data.inspirationImages?.length) { setInspirationImages(data.inspirationImages); setInspirationOffset(0); } else if (!isInspirationSelection) { setInspirationImages([]); setInspirationOffset(0); }
-        if (data.searchQuery) setCurrentSearchQuery(data.searchQuery);
+        setCurrentSearchQuery(data.searchQuery || currentSearchQuery);
         if (data.roomProgress && !isInspirationSelection) {
           const roomLabel = currentGroup?.roomType || 'other';
           setQuestionProgress(prev => ({
