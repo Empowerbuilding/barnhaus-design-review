@@ -282,10 +282,10 @@ Only include OPTIONS when the question has specific discrete choices. Do NOT inc
 **Inspiration images:** When you ask an aesthetic/visual question (anything about materials, colors, styles, finishes, fixtures, layouts), also append this line directly after OPTIONS (or alone if no OPTIONS):
 SEARCH: "tight specific search phrase for houzz or pinterest"
 The SEARCH phrase must be specific to the exact visual choice you are asking about — not the room in general. Examples:
-- Asking about roof color → SEARCH: "standing seam metal roof dark charcoal white walls modern farmhouse houzz"
-- Asking about stone wainscot → SEARCH: "hill country limestone stone wainscot white metal siding exterior houzz"
-- Asking about kitchen island → SEARCH: "kitchen island waterfall marble edge white oak cabinets houzz"
-- Asking about master shower → SEARCH: "master bath wet room freestanding tub glass shower modern farmhouse houzz"
+- Asking about roof color → SEARCH: "standing seam metal roof dark charcoal white walls modern farmhouse houzz OR pinterest"
+- Asking about stone wainscot → SEARCH: "hill country limestone stone wainscot white metal siding exterior houzz OR pinterest"
+- Asking about kitchen island → SEARCH: "kitchen island waterfall marble edge white oak cabinets houzz OR pinterest"
+- Asking about master shower → SEARCH: "master bath wet room freestanding tub glass shower modern farmhouse houzz OR pinterest"
 Do NOT include SEARCH for functional/layout questions (seat counts, appliance placement, room sizing, etc.).
 
 **IMPORTANT:** Whenever you include a SEARCH tag, your message text MUST reference the images. End your question with a natural callout like "I'm pulling up some reference images to the left — take a look and let me know which direction feels right" or "Check out the reference images on the left side of your screen." Never include a SEARCH tag silently — always tell the client to look at the pictures.`;
@@ -338,25 +338,25 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
     opening: `This is NOT a baseline presentation. Michael has already done the design work based on previous meetings with this client. You are presenting THEIR specific exterior render — a custom design Michael built for them. Do NOT describe it as a "baseline" or "starting point." Acknowledge the real work that went into it. Reference what you know about their kickoff preferences. Ask for their honest gut reaction on the overall direction. These are real Barnhaus renders, not AI — do NOT mention AI distortion or proportion warnings.`,
     baseline: null,
     questions: [
-      { text: "Does this color blocking and material palette match the vision you had in mind?", options: ["Yes, nailed it", "Something feels off", "Michael's call"], requiresImage: true, serperContext: "modern farmhouse exterior material palette metal siding stone wainscot houzz" },
-      { text: "Are the rooflines and roof pitches hitting the mark, or do we need to adjust the pitch or form?", options: ["Rooflines look great", "Adjust the pitch", "Flag for Michael"], requiresImage: true, serperContext: "barndominium standing seam metal roof pitch form exterior houzz" },
-      { text: "Siding: are we confirmed on the siding type — corrugated, standing seam, U-panel, or a mix with stone/masonry?", options: ["Corrugated metal", "Standing seam metal", "U-panel metal", "Mix with stone/masonry"], requiresImage: true, serperContext: "corrugated metal siding standing seam U-panel mix stone masonry farmhouse exterior houzz" },
+      { text: "Does this color blocking and material palette match the vision you had in mind?", options: ["Yes, nailed it", "Something feels off", "Michael's call"], requiresImage: true, serperContext: "modern farmhouse exterior material palette metal siding stone wainscot houzz OR pinterest" },
+      { text: "Are the rooflines and roof pitches hitting the mark, or do we need to adjust the pitch or form?", options: ["Rooflines look great", "Adjust the pitch", "Flag for Michael"], requiresImage: true, serperContext: "barndominium standing seam metal roof pitch form exterior houzz OR pinterest" },
+      { text: "Siding: are we confirmed on the siding type — corrugated, standing seam, U-panel, or a mix with stone/masonry?", options: ["Corrugated metal", "Standing seam metal", "U-panel metal", "Mix with stone/masonry"], requiresImage: true, serperContext: "corrugated metal siding standing seam U-panel mix stone masonry farmhouse exterior houzz OR pinterest" },
       { text: "Window frames: black, white, or another color?", options: ["Black (modern)", "White (classic)", "Bronze", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Do we need more natural light in any specific rooms — bigger windows anywhere?", options: ["Happy with current windows", "Need larger windows somewhere", "Flag for Michael"], requiresImage: false, serperContext: "" },
       { text: "Porches and patios: are the overhang depths sufficient, or do we need to extend the covered outdoor living?", options: ["Depths look sufficient", "Need more coverage", "Flag for Michael"], requiresImage: false, serperContext: "" },
       { text: "Window grids: no grids (clean modern look), simple modern grids, or traditional multi-pane?", options: ["No grids (clean modern)", "Simple modern grids", "Traditional multi-pane", "Michael's call"], requiresImage: false, serperContext: "" },
-      { text: "Any black metal awnings over windows, or keep the lines clean?", options: ["Add metal awnings", "Keep lines clean", "Michael's call"], requiresImage: true, serperContext: "black metal awnings farmhouse exterior window architectural detail houzz" },
-      { text: "Stone or brick wainscoting across the base — confirmed, or adjust the height?", options: ["Confirmed, looks great", "Adjust the height", "Remove it", "Michael's call"], requiresImage: true, serperContext: "stone brick wainscoting base exterior modern farmhouse black windows houzz" },
-      { text: "Front door: what direction are you leaning — solid steel/metal, glass panel inset, or a wood-look door?", options: ["Solid steel/metal", "Glass panel inset", "Wood-look", "Michael's call"], requiresImage: true, serperContext: "modern farmhouse front door steel metal glass panel black exterior houzz" },
-      { text: "Garage doors: full panel flush steel, carriage house style, or glass panel garage doors?", options: ["Flush steel (modern)", "Carriage house style", "Glass panel", "Michael's call"], requiresImage: true, serperContext: "modern farmhouse garage door flush steel glass panel carriage house houzz" },
-      { text: "Exterior lighting: wall sconces at entry, pendant at porch, or both?", options: ["Wall sconces only", "Porch pendant only", "Both", "Michael's call"], requiresImage: true, serperContext: "modern farmhouse exterior lighting black wall sconce porch pendant houzz" },
+      { text: "Any black metal awnings over windows, or keep the lines clean?", options: ["Add metal awnings", "Keep lines clean", "Michael's call"], requiresImage: true, serperContext: "black metal awnings farmhouse exterior window architectural detail houzz OR pinterest" },
+      { text: "Stone or brick wainscoting across the base — confirmed, or adjust the height?", options: ["Confirmed, looks great", "Adjust the height", "Remove it", "Michael's call"], requiresImage: true, serperContext: "stone brick wainscoting base exterior modern farmhouse black windows houzz OR pinterest" },
+      { text: "Front door: what direction are you leaning — solid steel/metal, glass panel inset, or a wood-look door?", options: ["Solid steel/metal", "Glass panel inset", "Wood-look", "Michael's call"], requiresImage: true, serperContext: "modern farmhouse front door steel metal glass panel black exterior houzz OR pinterest" },
+      { text: "Garage doors: full panel flush steel, carriage house style, or glass panel garage doors?", options: ["Flush steel (modern)", "Carriage house style", "Glass panel", "Michael's call"], requiresImage: true, serperContext: "modern farmhouse garage door flush steel glass panel carriage house houzz OR pinterest" },
+      { text: "Exterior lighting: wall sconces at entry, pendant at porch, or both?", options: ["Wall sconces only", "Porch pendant only", "Both", "Michael's call"], requiresImage: true, serperContext: "modern farmhouse exterior lighting black wall sconce porch pendant houzz OR pinterest" },
       { text: "Fascia and soffit: black to match trim, white, or natural metal finish?", options: ["Black (match trim)", "White", "Natural metal", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Gutters: hidden/box gutters integrated into the roofline, or standard K-style gutters?", options: ["Hidden/box gutters", "Standard K-style", "Michael's call"], requiresImage: false, serperContext: "" },
-      { text: "Outdoor living: any covered outdoor kitchen, fireplace, or TV wall on the patio?", options: ["Outdoor kitchen", "Fireplace/fire pit", "TV wall", "Just covered patio is fine"], requiresImage: true, serperContext: "covered outdoor kitchen fireplace patio modern farmhouse hill country houzz" },
-      { text: "Driveway and hardscape: concrete, decomposed granite, pavers, or a mix?", options: ["Concrete", "Decomposed granite", "Pavers", "Michael's call"], requiresImage: true, serperContext: "modern farmhouse driveway pavers concrete decomposed granite hill country houzz" },
-      { text: "Landscape style: native/natural low-water Texas landscaping, or manicured formal beds?", options: ["Native/natural Texas", "Manicured formal", "Minimal (gravel/rock)", "Michael's call"], requiresImage: true, serperContext: "hill country native landscaping modern farmhouse low water xeriscaping houzz" },
-      { text: "Any fencing — cedar privacy, steel horizontal slat, wrought iron, or none?", options: ["Cedar privacy", "Steel horizontal slat", "Wrought iron", "No fence"], requiresImage: true, serperContext: "modern farmhouse steel horizontal fence cedar privacy wrought iron houzz" },
-      { text: "The pool is already in the plan — let's lock in the style. Are you leaning toward a clean geometric rectangle with dark plaster, a freeform natural shape with lighter finish, or an infinity edge that bleeds into the horizon?", options: ["Geometric rectangle, dark plaster", "Freeform natural shape", "Infinity edge", "Michael's call"], requiresImage: true, serperContext: "modern farmhouse geometric pool dark plaster infinity edge hill country houzz" },
+      { text: "Outdoor living: any covered outdoor kitchen, fireplace, or TV wall on the patio?", options: ["Outdoor kitchen", "Fireplace/fire pit", "TV wall", "Just covered patio is fine"], requiresImage: true, serperContext: "covered outdoor kitchen fireplace patio modern farmhouse hill country houzz OR pinterest" },
+      { text: "Driveway and hardscape: concrete, decomposed granite, pavers, or a mix?", options: ["Concrete", "Decomposed granite", "Pavers", "Michael's call"], requiresImage: true, serperContext: "modern farmhouse driveway pavers concrete decomposed granite hill country houzz OR pinterest" },
+      { text: "Landscape style: native/natural low-water Texas landscaping, or manicured formal beds?", options: ["Native/natural Texas", "Manicured formal", "Minimal (gravel/rock)", "Michael's call"], requiresImage: true, serperContext: "hill country native landscaping modern farmhouse low water xeriscaping houzz OR pinterest" },
+      { text: "Any fencing — cedar privacy, steel horizontal slat, wrought iron, or none?", options: ["Cedar privacy", "Steel horizontal slat", "Wrought iron", "No fence"], requiresImage: true, serperContext: "modern farmhouse steel horizontal fence cedar privacy wrought iron houzz OR pinterest" },
+      { text: "The pool is already in the plan — let's lock in the style. Are you leaning toward a clean geometric rectangle with dark plaster, a freeform natural shape with lighter finish, or an infinity edge that bleeds into the horizon?", options: ["Geometric rectangle, dark plaster", "Freeform natural shape", "Infinity edge", "Michael's call"], requiresImage: true, serperContext: "modern farmhouse geometric pool dark plaster infinity edge hill country houzz OR pinterest" },
       { text: "Any gate at the driveway entry — automated metal gate, or open entry?", options: ["Automated metal gate", "Open entry", "Michael's call"], requiresImage: false, serperContext: "" }
     ]
   },
@@ -365,17 +365,17 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
     opening: `Start with The Recommended Function List. Present the baseline and get them to approve it before drilling into aesthetics. This saves 45 minutes of questioning.`,
     baseline: { text: "Michael's standard high-end kitchen baseline: built-in panel-ready refrigerator, drawers for all base cabinets (not doors), dishwasher and dedicated trash pull-out directly beside the main sink, skinny pull-out spice & tray cabinets flanking both sides of the range. Does this baseline work for you?", options: ["Approve baseline", "Change something"], requiresImage: false, serperContext: "" },
     questions: [
-      { text: "Island: what size feels right? Do you want a waterfall stone edge, or a standard square overhang?", options: ["Waterfall stone edge", "Standard square overhang", "No island", "Michael's call"], requiresImage: true, serperContext: "kitchen island waterfall quartz edge modern farmhouse houzz" },
+      { text: "Island: what size feels right? Do you want a waterfall stone edge, or a standard square overhang?", options: ["Waterfall stone edge", "Standard square overhang", "No island", "Michael's call"], requiresImage: true, serperContext: "kitchen island waterfall quartz edge modern farmhouse houzz OR pinterest" },
       { text: "Island seating: which side, and how many seats?", options: ["2 seats", "3 seats", "4 seats", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Microwave: Michael usually tucks it into a drawer in the island — does that work, or do you want it elsewhere?", options: ["Island drawer (Michael's rec)", "Built into upper cabinets", "Above range", "Michael's call"], requiresImage: false, serperContext: "" },
-      { text: "Range hood: custom plaster, exposed metal/steel, or built-in to match the cabinets?", options: ["Custom plaster hood", "Exposed metal/steel", "Built-in cabinet style", "Michael's call"], requiresImage: true, serperContext: "custom range hood plaster metal modern farmhouse kitchen houzz" },
-      { text: "Upper cabinets vs open floating shelves flanking the hood — which do you prefer?", options: ["Upper cabinets", "Open floating shelves", "Mix of both", "Michael's call"], requiresImage: true, serperContext: "open floating shelves vs upper cabinets kitchen flanking hood houzz" },
+      { text: "Range hood: custom plaster, exposed metal/steel, or built-in to match the cabinets?", options: ["Custom plaster hood", "Exposed metal/steel", "Built-in cabinet style", "Michael's call"], requiresImage: true, serperContext: "custom range hood plaster metal modern farmhouse kitchen houzz OR pinterest" },
+      { text: "Upper cabinets vs open floating shelves flanking the hood — which do you prefer?", options: ["Upper cabinets", "Open floating shelves", "Mix of both", "Michael's call"], requiresImage: true, serperContext: "open floating shelves vs upper cabinets kitchen flanking hood houzz OR pinterest" },
       { text: "Kitchen ceiling: vault it with the great room, keep it flat and high, or drop it flat and start the vault at the edge of the kitchen?", options: ["Vault with great room", "Flat and high", "Drop flat, vault at edge", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Sink placement confirmed? Any secondary sink (island or butler's pantry side)?", options: ["Primary sink only is fine", "Add island sink", "Add butler's pantry sink", "Flag for Michael"], requiresImage: false, serperContext: "" },
       { text: "Range placement and fridge placement — are we happy with where those land?", options: ["Both placements work", "Adjust range placement", "Adjust fridge placement", "Flag for Michael"], requiresImage: false, serperContext: "" },
       { text: "Double-stacked wall oven — do you want this, or stick with the main range?", options: ["Add double wall oven", "Keep main range only", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Warming drawers — do you want these?", options: ["Yes, add warming drawers", "No thanks", "Michael's call"], requiresImage: false, serperContext: "" },
-      { text: "Backsplash: tile, stone, or slab behind the range?", options: ["Full slab (seamless)", "Stone/marble tile", "Ceramic/porcelain tile", "Michael's call"], requiresImage: true, serperContext: "kitchen backsplash slab quartz tile behind range modern farmhouse houzz" },
+      { text: "Backsplash: tile, stone, or slab behind the range?", options: ["Full slab (seamless)", "Stone/marble tile", "Ceramic/porcelain tile", "Michael's call"], requiresImage: true, serperContext: "kitchen backsplash slab quartz tile behind range modern farmhouse houzz OR pinterest" },
       { text: "Any extras: ice machine, beverage fridge, wine cooler, additional sink?", options: ["Ice machine", "Beverage fridge", "Wine cooler", "None of these"], requiresImage: false, serperContext: "" }
     ]
   },
@@ -384,9 +384,9 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
     opening: `Show a beautiful butler's pantry image first — the sexy hook. Standard setup: deep countertops, open shelving on top, base storage on bottom. Almost everyone loves this.`,
     baseline: { text: "Standard Barnhaus butler's pantry: thick wood open shelving on top, deep countertops for appliances, base storage (open shelves with baskets — lower cost, great look). Does this setup work for you?", options: ["Approve baseline", "Change something"], requiresImage: false, serperContext: "" },
     questions: [
-      { text: "Base storage: open shelves with baskets (lower cost, great look), or full custom drawers and cabinet faces on the bottom?", options: ["Open shelves with baskets", "Full custom drawers", "Michael's call"], requiresImage: true, serperContext: "butler pantry base storage open shelves baskets custom drawers houzz" },
+      { text: "Base storage: open shelves with baskets (lower cost, great look), or full custom drawers and cabinet faces on the bottom?", options: ["Open shelves with baskets", "Full custom drawers", "Michael's call"], requiresImage: true, serperContext: "butler pantry base storage open shelves baskets custom drawers houzz OR pinterest" },
       { text: "What small appliances are living back here — air fryer, toaster, coffee maker?", options: ["Air fryer + toaster", "Coffee maker setup", "All of the above", "Michael's call"], requiresImage: false, serperContext: "" },
-      { text: "Can those appliances sit on the counter, or do you want them hidden behind an appliance garage door?", options: ["On the counter is fine", "Hidden appliance garage", "Michael's call"], requiresImage: true, serperContext: "appliance garage door pantry hidden countertop modern houzz" },
+      { text: "Can those appliances sit on the counter, or do you want them hidden behind an appliance garage door?", options: ["On the counter is fine", "Hidden appliance garage", "Michael's call"], requiresImage: true, serperContext: "appliance garage door pantry hidden countertop modern houzz OR pinterest" },
       { text: "Coffee station: do you need a water line run for a plumbed-in espresso machine?", options: ["Yes, plumb it in", "No, just counter space", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Secondary fridge back here? Dedicated ice machine? Wine cooler?", options: ["Secondary fridge", "Ice machine", "Wine cooler", "None needed"], requiresImage: false, serperContext: "" },
       { text: "Prep sink in the pantry?", options: ["Yes, add a prep sink", "No sink needed", "Michael's call"], requiresImage: false, serperContext: "" }
@@ -397,13 +397,13 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
     opening: `Fireplace is the centerpiece — start with 3 inspiration images. The right image answers almost every question at once. Standard setup: stone or tile surround, base cabinets flanking both sides, thick open floating shelves above the cabinets, heavy mantle for the TV.`,
     baseline: { text: "Standard Barnhaus fireplace setup: stone or tile surround, base cabinets flanking the firebox for storage, thick open floating shelves above those cabinets, and a heavy solid wood mantle sized for the TV. Does this layout work for you?", options: ["Approve baseline", "Change something"], requiresImage: false, serperContext: "" },
     questions: [
-      { text: "Fireplace surround vibe check — which direction are we going?", options: ["Stone surround (classic)", "Large format tile (modern)", "Stucco/plaster (clean)", "Michael's call"], requiresImage: true, serperContext: "modern farmhouse fireplace surround stone tile great room vaulted ceiling houzz" },
+      { text: "Fireplace surround vibe check — which direction are we going?", options: ["Stone surround (classic)", "Large format tile (modern)", "Stucco/plaster (clean)", "Michael's call"], requiresImage: true, serperContext: "modern farmhouse fireplace surround stone tile great room vaulted ceiling houzz OR pinterest" },
       { text: "Fireplace type: gas or wood-burning? (affects framing for flue/chase)", options: ["Gas (easier operation)", "Wood-burning (authentic feel)", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "TV: are you planning to mount the TV above the mantle?", options: ["Yes, TV above mantle", "No TV at fireplace", "Michael's call"], requiresImage: false, serperContext: "" },
-      { text: "Flanking cabinets: match the wood finish of the floating shelves, or paint them to match the kitchen cabinets?", options: ["Match wood floating shelves", "Paint to match kitchen", "Michael's call"], requiresImage: true, serperContext: "flanking cabinets fireplace built-in floating shelves great room houzz" },
+      { text: "Flanking cabinets: match the wood finish of the floating shelves, or paint them to match the kitchen cabinets?", options: ["Match wood floating shelves", "Paint to match kitchen", "Michael's call"], requiresImage: true, serperContext: "flanking cabinets fireplace built-in floating shelves great room houzz OR pinterest" },
       { text: "Hearth: raised hearth bench at the base, or firebox flush to the floor?", options: ["Raised hearth bench", "Flush to floor", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Ceiling in the great room: vault confirmed, or any changes to the height or form?", options: ["Vault looks great", "Adjust vault height", "Flag for Michael"], requiresImage: false, serperContext: "" },
-      { text: "Vault ceiling finish — how do you want to finish that vault above the great room? Clean sheetrock lets the form do the talking, tongue-and-groove wood planking adds warmth, or heavy timber trusses/beams give it that ranch lodge character.", options: ["Clean sheetrock", "Tongue-and-groove wood", "Heavy timber beams/trusses", "Michael's call"], requiresImage: true, serperContext: "vaulted great room ceiling tongue groove wood timber beams trusses modern farmhouse houzz" }
+      { text: "Vault ceiling finish — how do you want to finish that vault above the great room? Clean sheetrock lets the form do the talking, tongue-and-groove wood planking adds warmth, or heavy timber trusses/beams give it that ranch lodge character.", options: ["Clean sheetrock", "Tongue-and-groove wood", "Heavy timber beams/trusses", "Michael's call"], requiresImage: true, serperContext: "vaulted great room ceiling tongue groove wood timber beams trusses modern farmhouse houzz OR pinterest" }
     ]
   },
 
@@ -411,8 +411,8 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
     opening: `Same as great room — vibe check first, then confirm the fireplace and built-in details if applicable.`,
     questions: [
       { text: "Is there a fireplace in this room?", options: ["Yes, run fireplace flow", "No fireplace", "Michael's call"], requiresImage: false, serperContext: "" },
-      { text: "Built-in shelving or entertainment center on any wall?", options: ["Yes, add built-ins", "No, keep it open", "Michael's call"], requiresImage: true, serperContext: "living room built-in shelving entertainment center modern farmhouse houzz" },
-      { text: "Ceiling in this room — do you want to vault it, keep it flat and high, add a coffered grid, or leave it for Michael to decide based on what makes structural sense?", options: ["Vault it", "Flat and high", "Coffered ceiling", "Michael's call"], requiresImage: true, serperContext: "living room vaulted ceiling vs coffered ceiling vs flat high ceiling modern farmhouse houzz" },
+      { text: "Built-in shelving or entertainment center on any wall?", options: ["Yes, add built-ins", "No, keep it open", "Michael's call"], requiresImage: true, serperContext: "living room built-in shelving entertainment center modern farmhouse houzz OR pinterest" },
+      { text: "Ceiling in this room — do you want to vault it, keep it flat and high, add a coffered grid, or leave it for Michael to decide based on what makes structural sense?", options: ["Vault it", "Flat and high", "Coffered ceiling", "Michael's call"], requiresImage: true, serperContext: "living room vaulted ceiling vs coffered ceiling vs flat high ceiling modern farmhouse houzz OR pinterest" },
       { text: "Natural light: are we happy with the window placement in this room?", options: ["Yes, windows look great", "Need more light", "Flag for Michael"], requiresImage: false, serperContext: "" }
     ]
   },
@@ -421,26 +421,26 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
     opening: `Confirm the suite setup — privacy, ceiling, and any built-ins. Michael separates the master from the rest of the house whenever possible.`,
     questions: [
       { text: "Does the bedroom fit your furniture — king bed plus nightstands on both sides with comfortable clearance?", options: ["Yes, fits great", "Feels a bit tight", "Flag for Michael"], requiresImage: false, serperContext: "" },
-      { text: "Ceiling: vault, tray, or flat? Any tongue and groove?", options: ["Vault", "Tray ceiling", "Flat", "Tongue and groove"], requiresImage: true, serperContext: "primary bedroom vaulted ceiling tongue groove wood modern farmhouse houzz" },
+      { text: "Ceiling: vault, tray, or flat? Any tongue and groove?", options: ["Vault", "Tray ceiling", "Flat", "Tongue and groove"], requiresImage: true, serperContext: "primary bedroom vaulted ceiling tongue groove wood modern farmhouse houzz OR pinterest" },
       { text: "Is the privacy entrance or separation from the guest wing working for you?", options: ["Yes, privacy works", "Need more separation", "Flag for Michael"], requiresImage: false, serperContext: "" },
-      { text: "Any built-ins — window seat, built-in bench, reading nook?", options: ["Add window seat", "Add reading nook", "Keep it open", "Michael's call"], requiresImage: true, serperContext: "primary bedroom built-in window seat reading nook modern houzz" },
-      { text: "Fireplace in the master — do you want one?", options: ["Yes, add a fireplace", "No fireplace", "Michael's call"], requiresImage: true, serperContext: "master bedroom fireplace cozy luxury modern houzz" }
+      { text: "Any built-ins — window seat, built-in bench, reading nook?", options: ["Add window seat", "Add reading nook", "Keep it open", "Michael's call"], requiresImage: true, serperContext: "primary bedroom built-in window seat reading nook modern houzz OR pinterest" },
+      { text: "Fireplace in the master — do you want one?", options: ["Yes, add a fireplace", "No fireplace", "Michael's call"], requiresImage: true, serperContext: "master bedroom fireplace cozy luxury modern houzz OR pinterest" }
     ]
   },
 
   'primary bath': {
     opening: `Master bath is all about the luxury fixtures. Show images — freestanding tub, massive walk-in shower, double vanity. This one is worth spending time on.`,
     questions: [
-      { text: "Overall bath vibe — which direction are we going?", options: ["Spa-modern (clean marble)", "Dark moody (matte black)", "Warm natural (wood accents)", "Michael's call"], requiresImage: true, serperContext: "luxury primary bath spa marble freestanding tub walk-in shower houzz" },
-      { text: "Freestanding soaking tub or no tub — Michael recommends against a traditional drop-in for luxury builds.", options: ["Freestanding tub (yes)", "Skip the tub entirely", "Michael's call"], requiresImage: true, serperContext: "freestanding soaking tub primary bath marble luxury houzz" },
-      { text: "Walk-in shower: rain head, wall heads, handheld — all three?", options: ["All three (rain + wall + handheld)", "Rain head only", "Rain + handheld", "Michael's call"], requiresImage: true, serperContext: "walk-in shower rain head wall heads primary bath luxury tile houzz" },
+      { text: "Overall bath vibe — which direction are we going?", options: ["Spa-modern (clean marble)", "Dark moody (matte black)", "Warm natural (wood accents)", "Michael's call"], requiresImage: true, serperContext: "luxury primary bath spa marble freestanding tub walk-in shower houzz OR pinterest" },
+      { text: "Freestanding soaking tub or no tub — Michael recommends against a traditional drop-in for luxury builds.", options: ["Freestanding tub (yes)", "Skip the tub entirely", "Michael's call"], requiresImage: true, serperContext: "freestanding soaking tub primary bath marble luxury houzz OR pinterest" },
+      { text: "Walk-in shower: rain head, wall heads, handheld — all three?", options: ["All three (rain + wall + handheld)", "Rain head only", "Rain + handheld", "Michael's call"], requiresImage: true, serperContext: "walk-in shower rain head wall heads primary bath luxury tile houzz OR pinterest" },
       { text: "Separate shower valves or a single all-in-one unit?", options: ["Separate valves (more control)", "Single all-in-one unit", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Double vanity confirmed? How long — 72 inches, 84 inches, longer?", options: ["72 inches", "84 inches", "96+ inches", "Michael's call"], requiresImage: false, serperContext: "" },
-      { text: "Vanity style: floating modern, or traditional base cabinet to the floor?", options: ["Floating modern", "Traditional (to the floor)", "Michael's call"], requiresImage: true, serperContext: "floating vanity primary bath modern vs traditional base cabinet houzz" },
-      { text: "Mirror: one massive slab mirror, individual mirrors per sink, or backlit LED mirrors?", options: ["One massive slab mirror", "Individual mirrors per sink", "Backlit LED mirrors", "Michael's call"], requiresImage: true, serperContext: "bathroom mirror slab backlit LED individual primary bath houzz" },
+      { text: "Vanity style: floating modern, or traditional base cabinet to the floor?", options: ["Floating modern", "Traditional (to the floor)", "Michael's call"], requiresImage: true, serperContext: "floating vanity primary bath modern vs traditional base cabinet houzz OR pinterest" },
+      { text: "Mirror: one massive slab mirror, individual mirrors per sink, or backlit LED mirrors?", options: ["One massive slab mirror", "Individual mirrors per sink", "Backlit LED mirrors", "Michael's call"], requiresImage: true, serperContext: "bathroom mirror slab backlit LED individual primary bath houzz OR pinterest" },
       { text: "Lighting: flanking wall sconces vs overhead bar — or both?", options: ["Flanking wall sconces", "Overhead bar light", "Both", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Shower niche: horizontal niche under the window sill, or vertical niche on the side wall?", options: ["Horizontal under window sill", "Vertical on side wall", "Michael's call"], requiresImage: false, serperContext: "" },
-      { text: "Wet room (shower and tub in same wet zone with no door) — is this something you want to explore?", options: ["Yes, explore wet room", "No, keep separate", "Michael's call"], requiresImage: true, serperContext: "wet room shower freestanding tub same zone luxury bath houzz" },
+      { text: "Wet room (shower and tub in same wet zone with no door) — is this something you want to explore?", options: ["Yes, explore wet room", "No, keep separate", "Michael's call"], requiresImage: true, serperContext: "wet room shower freestanding tub same zone luxury bath houzz OR pinterest" },
       { text: "Heated floors in the master bath?", options: ["Yes, heated floors", "No thanks", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Any water closet (private toilet room with a door) or open layout?", options: ["Water closet (private)", "Open layout", "Michael's call"], requiresImage: false, serperContext: "" }
     ]
@@ -450,22 +450,22 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
     opening: `Same as primary bedroom — confirm suite layout, privacy, ceiling, and any built-ins.`,
     questions: [
       { text: "Does the bedroom fit your furniture — king bed plus nightstands with comfortable clearance?", options: ["Yes, fits great", "Feels a bit tight", "Flag for Michael"], requiresImage: false, serperContext: "" },
-      { text: "Ceiling: vault, tray, flat, or tongue and groove?", options: ["Vault", "Tray ceiling", "Flat", "Tongue and groove"], requiresImage: true, serperContext: "master bedroom vaulted ceiling wood beam tongue groove houzz" },
+      { text: "Ceiling: vault, tray, flat, or tongue and groove?", options: ["Vault", "Tray ceiling", "Flat", "Tongue and groove"], requiresImage: true, serperContext: "master bedroom vaulted ceiling wood beam tongue groove houzz OR pinterest" },
       { text: "Privacy entrance or separation from guest wing — is that working?", options: ["Yes, privacy works", "Need more separation", "Flag for Michael"], requiresImage: false, serperContext: "" },
-      { text: "Any built-ins or fireplace in the master?", options: ["Add built-ins", "Add fireplace", "Keep it open", "Michael's call"], requiresImage: true, serperContext: "master bedroom fireplace built-in luxury cozy houzz" }
+      { text: "Any built-ins or fireplace in the master?", options: ["Add built-ins", "Add fireplace", "Keep it open", "Michael's call"], requiresImage: true, serperContext: "master bedroom fireplace built-in luxury cozy houzz OR pinterest" }
     ]
   },
 
   'master bath': {
     opening: `Same as primary bath — luxury fixtures, show images first.`,
     questions: [
-      { text: "Overall bath vibe — which direction are we going?", options: ["Spa-modern (clean marble)", "Dark moody (matte black)", "Warm natural (wood accents)", "Michael's call"], requiresImage: true, serperContext: "luxury master bath spa marble freestanding tub walk-in shower houzz" },
-      { text: "Freestanding soaking tub, or no tub?", options: ["Freestanding tub (yes)", "Skip the tub", "Michael's call"], requiresImage: true, serperContext: "freestanding soaking tub master bath luxury marble houzz" },
-      { text: "Walk-in shower size and fixtures — rain head, wall heads, handheld?", options: ["All three (rain + wall + handheld)", "Rain head only", "Rain + handheld", "Michael's call"], requiresImage: true, serperContext: "walk-in shower rain head luxury tile master bath houzz" },
-      { text: "Double vanity: size and style (floating vs traditional)?", options: ["Floating modern", "Traditional (to the floor)", "Michael's call"], requiresImage: true, serperContext: "double vanity floating modern master bath houzz" },
-      { text: "Mirror setup: slab, individual, or backlit?", options: ["One massive slab mirror", "Individual per sink", "Backlit LED", "Michael's call"], requiresImage: true, serperContext: "bathroom mirror slab backlit luxury master bath houzz" },
+      { text: "Overall bath vibe — which direction are we going?", options: ["Spa-modern (clean marble)", "Dark moody (matte black)", "Warm natural (wood accents)", "Michael's call"], requiresImage: true, serperContext: "luxury master bath spa marble freestanding tub walk-in shower houzz OR pinterest" },
+      { text: "Freestanding soaking tub, or no tub?", options: ["Freestanding tub (yes)", "Skip the tub", "Michael's call"], requiresImage: true, serperContext: "freestanding soaking tub master bath luxury marble houzz OR pinterest" },
+      { text: "Walk-in shower size and fixtures — rain head, wall heads, handheld?", options: ["All three (rain + wall + handheld)", "Rain head only", "Rain + handheld", "Michael's call"], requiresImage: true, serperContext: "walk-in shower rain head luxury tile master bath houzz OR pinterest" },
+      { text: "Double vanity: size and style (floating vs traditional)?", options: ["Floating modern", "Traditional (to the floor)", "Michael's call"], requiresImage: true, serperContext: "double vanity floating modern master bath houzz OR pinterest" },
+      { text: "Mirror setup: slab, individual, or backlit?", options: ["One massive slab mirror", "Individual per sink", "Backlit LED", "Michael's call"], requiresImage: true, serperContext: "bathroom mirror slab backlit luxury master bath houzz OR pinterest" },
       { text: "Shower niche placement and orientation?", options: ["Horizontal under window sill", "Vertical on side wall", "Michael's call"], requiresImage: false, serperContext: "" },
-      { text: "Wet room option?", options: ["Yes, explore wet room", "No, keep separate", "Michael's call"], requiresImage: true, serperContext: "wet room shower tub same zone luxury bath houzz" },
+      { text: "Wet room option?", options: ["Yes, explore wet room", "No, keep separate", "Michael's call"], requiresImage: true, serperContext: "wet room shower tub same zone luxury bath houzz OR pinterest" },
       { text: "Heated floors?", options: ["Yes, heated floors", "No thanks", "Michael's call"], requiresImage: false, serperContext: "" }
     ]
   },
@@ -476,7 +476,7 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
       { text: "Door sizes confirmed — do the openings fit your largest vehicle (dually, tall truck, boat trailer)?", options: ["Yes, door sizes work", "Need larger openings", "Flag for Michael"], requiresImage: false, serperContext: "" },
       { text: "How many cars is this designed for — is that count still correct?", options: ["Count is correct", "Need one more bay", "Flag for Michael"], requiresImage: false, serperContext: "" },
       { text: "Any dedicated workshop space or utility bay inside the garage?", options: ["Yes, add workshop space", "No, standard garage only", "Michael's call"], requiresImage: false, serperContext: "" },
-      { text: "Built-in storage wall or just open walls?", options: ["Built-in storage wall", "Open walls", "Michael's call"], requiresImage: true, serperContext: "garage built-in storage wall organized cabinets custom houzz" },
+      { text: "Built-in storage wall or just open walls?", options: ["Built-in storage wall", "Open walls", "Michael's call"], requiresImage: true, serperContext: "garage built-in storage wall organized cabinets custom houzz OR pinterest" },
       { text: "Utility sink in the garage?", options: ["Yes, utility sink", "No sink needed", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "EV charger rough-in?", options: ["Yes, rough in EV charger", "No EV charger", "Michael's call"], requiresImage: false, serperContext: "" }
     ]
@@ -486,7 +486,7 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
     opening: `Show a great mudroom image first — bench, lockers, storage. This space depends heavily on whether laundry is combined or separate.`,
     baseline: { text: "Standard Barnhaus mudroom: heavy wood bench with open shoe cubbies underneath, coat hooks or locker doors above, built-in storage. Does this setup work for you?", options: ["Approve baseline", "Change something"], requiresImage: false, serperContext: "" },
     questions: [
-      { text: "Open coat hooks or closed locker doors to hide the mess?", options: ["Open coat hooks (easy access)", "Closed locker doors (cleaner look)", "Michael's call"], requiresImage: true, serperContext: "mudroom open hooks vs closed locker doors built-in bench storage houzz" },
+      { text: "Open coat hooks or closed locker doors to hide the mess?", options: ["Open coat hooks (easy access)", "Closed locker doors (cleaner look)", "Michael's call"], requiresImage: true, serperContext: "mudroom open hooks vs closed locker doors built-in bench storage houzz OR pinterest" },
       { text: "Dog wash station or just a deep utility mop sink for boots and gear?", options: ["Dog wash station", "Deep utility mop sink", "Neither", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Is laundry combined in this room or in a separate laundry room?", options: ["Combined with mudroom", "Separate laundry room", "Flag for Michael"], requiresImage: false, serperContext: "" }
     ]
@@ -501,15 +501,15 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
       { text: "Hanging rod and open shelves above for drying clothes?", options: ["Yes, hanging rod + shelves", "Shelves only", "No", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Utility sink in the laundry room?", options: ["Yes, utility sink", "No sink", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Broom closet: tall built-in cabinet, or a framed closet with a door?", options: ["Tall built-in cabinet", "Framed closet with door", "Michael's call"], requiresImage: false, serperContext: "" },
-      { text: "Soap and supply storage: closed upper cabinets above the machines, or open floating shelves?", options: ["Closed upper cabinets", "Open floating shelves", "Michael's call"], requiresImage: true, serperContext: "laundry room upper cabinets vs open shelves organized modern houzz" }
+      { text: "Soap and supply storage: closed upper cabinets above the machines, or open floating shelves?", options: ["Closed upper cabinets", "Open floating shelves", "Michael's call"], requiresImage: true, serperContext: "laundry room upper cabinets vs open shelves organized modern houzz OR pinterest" }
     ]
   },
 
   'office': {
     opening: `Confirm the office function — built-in desk, storage, any specialty needs.`,
     questions: [
-      { text: "Built-in desk with upper cabinets and shelving, or keep it open for furniture?", options: ["Built-in desk + cabinets", "Open for furniture", "Michael's call"], requiresImage: true, serperContext: "home office built-in desk upper cabinets shelving dark moody houzz" },
-      { text: "Any built-in bookcase or display wall?", options: ["Yes, built-in bookcase", "Display wall", "No, keep it open", "Michael's call"], requiresImage: true, serperContext: "home office built-in bookcase display wall modern houzz" },
+      { text: "Built-in desk with upper cabinets and shelving, or keep it open for furniture?", options: ["Built-in desk + cabinets", "Open for furniture", "Michael's call"], requiresImage: true, serperContext: "home office built-in desk upper cabinets shelving dark moody houzz OR pinterest" },
+      { text: "Any built-in bookcase or display wall?", options: ["Yes, built-in bookcase", "Display wall", "No, keep it open", "Michael's call"], requiresImage: true, serperContext: "home office built-in bookcase display wall modern houzz OR pinterest" },
       { text: "Ceiling: vault or flat?", options: ["Vault", "Flat", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Murphy bed for flex use as a guest room?", options: ["Yes, add Murphy bed", "No Murphy bed", "Michael's call"], requiresImage: false, serperContext: "" }
     ]
@@ -519,9 +519,9 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
     opening: `Outdoor living is a big deal — confirm the coverage, ceiling, and outdoor kitchen or grill setup.`,
     questions: [
       { text: "Is the depth of the covered porch sufficient — do you have enough shade in the afternoon?", options: ["Yes, depth is great", "Need more depth", "Flag for Michael"], requiresImage: false, serperContext: "" },
-      { text: "Outdoor kitchen: full built-in grill and counter setup, or just a gas hookup and space for a freestanding grill?", options: ["Full built-in outdoor kitchen", "Gas hookup for freestanding grill", "Michael's call"], requiresImage: true, serperContext: "covered porch outdoor kitchen built-in grill concrete countertop modern farmhouse houzz" },
-      { text: "Outdoor fireplace or fire pit?", options: ["Outdoor fireplace", "Fire pit", "Neither", "Michael's call"], requiresImage: true, serperContext: "covered porch outdoor fireplace fire pit farmhouse concrete houzz" },
-      { text: "Tongue and groove or bead board on the porch ceiling?", options: ["Tongue and groove", "Bead board", "Painted drywall", "Michael's call"], requiresImage: true, serperContext: "covered porch tongue groove ceiling outdoor living farmhouse houzz" },
+      { text: "Outdoor kitchen: full built-in grill and counter setup, or just a gas hookup and space for a freestanding grill?", options: ["Full built-in outdoor kitchen", "Gas hookup for freestanding grill", "Michael's call"], requiresImage: true, serperContext: "covered porch outdoor kitchen built-in grill concrete countertop modern farmhouse houzz OR pinterest" },
+      { text: "Outdoor fireplace or fire pit?", options: ["Outdoor fireplace", "Fire pit", "Neither", "Michael's call"], requiresImage: true, serperContext: "covered porch outdoor fireplace fire pit farmhouse concrete houzz OR pinterest" },
+      { text: "Tongue and groove or bead board on the porch ceiling?", options: ["Tongue and groove", "Bead board", "Painted drywall", "Michael's call"], requiresImage: true, serperContext: "covered porch tongue groove ceiling outdoor living farmhouse houzz OR pinterest" },
       { text: "Ceiling fans — how many?", options: ["One fan", "Two fans", "None", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "TV hookup rough-in on the porch?", options: ["Yes, rough in TV hookup", "No TV hookup", "Michael's call"], requiresImage: false, serperContext: "" }
     ]
@@ -531,7 +531,7 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
     opening: `Confirm the dining setup — formal vs casual, built-ins, ceiling.`,
     questions: [
       { text: "Formal dining room or more of a casual everyday dining space?", options: ["Formal dining", "Casual everyday", "Michael's call"], requiresImage: false, serperContext: "" },
-      { text: "Built-in buffet or china cabinet on any wall?", options: ["Add built-in buffet", "Add china cabinet", "Neither", "Michael's call"], requiresImage: true, serperContext: "dining room built-in buffet china cabinet modern farmhouse houzz" },
+      { text: "Built-in buffet or china cabinet on any wall?", options: ["Add built-in buffet", "Add china cabinet", "Neither", "Michael's call"], requiresImage: true, serperContext: "dining room built-in buffet china cabinet modern farmhouse houzz OR pinterest" },
       { text: "Ceiling: coffered, tray, or flat?", options: ["Coffered", "Tray ceiling", "Flat", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Chandelier rough-in centered over the table?", options: ["Yes, rough in chandelier", "No chandelier", "Michael's call"], requiresImage: false, serperContext: "" }
     ]
@@ -540,10 +540,10 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
   'foyer': {
     opening: `Show a high-end entryway image matching the aesthetic. Only ask if a foyer exists on the floor plan.`,
     questions: [
-      { text: "Foyer vibe check — which direction are we going?", options: ["Grand statement entry", "Clean minimalist entry", "Warm farmhouse entry", "Michael's call"], requiresImage: true, serperContext: "grand foyer entry chandelier herringbone tile statement modern houzz" },
+      { text: "Foyer vibe check — which direction are we going?", options: ["Grand statement entry", "Clean minimalist entry", "Warm farmhouse entry", "Michael's call"], requiresImage: true, serperContext: "grand foyer entry chandelier herringbone tile statement modern houzz OR pinterest" },
       { text: "Storage: built-in coat closet, or a clean entry bench with art/mirrors on the wall?", options: ["Built-in coat closet", "Entry bench with art/mirrors", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Sightline: keep it completely open, or add architectural framing (archway) to transition into the great room?", options: ["Keep it open", "Add archway/framing", "Michael's call"], requiresImage: false, serperContext: "" },
-      { text: "Lighting: statement chandelier or recessed lighting?", options: ["Statement chandelier", "Recessed lighting", "Both", "Michael's call"], requiresImage: true, serperContext: "foyer statement chandelier pendant lighting grand entry houzz" },
+      { text: "Lighting: statement chandelier or recessed lighting?", options: ["Statement chandelier", "Recessed lighting", "Both", "Michael's call"], requiresImage: true, serperContext: "foyer statement chandelier pendant lighting grand entry houzz OR pinterest" },
       { text: "Front entry approach: wide tiered concrete steps up to the front door, or a continuous ramped walkway?", options: ["Tiered concrete steps", "Continuous ramped walkway", "Michael's call"], requiresImage: false, serperContext: "" }
     ]
   },
@@ -551,9 +551,9 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
   'entryway': {
     opening: `Same as foyer — show inspiration image, confirm storage and lighting.`,
     questions: [
-      { text: "Entryway vibe check — which direction are we going?", options: ["Grand statement entry", "Clean minimalist entry", "Warm farmhouse entry", "Michael's call"], requiresImage: true, serperContext: "entryway entry hall modern farmhouse statement lighting houzz" },
+      { text: "Entryway vibe check — which direction are we going?", options: ["Grand statement entry", "Clean minimalist entry", "Warm farmhouse entry", "Michael's call"], requiresImage: true, serperContext: "entryway entry hall modern farmhouse statement lighting houzz OR pinterest" },
       { text: "Built-in coat closet or entry bench with mirrors?", options: ["Built-in coat closet", "Entry bench with mirrors", "Michael's call"], requiresImage: false, serperContext: "" },
-      { text: "Statement chandelier or recessed lighting?", options: ["Statement chandelier", "Recessed lighting", "Both", "Michael's call"], requiresImage: true, serperContext: "entryway chandelier pendant statement lighting modern farmhouse houzz" },
+      { text: "Statement chandelier or recessed lighting?", options: ["Statement chandelier", "Recessed lighting", "Both", "Michael's call"], requiresImage: true, serperContext: "entryway chandelier pendant statement lighting modern farmhouse houzz OR pinterest" },
       { text: "Front steps or ramped approach from the driveway?", options: ["Tiered steps", "Ramped walkway", "Michael's call"], requiresImage: false, serperContext: "" }
     ]
   },
@@ -562,9 +562,9 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
     opening: `Confirm ceilings, bunk details if applicable, and guest closets. Design one closet, apply to all.`,
     questions: [
       { text: "Ceiling: Michael's standard is flat 10-foot for guest rooms to save on HVAC. Want to vault any of them?", options: ["Keep flat 10-foot (standard)", "Vault one or more", "Michael's call"], requiresImage: false, serperContext: "" },
-      { text: "Bunk room (if applicable): built-in bunks with stairs/cubbies vs freestanding frames — which direction?", options: ["Custom built-in bunks", "Freestanding frames", "No bunks", "Michael's call"], requiresImage: true, serperContext: "custom built-in bunk room stairs cubbies storage modern farmhouse houzz" },
+      { text: "Bunk room (if applicable): built-in bunks with stairs/cubbies vs freestanding frames — which direction?", options: ["Custom built-in bunks", "Freestanding frames", "No bunks", "Michael's call"], requiresImage: true, serperContext: "custom built-in bunk room stairs cubbies storage modern farmhouse houzz OR pinterest" },
       { text: "Guest closets: simple walk-in layout — 2-row hanging, shoe rack, simple cubbies. Does this work? Michael will apply to all guest closets.", options: ["Yes, apply to all", "Want custom built-ins", "Michael's call"], requiresImage: false, serperContext: "" },
-      { text: "Guest closet: full custom built-ins, or simple rods and shelves?", options: ["Full custom built-ins", "Simple rods and shelves", "Michael's call"], requiresImage: true, serperContext: "guest bedroom walk-in closet simple organized rods shelves houzz" }
+      { text: "Guest closet: full custom built-ins, or simple rods and shelves?", options: ["Full custom built-ins", "Simple rods and shelves", "Michael's call"], requiresImage: true, serperContext: "guest bedroom walk-in closet simple organized rods shelves houzz OR pinterest" }
     ]
   },
 
@@ -582,9 +582,9 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
   'half bath': {
     opening: `The powder room is a statement piece — treat it separately from the guest baths. Show a dramatic powder room image (moody, floating vanity, backlit mirror).`,
     questions: [
-      { text: "Bold statement piece or clean and light like the guest baths?", options: ["Bold statement (dark, dramatic)", "Clean and light", "Michael's call"], requiresImage: true, serperContext: "dramatic powder room moody dark floating vanity backlit mirror houzz" },
-      { text: "Vanity: floating wall-mounted, or a vessel sink on a custom wood console?", options: ["Floating wall-mounted", "Vessel sink on wood console", "Michael's call"], requiresImage: true, serperContext: "powder room floating vanity vessel sink console half bath houzz" },
-      { text: "Mirror: round statement mirror, backlit rectangular, or framed art mirror?", options: ["Round statement mirror", "Backlit rectangular", "Framed art mirror", "Michael's call"], requiresImage: true, serperContext: "powder room statement mirror round backlit half bath houzz" },
+      { text: "Bold statement piece or clean and light like the guest baths?", options: ["Bold statement (dark, dramatic)", "Clean and light", "Michael's call"], requiresImage: true, serperContext: "dramatic powder room moody dark floating vanity backlit mirror houzz OR pinterest" },
+      { text: "Vanity: floating wall-mounted, or a vessel sink on a custom wood console?", options: ["Floating wall-mounted", "Vessel sink on wood console", "Michael's call"], requiresImage: true, serperContext: "powder room floating vanity vessel sink console half bath houzz OR pinterest" },
+      { text: "Mirror: round statement mirror, backlit rectangular, or framed art mirror?", options: ["Round statement mirror", "Backlit rectangular", "Framed art mirror", "Michael's call"], requiresImage: true, serperContext: "powder room statement mirror round backlit half bath houzz OR pinterest" },
       { text: "Cabinet over the toilet: yes or no?", options: ["Yes, cabinet over toilet", "No, keep it open", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Any floating shelves for decor or storage?", options: ["Yes, floating shelves", "No, keep it minimal", "Michael's call"], requiresImage: false, serperContext: "" }
     ]
@@ -593,17 +593,17 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
   'powder room': {
     opening: `Same as half bath — show dramatic inspiration image, treat as a statement piece.`,
     questions: [
-      { text: "Bold statement or clean and light like the guest baths?", options: ["Bold statement (dark, dramatic)", "Clean and light", "Michael's call"], requiresImage: true, serperContext: "dramatic powder room moody dark vessel sink statement houzz" },
-      { text: "Vanity style: floating, vessel sink, or console?", options: ["Floating wall-mounted", "Vessel sink", "Wood console", "Michael's call"], requiresImage: true, serperContext: "powder room vanity floating vessel sink console dramatic houzz" },
-      { text: "Mirror: round, backlit, or framed art?", options: ["Round statement mirror", "Backlit rectangular", "Framed art mirror", "Michael's call"], requiresImage: true, serperContext: "powder room mirror round backlit art statement houzz" }
+      { text: "Bold statement or clean and light like the guest baths?", options: ["Bold statement (dark, dramatic)", "Clean and light", "Michael's call"], requiresImage: true, serperContext: "dramatic powder room moody dark vessel sink statement houzz OR pinterest" },
+      { text: "Vanity style: floating, vessel sink, or console?", options: ["Floating wall-mounted", "Vessel sink", "Wood console", "Michael's call"], requiresImage: true, serperContext: "powder room vanity floating vessel sink console dramatic houzz OR pinterest" },
+      { text: "Mirror: round, backlit, or framed art?", options: ["Round statement mirror", "Backlit rectangular", "Framed art mirror", "Michael's call"], requiresImage: true, serperContext: "powder room mirror round backlit art statement houzz OR pinterest" }
     ]
   },
 
   'pool': {
     opening: `Pool is practically a second design contract. Only trigger if on Draft 1 or explicitly requested. Start with a big vibe check — 3 pool images.`,
     questions: [
-      { text: "Pool style vibe check — which direction are we going?", options: ["Modern geometric", "Infinity edge", "Natural rock/freeform", "Michael's call"], requiresImage: true, serperContext: "luxury pool modern geometric infinity edge outdoor living houzz" },
-      { text: "Hot tub: raised overflow hot tub spilling into the pool, or flush with the deck?", options: ["Raised overflow hot tub", "Flush with deck", "No hot tub", "Michael's call"], requiresImage: true, serperContext: "pool hot tub raised overflow spillover luxury outdoor houzz" },
+      { text: "Pool style vibe check — which direction are we going?", options: ["Modern geometric", "Infinity edge", "Natural rock/freeform", "Michael's call"], requiresImage: true, serperContext: "luxury pool modern geometric infinity edge outdoor living houzz OR pinterest" },
+      { text: "Hot tub: raised overflow hot tub spilling into the pool, or flush with the deck?", options: ["Raised overflow hot tub", "Flush with deck", "No hot tub", "Michael's call"], requiresImage: true, serperContext: "pool hot tub raised overflow spillover luxury outdoor houzz OR pinterest" },
       { text: "Shallow tanning ledge for loungers — yes or no?", options: ["Yes, tanning ledge", "No tanning ledge", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Built-in sunken fire pit by the pool, or concrete pad for a freestanding fire pit?", options: ["Built-in sunken fire pit", "Concrete pad for freestanding", "Neither", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Outdoor kitchen/bar: out by the pool under a separate pavilion, or keep it attached to the main house patio?", options: ["Separate pool pavilion", "Attached to main patio", "Michael's call"], requiresImage: false, serperContext: "" },
@@ -624,8 +624,8 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
   'loft': {
     opening: `Only ask if a loft exists on the floor plan. Show a Pinterest image of an open loft overlooking a great room.`,
     questions: [
-      { text: "Loft vibe check — which direction are we going?", options: ["Open to great room (modern railing)", "Semi-private (solid half-wall)", "Michael's call"], requiresImage: true, serperContext: "open loft overlook great room modern metal railing sitting area houzz" },
-      { text: "Open to the great room with a clean metal or wood railing, or a solid half-wall for more privacy?", options: ["Open with metal railing", "Open with wood railing", "Solid half-wall", "Michael's call"], requiresImage: true, serperContext: "loft railing metal wood open overlook living room houzz" },
+      { text: "Loft vibe check — which direction are we going?", options: ["Open to great room (modern railing)", "Semi-private (solid half-wall)", "Michael's call"], requiresImage: true, serperContext: "open loft overlook great room modern metal railing sitting area houzz OR pinterest" },
+      { text: "Open to the great room with a clean metal or wood railing, or a solid half-wall for more privacy?", options: ["Open with metal railing", "Open with wood railing", "Solid half-wall", "Michael's call"], requiresImage: true, serperContext: "loft railing metal wood open overlook living room houzz OR pinterest" },
       { text: "What is the loft used for — sitting area, office, kids play area, sleeping?", options: ["Sitting area", "Office/study", "Kids play area", "Sleeping area"], requiresImage: false, serperContext: "" }
     ]
   },
@@ -643,8 +643,8 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
   'game room': {
     opening: `Confirm the game room function. Only ask if on the floor plan.`,
     questions: [
-      { text: "Game room vibe check — which direction are we going?", options: ["High-end lounge (bar + seating)", "Classic game room (pool table)", "Kids/family game room", "Michael's call"], requiresImage: true, serperContext: "high-end game room bar seating pool table lounge modern farmhouse houzz" },
-      { text: "Built-in bar or wet bar in here?", options: ["Yes, built-in bar", "Yes, wet bar", "No bar", "Michael's call"], requiresImage: true, serperContext: "game room built-in wet bar custom cabinets modern houzz" },
+      { text: "Game room vibe check — which direction are we going?", options: ["High-end lounge (bar + seating)", "Classic game room (pool table)", "Kids/family game room", "Michael's call"], requiresImage: true, serperContext: "high-end game room bar seating pool table lounge modern farmhouse houzz OR pinterest" },
+      { text: "Built-in bar or wet bar in here?", options: ["Yes, built-in bar", "Yes, wet bar", "No bar", "Michael's call"], requiresImage: true, serperContext: "game room built-in wet bar custom cabinets modern houzz OR pinterest" },
       { text: "Custom storage for games/equipment?", options: ["Yes, custom storage", "Standard shelving", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Built-in seating?", options: ["Yes, built-in booth seating", "No, freestanding furniture", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Ceiling: vault, flat, or coffered?", options: ["Vault", "Flat", "Coffered", "Michael's call"], requiresImage: false, serperContext: "" }
@@ -654,9 +654,9 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
   'media room': {
     opening: `Confirm theater/media room setup. Show a high-end media room image first.`,
     questions: [
-      { text: "Media room vibe check — which direction are we going?", options: ["Home theater (dark, acoustic)", "Modern media room (open)", "Cozy family room style", "Michael's call"], requiresImage: true, serperContext: "luxury home media room recliner seating acoustic panels dark houzz" },
+      { text: "Media room vibe check — which direction are we going?", options: ["Home theater (dark, acoustic)", "Modern media room (open)", "Cozy family room style", "Michael's call"], requiresImage: true, serperContext: "luxury home media room recliner seating acoustic panels dark houzz OR pinterest" },
       { text: "Stepped platform seating for a stadium effect, or flat floor with furniture?", options: ["Stepped platform seating", "Flat floor with furniture", "Michael's call"], requiresImage: false, serperContext: "" },
-      { text: "Built-in media wall with screen and integrated speaker bays?", options: ["Yes, full built-in media wall", "No, freestanding setup", "Michael's call"], requiresImage: true, serperContext: "media room built-in wall screen speaker bays modern houzz" },
+      { text: "Built-in media wall with screen and integrated speaker bays?", options: ["Yes, full built-in media wall", "No, freestanding setup", "Michael's call"], requiresImage: true, serperContext: "media room built-in wall screen speaker bays modern houzz OR pinterest" },
       { text: "Ceiling: coffered, flat, or specialized acoustic treatment?", options: ["Coffered ceiling", "Flat ceiling", "Acoustic treatment panels", "Michael's call"], requiresImage: false, serperContext: "" }
     ]
   },
@@ -664,9 +664,9 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
   'theater': {
     opening: `Same as media room.`,
     questions: [
-      { text: "Theater vibe check — which direction are we going?", options: ["Classic home theater", "Modern minimalist screening room", "Luxury private cinema", "Michael's call"], requiresImage: true, serperContext: "luxury home theater private cinema recliner seats dark acoustic houzz" },
+      { text: "Theater vibe check — which direction are we going?", options: ["Classic home theater", "Modern minimalist screening room", "Luxury private cinema", "Michael's call"], requiresImage: true, serperContext: "luxury home theater private cinema recliner seats dark acoustic houzz OR pinterest" },
       { text: "Stepped platform seating yes or no?", options: ["Yes, stepped seating", "No, flat floor", "Michael's call"], requiresImage: false, serperContext: "" },
-      { text: "Built-in media wall for the screen?", options: ["Yes, built-in media wall", "No, freestanding screen", "Michael's call"], requiresImage: true, serperContext: "home theater built-in screen media wall integrated speakers houzz" },
+      { text: "Built-in media wall for the screen?", options: ["Yes, built-in media wall", "No, freestanding screen", "Michael's call"], requiresImage: true, serperContext: "home theater built-in screen media wall integrated speakers houzz OR pinterest" },
       { text: "Acoustic panels or sound treatment on walls/ceiling?", options: ["Yes, acoustic panels", "No treatment", "Michael's call"], requiresImage: false, serperContext: "" }
     ]
   },
@@ -674,9 +674,9 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
   'bar': {
     opening: `Show a high-end wet bar or wine nook image first — presents a fully designed concept, not open-ended questions.`,
     questions: [
-      { text: "Bar vibe check — which direction are we going?", options: ["Dark moody (floating shelves + LED)", "Clean modern (quartz + minimal)", "Warm farmhouse (shiplap + brass)", "Michael's call"], requiresImage: true, serperContext: "custom home bar dark cabinets floating shelves LED backlit houzz" },
+      { text: "Bar vibe check — which direction are we going?", options: ["Dark moody (floating shelves + LED)", "Clean modern (quartz + minimal)", "Warm farmhouse (shiplap + brass)", "Michael's call"], requiresImage: true, serperContext: "custom home bar dark cabinets floating shelves LED backlit houzz OR pinterest" },
       { text: "Wine fridge, under-counter beverage fridge, or both?", options: ["Wine fridge only", "Beverage fridge only", "Both", "Michael's call"], requiresImage: false, serperContext: "" },
-      { text: "Floating shelves with LED backlight for bottle display, or full upper cabinetry?", options: ["Floating shelves + LED backlight", "Full upper cabinetry", "Michael's call"], requiresImage: true, serperContext: "bar floating shelves LED backlit bottle display modern houzz" },
+      { text: "Floating shelves with LED backlight for bottle display, or full upper cabinetry?", options: ["Floating shelves + LED backlight", "Full upper cabinetry", "Michael's call"], requiresImage: true, serperContext: "bar floating shelves LED backlit bottle display modern houzz OR pinterest" },
       { text: "Wet bar sink — yes or no?", options: ["Yes, wet bar sink", "No sink", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Dedicated under-counter ice machine?", options: ["Yes, ice machine", "No thanks", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Bar overhang for seating?", options: ["Yes, bar seating overhang", "No bar seating", "Michael's call"], requiresImage: false, serperContext: "" }
@@ -686,9 +686,9 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
   'winery': {
     opening: `Same as bar — show high-end winery inspiration first.`,
     questions: [
-      { text: "Wine room vibe check — which direction are we going?", options: ["Dark wood + ambient lighting", "Modern glass cellar", "Rustic brick cellar", "Michael's call"], requiresImage: true, serperContext: "luxury wine room cellar dark wood LED ambient lighting houzz" },
+      { text: "Wine room vibe check — which direction are we going?", options: ["Dark wood + ambient lighting", "Modern glass cellar", "Rustic brick cellar", "Michael's call"], requiresImage: true, serperContext: "luxury wine room cellar dark wood LED ambient lighting houzz OR pinterest" },
       { text: "Built-in wine fridge, secondary beverage cooler, or both?", options: ["Wine fridge only", "Both wine + beverage", "Michael's call"], requiresImage: false, serperContext: "" },
-      { text: "Floating wood shelves backlit with LED strips, or enclosed cabinetry?", options: ["Floating shelves + LED backlit", "Enclosed cabinetry", "Michael's call"], requiresImage: true, serperContext: "wine room floating wood shelves LED backlit display houzz" },
+      { text: "Floating wood shelves backlit with LED strips, or enclosed cabinetry?", options: ["Floating shelves + LED backlit", "Enclosed cabinetry", "Michael's call"], requiresImage: true, serperContext: "wine room floating wood shelves LED backlit display houzz OR pinterest" },
       { text: "Quartz counter and prep sink?", options: ["Yes, counter + prep sink", "Counter only", "Neither", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Bar seating overhang?", options: ["Yes, bar seating", "No bar seating", "Michael's call"], requiresImage: false, serperContext: "" }
     ]
@@ -698,7 +698,7 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
     opening: `Confirm the space function and any built-ins or special features. Start with 'What were you most excited about in this room from your kickoff conversation?'`,
     questions: [
       { text: "Is this space sized correctly for how you plan to use it?", options: ["Yes, size works great", "Needs to be larger", "Needs to be smaller", "Flag for Michael"], requiresImage: false, serperContext: "" },
-      { text: "Any built-ins or specialty millwork in this room?", options: ["Yes, add built-ins", "No, keep it open", "Michael's call"], requiresImage: true, serperContext: "custom built-in shelving millwork luxury interior houzz" },
+      { text: "Any built-ins or specialty millwork in this room?", options: ["Yes, add built-ins", "No, keep it open", "Michael's call"], requiresImage: true, serperContext: "custom built-in shelving millwork luxury interior houzz OR pinterest" },
       { text: "Ceiling treatment — vault, tray, or flat?", options: ["Vault", "Tray", "Flat", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Natural light — are we happy with the window count and placement?", options: ["Yes, windows look great", "Need more light", "Flag for Michael"], requiresImage: false, serperContext: "" }
     ]
@@ -709,9 +709,9 @@ const CLOSET_QUESTIONS = {
   opening: `Show a master closet inspiration image first. If his & hers are separate, show a luxury 'her' closet and a more masculine 'his' closet. If it's one shared walk-in, show a large shared built-in layout.`,
   baseline: { text: "Standard Barnhaus master closet: two rows of hanging (one section reserved for long hanging — dresses, coats), built-in dresser drawers, open cubbies for folded items, angled shoe rack at the bottom, open shelving on top. Does this layout work for you?", options: ["Approve baseline", "Change something"], requiresImage: false, serperContext: "" },
   questions: [
-    { text: "Closet vibe check — full custom built-ins like this, or simpler shelves and hanging rods?", options: ["Full custom built-ins", "Simpler shelves and hanging rods", "Michael's call"], requiresImage: true, serperContext: "luxury master closet custom built-in his hers organized houzz" },
+    { text: "Closet vibe check — full custom built-ins like this, or simpler shelves and hanging rods?", options: ["Full custom built-ins", "Simpler shelves and hanging rods", "Michael's call"], requiresImage: true, serperContext: "luxury master closet custom built-in his hers organized houzz OR pinterest" },
     { text: "If his & hers are separate: does he want closed cabinetry for hunting/outdoor gear or gun safe integration?", options: ["Yes, closed cabinetry for gear", "Open shelving is fine", "Michael's call"], requiresImage: false, serperContext: "" },
-    { text: "Center island in the closet: do you want a stone top (to match the bath) or wood?", options: ["Stone top (match the bath)", "Wood top", "No island", "Michael's call"], requiresImage: true, serperContext: "master closet center island stone wood top luxury houzz" },
+    { text: "Center island in the closet: do you want a stone top (to match the bath) or wood?", options: ["Stone top (match the bath)", "Wood top", "No island", "Michael's call"], requiresImage: true, serperContext: "master closet center island stone wood top luxury houzz OR pinterest" },
     { text: "Long hanging zone for dresses and coats — one dedicated section on the ladies' side?", options: ["Yes, full-length hanging section", "Standard two-row hanging is fine", "Michael's call"], requiresImage: false, serperContext: "" },
     { text: "Drawers: built-in dresser drawers in the wall panels, or open cubbies for folded items?", options: ["Built-in dresser drawers", "Open cubbies", "Both", "Michael's call"], requiresImage: false, serperContext: "" },
     { text: "Shoes: angled display rack at the bottom, or flat open shelving?", options: ["Angled display rack", "Flat open shelving", "Michael's call"], requiresImage: false, serperContext: "" }
@@ -721,9 +721,9 @@ const CLOSET_QUESTIONS = {
 const BAR_QUESTIONS = {
   opening: `Show a high-end wet bar or wine nook image. Usually triggers excitement.`,
   questions: [
-    { text: "Bar vibe check — which direction are we going?", options: ["Dark moody (floating shelves + LED)", "Clean modern", "Farmhouse (shiplap + brass)", "Michael's call"], requiresImage: true, serperContext: "custom wet bar floating shelves LED backlit dark modern houzz" },
+    { text: "Bar vibe check — which direction are we going?", options: ["Dark moody (floating shelves + LED)", "Clean modern", "Farmhouse (shiplap + brass)", "Michael's call"], requiresImage: true, serperContext: "custom wet bar floating shelves LED backlit dark modern houzz OR pinterest" },
     { text: "Wine fridge, under-counter beverage fridge, or both?", options: ["Wine fridge only", "Beverage fridge only", "Both", "Michael's call"], requiresImage: false, serperContext: "" },
-    { text: "Floating shelves above the counter for display, or full upper cabinetry?", options: ["Floating shelves + LED", "Full upper cabinetry", "Michael's call"], requiresImage: true, serperContext: "bar floating shelves display LED backlit modern houzz" },
+    { text: "Floating shelves above the counter for display, or full upper cabinetry?", options: ["Floating shelves + LED", "Full upper cabinetry", "Michael's call"], requiresImage: true, serperContext: "bar floating shelves display LED backlit modern houzz OR pinterest" },
     { text: "Sink at the bar — yes or no?", options: ["Yes, wet bar sink", "No sink", "Michael's call"], requiresImage: false, serperContext: "" },
     { text: "Ice machine dedicated under the counter?", options: ["Yes, ice machine", "No thanks", "Michael's call"], requiresImage: false, serperContext: "" }
   ]
@@ -731,9 +731,9 @@ const BAR_QUESTIONS = {
 
 const STAIRCASE_QUESTIONS = {
   questions: [
-    { text: "Treads: wood (matches floors), or carpet?", options: ["Wood treads (match floors)", "Carpet", "Michael's call"], requiresImage: true, serperContext: "staircase wood treads modern open riser metal railing houzz" },
-    { text: "Railing: metal (cable, rod, or flat bar), wood, or combination?", options: ["Metal cable", "Metal rod or flat bar", "Wood", "Combination"], requiresImage: true, serperContext: "staircase railing metal cable rod wood modern farmhouse houzz" },
-    { text: "Open risers (floating modern look) or closed risers?", options: ["Open risers (modern)", "Closed risers (traditional)", "Michael's call"], requiresImage: true, serperContext: "staircase open risers floating modern metal railing houzz" },
+    { text: "Treads: wood (matches floors), or carpet?", options: ["Wood treads (match floors)", "Carpet", "Michael's call"], requiresImage: true, serperContext: "staircase wood treads modern open riser metal railing houzz OR pinterest" },
+    { text: "Railing: metal (cable, rod, or flat bar), wood, or combination?", options: ["Metal cable", "Metal rod or flat bar", "Wood", "Combination"], requiresImage: true, serperContext: "staircase railing metal cable rod wood modern farmhouse houzz OR pinterest" },
+    { text: "Open risers (floating modern look) or closed risers?", options: ["Open risers (modern)", "Closed risers (traditional)", "Michael's call"], requiresImage: true, serperContext: "staircase open risers floating modern metal railing houzz OR pinterest" },
     { text: "Angled/straight run or L-shaped?", options: ["Straight run", "L-shaped", "U-shaped", "Flag for Michael"], requiresImage: false, serperContext: "" }
   ]
 };
