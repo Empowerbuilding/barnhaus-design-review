@@ -640,6 +640,12 @@ function ReviewPage() {
   const handleSectionChange = useCallback((idx) => {
     // Save current section's messages before leaving
     sectionMessages.current[currentGroupIdx] = messages;
+    // Clear fired trigger for target section so image change re-fires on arrival
+    const targetGroup = project?.groups?.[idx];
+    if (targetGroup?.images?.[0]) {
+      const targetKey = `${targetGroup.roomType}-${targetGroup.images[0].id}`;
+      firedTriggers.current.delete(targetKey);
+    }
 
     // Load saved messages for the target section (empty if first visit)
     const saved = sectionMessages.current[idx] || [];

@@ -254,13 +254,13 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
 
     const qIdx = roomQuestionIndexes.get(roomKey) || 0;
 
-    // Advance FIRST on real client answers so we inject and return the NEXT question
+    // Which question should Silas ask NOW? (before advancing)
+    const askIdx = (!isImageChangeTrigger && !isInspirationSelection) ? qIdx + 1 : qIdx;
+
+    // Advance AFTER computing askIdx
     if (!isImageChangeTrigger && !isInspirationSelection) {
       roomQuestionIndexes.set(roomKey, qIdx + 1);
     }
-
-    // Which question should Silas ask NOW?
-    const askIdx = (!isImageChangeTrigger && !isInspirationSelection) ? qIdx + 1 : qIdx;
     const sectionDone = askIdx >= allQuestions.length;
     const questionToAsk = sectionDone ? null : allQuestions[askIdx];
 
