@@ -6,7 +6,9 @@ const LOGO = 'https://barnhaussteelbuilders.com/assets/images/logo-BbjiAVC6.png'
 
 const styles = `
   .pg-screen {
+    flex: 1;
     height: 100%;
+    min-height: 0;
     overflow-y: auto;
     display: flex;
     flex-direction: column;

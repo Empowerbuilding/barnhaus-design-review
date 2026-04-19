@@ -120,9 +120,8 @@ const appStyles = `
 
   /* Playground scrollable mode */
   .review-page.playground-mode {
-    height: auto;
-    min-height: 100vh;
-    overflow-y: auto;
+    height: 100vh;
+    overflow: hidden;
   }
   .review-page.playground-mode .review-content {
     overflow: hidden;
