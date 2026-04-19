@@ -485,9 +485,11 @@ function ReviewPage() {
         if (data.reply && data.reply !== 'NO_REPLY' && data.reply !== 'ANNOUNCE_SKIP') {
           setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
         }
-        if (!isInspirationSelection) setChatOptions(data.options || []);
         if (data.inspirationImages?.length) { setInspirationImages(data.inspirationImages); setInspirationOffset(0); } else if (!isInspirationSelection) { setInspirationImages([]); setInspirationOffset(0); }
         if (data.searchQuery) setCurrentSearchQuery(data.searchQuery || currentSearchQuery);
+        // Set options after a tick so setMessages batch settles first
+        const opts = data.options || [];
+        setTimeout(() => { if (!isInspirationSelection) setChatOptions(opts); }, 50);
         // Don't update roomProgress from image change trigger — only client answers drive the counter
       })
       .catch(() => { setSilasTyping(false); });

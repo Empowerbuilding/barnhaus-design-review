@@ -330,7 +330,6 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
       finalImages = await getInspirationForQuestion(searchQuery, getProjectStyle(projectSlug || ''), 4).catch(() => []);
     }
 
-    console.log('[CHAT RESPONSE] options:', JSON.stringify(options), 'isImageChangeTrigger:', isImageChangeTrigger, 'silasOptions:', JSON.stringify(silasOptions), 'bankOptions:', JSON.stringify(bankOptions));
     res.json({
       reply,
       options: isInspirationSelection ? null : options,
