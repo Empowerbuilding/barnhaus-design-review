@@ -262,7 +262,7 @@ const styles = `
   }
 `;
 
-export default function ChatWindow({ messages, onSend, isComplete, options }) {
+export default function ChatWindow({ messages, onSend, isComplete, options, isTyping }) {
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [textMode, setTextMode] = useState(false);
@@ -311,7 +311,7 @@ export default function ChatWindow({ messages, onSend, isComplete, options }) {
             <div className="msg-bubble">{msg.content}</div>
           </div>
         ))}
-        {sending && (
+        {(sending || isTyping) && (
           <div className="chat-msg assistant">
             <div className="msg-avatar silas-bubble">S</div>
             <div className="msg-bubble typing">

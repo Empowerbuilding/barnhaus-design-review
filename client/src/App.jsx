@@ -366,6 +366,7 @@ function ReviewPage() {
   const [chatOptions, setChatOptions] = useState([]);
   const [inspirationImages, setInspirationImages] = useState([]);
   const [questionProgress, setQuestionProgress] = useState({});
+  const [silasTyping, setSilasTyping] = useState(false);
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth <= 768);
@@ -449,6 +450,7 @@ function ReviewPage() {
     const features = currentImage.analysis?.features?.join(', ') || '';
     const trigger = `[IMAGE CHANGE] The client is now viewing image ${currentImageIdx + 1} of ${currentGroup?.images?.length} in the ${roomLabel} section. Image name: ${currentImage.name}. Visible features: ${features || 'not analyzed'}. Open the conversation for this image — ask one targeted question based on the room type and what you know about this client. Do not wait for them to speak first.`;
 
+    setSilasTyping(true);
     fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -468,6 +470,7 @@ function ReviewPage() {
     })
       .then(r => r.json())
       .then(data => {
+        setSilasTyping(false);
         if (data.reply && data.reply !== 'NO_REPLY' && data.reply !== 'ANNOUNCE_SKIP') {
           setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
         }
@@ -480,7 +483,7 @@ function ReviewPage() {
           }));
         }
       })
-      .catch(() => {});
+      .catch(() => { setSilasTyping(false); });
   }, [currentGroup, currentImage, currentGroupIdx, currentImageIdx, project, sessionId, clientName, phase, messages]);
 
   useEffect(() => {
@@ -753,6 +756,7 @@ function ReviewPage() {
               onSend={sendChat}
               isComplete={completed}
               options={chatOptions}
+              isTyping={silasTyping}
             />
           </div>
         </div>
@@ -780,6 +784,7 @@ function ReviewPage() {
         onSend={sendChat}
         isComplete={completed}
         options={chatOptions}
+        isTyping={silasTyping}
       />
     </div>
   );

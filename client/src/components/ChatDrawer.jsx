@@ -90,7 +90,7 @@ const styles = `
   }
 `;
 
-export default function ChatDrawer({ open, onClose, messages, onSend, isComplete, options }) {
+export default function ChatDrawer({ open, onClose, messages, onSend, isComplete, options, isTyping }) {
   const dragStartY = useRef(null);
   const [dragging, setDragging] = useState(false);
   const [translateY, setTranslateY] = useState(0);
@@ -142,7 +142,7 @@ export default function ChatDrawer({ open, onClose, messages, onSend, isComplete
           <button className="chat-drawer-close" onClick={onClose} aria-label="Close chat">✕</button>
         </div>
         <div className="chat-drawer-body">
-          <ChatWindow messages={messages} onSend={onSend} isComplete={isComplete} options={options} />
+          <ChatWindow messages={messages} onSend={onSend} isComplete={isComplete} options={options} isTyping={isTyping} />
         </div>
       </div>
     </>
