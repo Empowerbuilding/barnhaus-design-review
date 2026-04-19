@@ -587,9 +587,9 @@ function ReviewPage() {
         if (!data.reply || data.reply === 'NO_REPLY' || data.reply === 'ANNOUNCE_SKIP') return;
         const updatedMessages = [...newMessages, { role: 'assistant', content: data.reply }];
         setMessages(updatedMessages);
-        if (!isInspirationSelection) setChatOptions(data.options || []);
-        if (data.inspirationImages?.length) { setInspirationImages(data.inspirationImages); setInspirationOffset(0); } else if (!isInspirationSelection) { setInspirationImages([]); setInspirationOffset(0); }
-        setCurrentSearchQuery(data.searchQuery || currentSearchQuery);
+        if (!isInspirationSelection && data.options) setChatOptions(data.options);
+        if (data.inspirationImages) { setInspirationImages(data.inspirationImages); setInspirationOffset(0); }
+        if (data.searchQuery) setCurrentSearchQuery(data.searchQuery);
         if (data.roomProgress && !isInspirationSelection) {
           const roomLabel = currentGroup?.roomType || 'other';
           setQuestionProgress(prev => ({
