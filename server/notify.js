@@ -22,7 +22,7 @@ function ratingColor(status) {
   return 0x555555;
 }
 
-async function notifyDiscord(projectName, clientName, feedback, chatTranscript, enhancedUrls = {}) {
+async function notifyDiscord(projectName, clientName, feedback, enhancedUrls = {}) {
   const token = process.env.DISCORD_TOKEN;
   if (!token) return;
   const channelId = '1488756820892848229';
