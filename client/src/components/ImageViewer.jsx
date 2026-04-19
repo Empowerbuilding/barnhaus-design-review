@@ -173,6 +173,8 @@ const styles = `
   /* Inspiration grid */
   .inspiration-section {
     flex-shrink: 0;
+    border-top: 1px solid #2a2a2a;
+    padding-top: 0.5rem;
     margin-top: 0.75rem;
   }
   .inspiration-label {
@@ -185,10 +187,11 @@ const styles = `
   }
   .inspiration-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(4, 1fr);
     gap: 0.5rem;
   }
   .inspiration-thumb {
+    aspect-ratio: 4/3;
     position: relative;
     aspect-ratio: 4/3;
     border-radius: 6px;
@@ -268,7 +271,7 @@ const styles = `
       min-height: 44px;
       margin-top: 0.75rem;
     }
-    .inspiration-grid { grid-template-columns: 1fr 1fr; gap: 0.4rem; }
+    .inspiration-grid { grid-template-columns: repeat(4, 1fr); gap: 0.3rem; }
   }
 `;
 
@@ -329,32 +332,8 @@ export default function ImageViewer({
         <span className="image-name">{image.name}</span>
       </div>
 
-      {/* When inspiration grid is shown, shrink Revit render to thumbnail */}
-      {hasInspiration ? (
-        <>
-          <div className="revit-mini" onClick={() => setLightboxOpen(true)} title="Click to zoom">
-            <img src={image.url} alt={image.name} onLoad={() => setImgLoaded(true)} />
-          </div>
-          <div className="revit-mini-label">Draft 1 render — click to zoom</div>
-
-          <div className="inspiration-section">
-            <div className="inspiration-label">Tap an image that matches your vision</div>
-            <div className="inspiration-grid">
-              {inspirationImages.slice(0, 4).map((img, i) => (
-                <div
-                  key={i}
-                  className={`inspiration-thumb ${selectedInspiration === i ? 'selected' : ''}`}
-                  onClick={() => handleInspirationClick(img, i)}
-                >
-                  <img src={img.url || img.thumb} alt={img.title || ''} loading="lazy" />
-                  {img.title && <div className="inspiration-thumb-title">{img.title}</div>}
-                </div>
-              ))}
-            </div>
-          </div>
-        </>
-      ) : (
-        <div className="image-main-wrap">
+      {/* Render always stays as the hero — inspiration strip appears below it */}
+      <div className="image-main-wrap">
           {hasMultiple && currentIndex > 0 && (
             <button className="nav-arrow nav-prev" onClick={goPrev} aria-label="Previous image">‹</button>
           )}
@@ -382,9 +361,9 @@ export default function ImageViewer({
             <button className="nav-arrow nav-next" onClick={goNext} aria-label="Next image">›</button>
           )}
         </div>
-      )}
+      </div>
 
-      {!hasInspiration && hasMultiple && (
+      {hasMultiple && (
         <div className="thumbnails">
           <div className="thumb-scroll-hint">
             {totalImages} views — click to explore
@@ -400,6 +379,24 @@ export default function ImageViewer({
                 <img src={img.url} alt={img.name} />
                 <span className="thumb-num">{i + 1}</span>
               </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {hasInspiration && (
+        <div className="inspiration-section">
+          <div className="inspiration-label">Reference images — tap one that matches your vision</div>
+          <div className="inspiration-grid">
+            {inspirationImages.slice(0, 4).map((img, i) => (
+              <div
+                key={i}
+                className={`inspiration-thumb ${selectedInspiration === i ? 'selected' : ''}`}
+                onClick={() => handleInspirationClick(img, i)}
+              >
+                <img src={img.url || img.thumb} alt={img.title || ''} loading="lazy" />
+                {img.title && <div className="inspiration-thumb-title">{img.title}</div>}
+              </div>
             ))}
           </div>
         </div>
