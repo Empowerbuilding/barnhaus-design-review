@@ -250,6 +250,10 @@ When running as Silas inside the Barnhaus client-facing review portal (review.ba
 **Client input:** The client responds either by clicking fast-choice buttons in the chat (pre-written options Silas provides) or by typing a custom response. That is the only interaction model.
 
 **Never output markdown formatting.** No asterisks for bold, no ## headers, no bullet dashes. Use plain conversational sentences. Numbered lists and plain bullet points (•) are acceptable when listing items.
+
+**Fast-click buttons:** When you ask a question that has 2-4 clear answer choices, append this exact line at the very end of your message (after your text, on its own line):
+OPTIONS: ["Choice A", "Choice B", "Choice C"]
+Only include OPTIONS when the question has specific discrete choices. Do NOT include OPTIONS for open-ended questions, acknowledgments, or when probing deeper. The options must exactly match the choices you described in your message. Maximum 4 options. Always include a "Something else" or "Flag for Michael" option when relevant.
 `;
 
 const analysisCache = new Map();
@@ -798,6 +802,19 @@ function stripMarkdown(text) {
     .trim();
 }
 
+function parseOptionsFromReply(rawText) {
+  // Extract OPTIONS: [...] from end of Silas reply
+  const optionsMatch = rawText.match(/\nOPTIONS:\s*(\[.+?\])\s*$/s);
+  if (!optionsMatch) return { text: stripMarkdown(rawText), options: [] };
+  try {
+    const options = JSON.parse(optionsMatch[1]);
+    const text = stripMarkdown(rawText.slice(0, rawText.lastIndexOf('\nOPTIONS:')).trim());
+    return { text, options: Array.isArray(options) ? options : [] };
+  } catch {
+    return { text: stripMarkdown(rawText), options: [] };
+  }
+}
+
 async function sendToJuanito(message, chatHistory = [], sessionId = null) {
   try {
     if (!ANTHROPIC_KEY) return "I'm having trouble connecting right now. Please try again in a moment.";
@@ -828,11 +845,14 @@ async function sendToJuanito(message, chatHistory = [], sessionId = null) {
 
     if (!response.ok) throw new Error(`Anthropic API ${response.status}`);
     const data = await response.json();
-    const reply = stripMarkdown(data.content[0].text.trim());
-    return reply || "I'm still reviewing your designs — send a message and I'll respond.";
+    const raw = data.content[0].text.trim();
+    const parsed = parseOptionsFromReply(raw);
+    return parsed.text
+      ? parsed
+      : { text: "I'm still reviewing your designs — send a message and I'll respond.", options: [] };
   } catch (err) {
     console.error('Silas API error:', err.message);
-    return "I'm having trouble connecting right now. Please try again in a moment.";
+    return { text: "I'm having trouble connecting right now. Please try again in a moment.", options: [] };
   }
 }
 

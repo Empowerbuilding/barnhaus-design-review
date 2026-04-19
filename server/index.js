@@ -151,7 +151,7 @@ app.post('/api/session/inspiration', upload.array('images', 10), async (req, res
       imageContents.push(`[CLIENT INSPIRATION IMAGE: ${f.originalname} (${f.mimetype})]`);
     }
     const msg = `[CLIENT UPLOADED INSPIRATION IMAGES before starting the review]\n${imageContents.join('\n')}\nThe client has shared these inspiration images before the walkthrough begins. Keep them in mind as context for their style preferences throughout the session.`;
-    await sendToJuanito(msg).catch(() => {});
+    await sendToJuanito(msg, [], null).catch(() => {});
     if (sessionId) {
       await supabaseFetch(`/rest/v1/design_review_sessions?id=eq.${sessionId}`, {
         method: 'PATCH',
@@ -267,13 +267,14 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
       total: allQuestions.length,
     };
 
-    const [reply, inspirationImages] = await Promise.all([
+    const [silasResult, inspirationImages] = await Promise.all([
       sendToJuanito(fullMessage, messages, sessionId),
       inspirationFetch,
     ]);
 
-    // No pre-set options — send empty array so ChatWindow stays in text mode
-    res.json({ reply, options: [], inspirationImages: inspirationImages || [], questionIndex: qIdx, roomProgress });
+    const reply = silasResult?.text || silasResult || '';
+    const silasOptions = silasResult?.options || [];
+    res.json({ reply, options: silasOptions, inspirationImages: inspirationImages || [], questionIndex: qIdx, roomProgress });
   } catch (err) {
     console.error('Chat error:', err.message);
     res.status(500).json({ error: 'Chat failed' });
@@ -315,7 +316,8 @@ The client selected inspiration image ${imageIndex} for the ${roomType}.
 Image URL: ${imageUrl}
 Acknowledge their pick and continue with targeted detail questions.`;
 
-    const reply = await sendToJuanito(contextMsg, messages || [], sessionId);
+    const silasPickResult = await sendToJuanito(contextMsg, messages || [], sessionId);
+    const reply = silasPickResult?.text || silasPickResult || '';
 
     // Save picked image to session
     if (sessionId) {
