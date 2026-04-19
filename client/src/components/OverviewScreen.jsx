@@ -181,11 +181,6 @@ const styles = `
 `;
 
 export default function OverviewScreen({ memo, sessionId, onStart }) {
-  const [uploads, setUploads] = useState([]);
-  const [dragging, setDragging] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef(null);
-
   const handleFiles = useCallback(async (files) => {
     if (!files || files.length === 0) return;
     setUploading(true);
@@ -279,41 +274,7 @@ export default function OverviewScreen({ memo, sessionId, onStart }) {
           </div>
         </div>
 
-        <div className="inspiration-section">
-          <div className="inspiration-label">
-            <span>Have inspiration images?</span>
-            <span className="inspiration-sub">Drop them here — Silas will reference them throughout your review.</span>
-          </div>
-          <div
-            className={`drop-zone ${dragging ? 'drop-zone-active' : ''}`}
-            onDrop={onDrop}
-            onDragOver={onDragOver}
-            onDragLeave={onDragLeave}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <input ref={fileInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={e => handleFiles(e.target.files)} />
-            {uploads.length === 0 ? (
-              <div className="drop-zone-placeholder">
-                {uploading
-                  ? <><div className="memo-spinner small" /><span>Uploading...</span></>
-                  : <><div className="drop-icon">📎</div><span>Drag &amp; drop or tap to browse</span><span className="drop-sub">Kitchen vibes, tile ideas, fireplace inspo — anything helps</span></>
-                }
-              </div>
-            ) : (
-              <div className="upload-grid">
-                {uploads.map((u, i) => (
-                  <div key={i} className="upload-thumb">
-                    <img src={u.dataUrl} alt={u.name} />
-                    <button className="upload-remove" onClick={e => { e.stopPropagation(); removeUpload(i); }}>×</button>
-                  </div>
-                ))}
-                <div className="upload-add" onClick={e => { e.stopPropagation(); fileInputRef.current?.click(); }}>+ Add more</div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <button className="start-btn" onClick={() => onStart(uploads)} disabled={!memo}>
+        <button className="start-btn" onClick={() => onStart([])} disabled={!memo}>
           {memo ? 'Start My Review →' : 'Loading...'}
         </button>
 
