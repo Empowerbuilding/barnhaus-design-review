@@ -146,7 +146,7 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
       .filter(i => i.imageId);
   }
 
-  console.log('[Playground] items:', items.length, 'feedback:', feedbackItems.length, 'groups:', project?.groups?.length);
+  console.log('[Playground] items:', items.length, 'feedback:', feedbackItems.length, 'groups:', project?.groups?.length, 'first item url:', items[0]?.originalUrl);
 
   const [currentIdx, setCurrentIdx] = useState(0);
   const [inspirationImages, setInspirationImages] = useState([]);
@@ -245,6 +245,7 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
     }
   };
 
+  console.log("[Playground] rendering item:", item?.imageId, "url:", item?.originalUrl);
   if (!item) return null;
 
   const displayUrl = enhancedUrls[item.imageId] || item.originalUrl;
