@@ -22,80 +22,64 @@ function ratingColor(status) {
   return 0x555555;
 }
 
-async function notifyDiscord(projectName, clientName, feedback, chatTranscript) {
+async function notifyDiscord(projectName, clientName, feedback, chatTranscript, enhancedUrls = {}) {
   const token = process.env.DISCORD_TOKEN;
   if (!token) return;
   const channelId = '1488756820892848229';
   const reviewDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-  const loveCount = feedback.filter(f => f.status === 'love').length;
-  const changeCount = feedback.filter(f => f.status === 'change').length;
-  const questionCount = feedback.filter(f => f.status === 'question').length;
-  const enhancedCount = feedback.filter(f => f.enhancedUrl).length;
+  // Build enhanced image list from enhancedUrls map (keyed by imageId)
+  const enhancedList = Object.entries(enhancedUrls).map(([imageId, url]) => ({ imageId, url }));
 
-  // Header summary embed
+  // 1. Clean header — no zero stats, just project + client + date
   await postToDiscord(token, channelId, {
     embeds: [{
-      title: `📋 Design Review Report — ${projectName}`,
-      description: `**Client:** ${clientName}\n**Date:** ${reviewDate}\n**Draft:** ${feedback[0]?.draft || 'd1'}`,
+      title: `📋 ${projectName} — Design Review`,
+      description: `**Client:** ${clientName}
+**Date:** ${reviewDate}`,
       color: 0xB8860B,
-      fields: [
-        { name: '💚 Love it', value: String(loveCount), inline: true },
-        { name: '🔶 Change it', value: String(changeCount), inline: true },
-        { name: '❓ Questions', value: String(questionCount), inline: true },
-        { name: '✨ Visualized', value: `${enhancedCount} image${enhancedCount !== 1 ? 's' : ''}`, inline: true },
-        { name: '📸 Total Images', value: String(feedback.length), inline: true },
-      ],
       footer: { text: 'Barnhaus Steel Builders · Design Review Portal' },
       timestamp: new Date().toISOString(),
     }]
   });
 
-  // Per-section image feedback
-  const grouped = {};
-  for (const item of feedback) {
-    const key = item.roomType || 'Other';
-    if (!grouped[key]) grouped[key] = [];
-    grouped[key].push(item);
-  }
-
-  for (const [section, items] of Object.entries(grouped)) {
-    await postToDiscord(token, channelId, { content: `\n**— ${section.toUpperCase()} —**` });
-
-    const embeds = items.map(item => {
-      const fields = [{ name: 'Rating', value: ratingEmoji(item.status), inline: true }];
-      if (item.notes) fields.push({ name: 'Notes', value: item.notes });
-      if (item.enhancedUrl) fields.push({ name: '✨ Visualized', value: `[View enhanced](${item.enhancedUrl})` });
-      const embed = { title: item.imageName || item.imageId, color: ratingColor(item.status), fields };
-      if (item.enhancedUrl) embed.image = { url: item.enhancedUrl };
-      return embed;
-    });
-
-    for (let i = 0; i < embeds.length; i += 10) {
-      await postToDiscord(token, channelId, { embeds: embeds.slice(i, i + 10) });
+  // 2. Feedback by section (only if client gave feedback)
+  const feedbackWithStatus = feedback.filter(f => f.status);
+  if (feedbackWithStatus.length > 0) {
+    const grouped = {};
+    for (const item of feedbackWithStatus) {
+      const key = item.roomType || 'Other';
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(item);
+    }
+    for (const [section, items] of Object.entries(grouped)) {
+      await postToDiscord(token, channelId, { content: `**— ${section.toUpperCase()} —**` });
+      const embeds = items.map(item => {
+        const fields = [{ name: 'Rating', value: ratingEmoji(item.status), inline: true }];
+        if (item.notes) fields.push({ name: 'Notes', value: item.notes });
+        const eUrl = enhancedUrls[item.imageId];
+        if (eUrl) fields.push({ name: '✨ Visualized', value: `[View](${eUrl})` });
+        const embed = { title: item.imageName || item.imageId, color: ratingColor(item.status), fields };
+        if (eUrl) embed.image = { url: eUrl };
+        return embed;
+      });
+      for (let i = 0; i < embeds.length; i += 10) {
+        await postToDiscord(token, channelId, { embeds: embeds.slice(i, i + 10) });
+      }
     }
   }
 
-  // Chat transcript
-  if (chatTranscript && chatTranscript.length > 0) {
-    const lines = chatTranscript
-      .filter(m => m.role !== 'system')
-      .map(m => `**${m.role === 'user' ? clientName : 'Silas'}:** ${m.content}`)
-      .join('\n');
-
-    const chunks = [];
-    let current = '';
-    for (const line of lines.split('\n')) {
-      if ((current + '\n' + line).length > 1900) { chunks.push(current); current = line; }
-      else current += (current ? '\n' : '') + line;
-    }
-    if (current) chunks.push(current);
-
-    await postToDiscord(token, channelId, {
-      embeds: [{ title: '💬 Chat Transcript', color: 0x2c2c2c, description: chunks[0] || '_(no messages)_' }]
-    });
-    for (let i = 1; i < chunks.length; i++) {
-      await postToDiscord(token, channelId, { content: chunks[i] });
+  // 3. Playground visualizations (enhanced images not tied to feedback clicks)
+  if (enhancedList.length > 0) {
+    await postToDiscord(token, channelId, { content: '**— ✨ PLAYGROUND VISUALIZATIONS —**' });
+    for (const { imageId, url } of enhancedList) {
+      // Only post if not already shown in feedback section
+      const alreadyShown = feedbackWithStatus.some(f => f.imageId === imageId && enhancedUrls[f.imageId]);
+      if (!alreadyShown) {
+        await postToDiscord(token, channelId, {
+          embeds: [{ color: 0xB8860B, image: { url }, footer: { text: imageId } }]
+        });
+      }
     }
   }
 }

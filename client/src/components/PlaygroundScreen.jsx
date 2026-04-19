@@ -130,7 +130,7 @@ const styles = `
   .pg-skeleton-box:nth-child(5) { animation-delay: 0.6s; }
 `;
 
-export default function PlaygroundScreen({ feedback, project, clientName, projectSlug, sessionId, onSendToMichael }) {
+export default function PlaygroundScreen({ feedback, project, clientName, projectSlug, sessionId, onSendToMichael, enhancedUrls: externalEnhancedUrls, onEnhanced }) {
   const feedbackItems = Object.values(feedback || {});
   let items = feedbackItems.filter(i => i?.imageId);
   if (items.length === 0 && project?.groups?.length > 0) {
@@ -153,7 +153,8 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
   const [inspirationImages, setInspirationImages] = useState([]);
   const [inspirationLoading, setInspirationLoading] = useState(false);
   const [autoEnhancePrompt, setAutoEnhancePrompt] = useState('');
-  const [enhancedUrls, setEnhancedUrls] = useState({});
+  const [localEnhancedUrls, setLocalEnhancedUrls] = useState({});
+  const enhancedUrls = { ...(externalEnhancedUrls || {}), ...localEnhancedUrls };
   const [sending, setSending] = useState(false);
   const [vibeLoading, setVibeLoading] = useState(false);
   const vibeCache = useRef({});
@@ -248,8 +249,11 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
   }, [item, clientName, sessionId]);
 
   const handleEnhanced = useCallback((url) => {
-    if (item) setEnhancedUrls(prev => ({ ...prev, [item.imageId]: url }));
-  }, [item?.imageId]);
+    if (item) {
+      setLocalEnhancedUrls(prev => ({ ...prev, [item.imageId]: url }));
+      if (onEnhanced) onEnhanced(prev => ({ ...prev, [item.imageId]: url }));
+    }
+  }, [item?.imageId, onEnhanced]);
 
   const handleSend = async () => {
     setSending(true);

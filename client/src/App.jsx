@@ -399,6 +399,7 @@ function ReviewPage() {
   const [feedback, setFeedback] = useState({});
   const [completed, setCompleted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [enhancedUrls, setEnhancedUrls] = useState({});
   const [sessionId, setSessionId] = useState(null);
   const [chatOpen, setChatOpen] = useState(true);   // desktop: open by default
   const [drawerOpen, setDrawerOpen] = useState(false); // mobile drawer: closed by default
@@ -727,6 +728,7 @@ function ReviewPage() {
         feedback: feedbackList,
         sessionId,
         chatTranscript: messages,
+        enhancedUrls,
       });
       const res = await fetch('/api/feedback', {
         method: 'POST',
@@ -799,6 +801,8 @@ function ReviewPage() {
               projectSlug={projectSlug}
               sessionId={sessionId}
               onSendToMichael={handleSendToMichael}
+              enhancedUrls={enhancedUrls}
+              onEnhanced={setEnhancedUrls}
             />
           </div>
           <div className={`chat-panel desktop-only ${chatOpen ? 'chat-panel-open' : 'chat-panel-closed'}`}>
