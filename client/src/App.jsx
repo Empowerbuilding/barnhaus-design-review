@@ -546,15 +546,16 @@ function ReviewPage() {
   }, [currentImage, currentGroup, currentImageIdx, clientName, projectSlug, sessionId, phase, messages]);
 
   const sendChat = useCallback(
-    async (userMessage) => {
+    async (userMessage, opts = {}) => {
+      const isInspirationSelection = opts.isInspirationSelection || false;
       if (!hasInputOnCurrentImage.current) {
         hasInputOnCurrentImage.current = true;
         triggerSilasForCurrentImage();
       }
       const newMessages = [...messages, { role: 'user', content: userMessage }];
       setMessages(newMessages);
-      setChatOptions([]);
-      setInspirationImages([]);
+      if (!isInspirationSelection) setChatOptions([]);
+      if (!isInspirationSelection) setInspirationImages([]);
 
       if (sessionId) {
         fetch(`/api/session/${sessionId}/transcript`, {
