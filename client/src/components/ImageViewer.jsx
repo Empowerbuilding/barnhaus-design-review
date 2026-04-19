@@ -293,6 +293,7 @@ export default function ImageViewer({
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [selectedInspiration, setSelectedInspiration] = useState(null);
+  const [inspirationLightbox, setInspirationLightbox] = useState(null); // {img, idx}
   useEffect(() => { setImgLoaded(false); }, [image?.id]);
   useEffect(() => { setSelectedInspiration(null); }, [image?.id]);
 
@@ -314,7 +315,14 @@ export default function ImageViewer({
   const goNext = () => { if (currentIndex < totalImages - 1) onSelectImage(currentIndex + 1); };
 
   const handleInspirationClick = (img, idx) => {
+    setInspirationLightbox({ img, idx });
+  };
+
+  const handleInspirationConfirm = () => {
+    if (!inspirationLightbox) return;
+    const { img, idx } = inspirationLightbox;
     setSelectedInspiration(idx);
+    setInspirationLightbox(null);
     if (onInspirationSelect) {
       onInspirationSelect(`[Selected inspiration: ${img.title || 'image ' + (idx + 1)}]`);
     }
@@ -440,6 +448,74 @@ export default function ImageViewer({
           </button>
         )}
       </div>
+
+      {/* Inspiration image lightbox */}
+      {inspirationLightbox && (
+        <div
+          onClick={() => setInspirationLightbox(null)}
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)',
+            zIndex: 9999, display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center', padding: '1.5rem',
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              position: 'relative', maxWidth: '780px', width: '100%',
+              background: '#111', borderRadius: '12px', overflow: 'hidden',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.8)',
+            }}
+          >
+            {/* X button */}
+            <button
+              onClick={() => setInspirationLightbox(null)}
+              style={{
+                position: 'absolute', top: '0.75rem', right: '0.75rem',
+                background: 'rgba(0,0,0,0.6)', border: 'none', color: '#fff',
+                borderRadius: '50%', width: '32px', height: '32px',
+                cursor: 'pointer', fontSize: '1.1rem', zIndex: 10,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >✕</button>
+
+            {/* Image */}
+            <img
+              src={inspirationLightbox.img.url}
+              alt={inspirationLightbox.img.title || 'Inspiration'}
+              style={{ width: '100%', maxHeight: '65vh', objectFit: 'cover', display: 'block' }}
+            />
+
+            {/* Title + confirm */}
+            <div style={{ padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+              <div>
+                <div style={{ color: '#eee', fontSize: '0.9rem', fontWeight: 500 }}>
+                  {inspirationLightbox.img.title || 'Reference image'}
+                </div>
+                {inspirationLightbox.img.source && (
+                  <div style={{ color: '#666', fontSize: '0.75rem', marginTop: '0.2rem' }}>
+                    {inspirationLightbox.img.source}
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={handleInspirationConfirm}
+                style={{
+                  background: '#B8860B', color: '#fff', border: 'none',
+                  borderRadius: '8px', padding: '0.6rem 1.4rem',
+                  fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer',
+                  whiteSpace: 'nowrap', flexShrink: 0,
+                  transition: 'background 0.2s',
+                }}
+                onMouseEnter={e => e.target.style.background = '#DAA520'}
+                onMouseLeave={e => e.target.style.background = '#B8860B'}
+              >
+                Yes, I like this direction
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {lightboxOpen && (
         <Lightbox
