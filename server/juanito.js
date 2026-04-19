@@ -3,6 +3,19 @@ const JUANITO_TOKEN = process.env.JUANITO_GATEWAY_TOKEN || 'juanito-2026';
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
 const SESSION_KEY = 'agent:main:main';
 
+const SILAS_SYSTEM_PROMPT = `You are Silas, Michael McAdams's automated design assistant at Barnhaus Steel Builders.
+Your job is to walk clients through their Draft 1 design renders and collect detailed decisions so Michael knows exactly what to build in Draft 2.
+
+CORE RULES:
+- You are convergence-focused. Your goal is to lock in decisions, not open new possibilities.
+- Ask one question at a time from the question bank. Wait for the answer before moving on.
+- When a client gives a short answer, probe one level deeper before moving to the next question.
+- Never suggest layout changes — those go to Michael on the live call.
+- Never mention Zoom, say "live meeting with Michael" instead.
+- Output ONLY your message to the client. No reasoning, no meta-commentary.
+- Do not wrap up a room or say "feel free to move on" — the client controls navigation.
+- After flagging a structural item, immediately pivot to the next question.`;
+
 const analysisCache = new Map();
 
 const QUESTION_BANK = {
@@ -492,7 +505,7 @@ function stripThinkBlocks(text) {
   return text.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/<final>([\s\S]*?)<\/final>/i, '$1').trim();
 }
 
-async function sendToJuanito(message) {
+async function sendViaGateway(message) {
   try {
     const response = await fetch(`${JUANITO_URL}/tools/invoke`, {
       method: 'POST',
@@ -524,7 +537,39 @@ async function sendToJuanito(message) {
 
     return "I'm still reviewing your designs — send a message and I'll respond.";
   } catch (err) {
-    console.error('Juanito error:', err.message);
+    console.error('Juanito gateway error:', err.message);
+    return "I'm having trouble connecting right now. Please try again in a moment.";
+  }
+}
+
+async function sendToJuanito(message, chatHistory = []) {
+  try {
+    if (!ANTHROPIC_KEY) return "I'm having trouble connecting right now. Please try again in a moment.";
+
+    const historyWindow = chatHistory.slice(-29);
+    const messages = [...historyWindow, { role: 'user', content: message }];
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': ANTHROPIC_KEY,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 1024,
+        system: SILAS_SYSTEM_PROMPT,
+        messages,
+      }),
+    });
+
+    if (!response.ok) throw new Error(`Anthropic API ${response.status}`);
+    const data = await response.json();
+    const reply = data.content[0].text.trim();
+    return reply || "I'm still reviewing your designs — send a message and I'll respond.";
+  } catch (err) {
+    console.error('Silas API error:', err.message);
     return "I'm having trouble connecting right now. Please try again in a moment.";
   }
 }
@@ -563,7 +608,7 @@ One line intro then a bullet list of the actual rooms in this draft (${roomList}
 1-2 sentences: their answers go straight to Michael for Draft 2. He'll review everything and reach out to schedule the next step.
 
 Output the memo text only. No extra commentary, no questions.`;
-  return sendToJuanito(message);
+  return sendViaGateway(message);
 }
 
 async function generateDesignBrief(projectSlug, clientName, chatTranscript, feedback) {
@@ -611,7 +656,16 @@ Rules:
 
 Output the brief text only. Michael will use this to brief his drafting session.`;
 
-  return sendToJuanito(message);
+  const brief = await sendViaGateway(message);
+
+  // Fire-and-forget: save transcript to Juanito's drive (one announce step, doesn't block)
+  invokeGateway('sessions_send', {
+    sessionKey: SESSION_KEY,
+    message: `[DESIGN REVIEW TRANSCRIPT SAVED — ${projectSlug}]\nFull session transcript has been saved to projects/${projectSlug}_review_${Date.now()}.md\n\n${chatSummary}`,
+    timeoutSeconds: 0,
+  }).catch(err => console.error('Transcript save error:', err.message));
+
+  return brief;
 }
 
 module.exports = { sendToJuanito, initJuanitoSession, generateDesignBrief, analyzeImageWithJuanito: analyzeImageWithClaude, getQuestionsForRoom, groupAndSortImages, QUESTION_BANK };

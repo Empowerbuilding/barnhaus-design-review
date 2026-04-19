@@ -252,7 +252,7 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
     };
 
     const [reply, inspirationImages] = await Promise.all([
-      sendToJuanito(fullMessage),
+      sendToJuanito(fullMessage, messages),
       inspirationFetch,
     ]);
 
