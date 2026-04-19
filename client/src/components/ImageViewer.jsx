@@ -411,7 +411,7 @@ export default function ImageViewer({
         <div className="inspiration-section">
           <div className="inspiration-label">Reference images — tap one that matches your vision</div>
           <div className="inspiration-grid">
-            {inspirationImages.slice(0, 4).map((img, i) => (
+            {inspirationImages.map((img, i) => (
               <div
                 key={i}
                 className={`inspiration-thumb ${selectedInspiration === i ? 'selected' : ''}`}

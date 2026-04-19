@@ -332,6 +332,7 @@ function ReviewPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentGroupIdx, setCurrentGroupIdx] = useState(0);
+  const [maxUnlocked, setMaxUnlocked] = useState(0);
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
   const [phase, setPhase] = useState('overview'); // 'overview' | 'walkthrough'
   const [memo, setMemo] = useState(null);
@@ -623,8 +624,10 @@ function ReviewPage() {
     if (currentImageIdx < currentGroup.images.length - 1) {
       setCurrentImageIdx(prev => prev + 1);
     } else if (currentGroupIdx < project.groups.length - 1) {
-      setCurrentGroupIdx(prev => prev + 1);
+      const nextIdx = currentGroupIdx + 1;
+      setCurrentGroupIdx(nextIdx);
       setCurrentImageIdx(0);
+      setMaxUnlocked(prev => Math.max(prev, nextIdx));
     }
   }, [currentGroup, currentGroupIdx, currentImageIdx, project]);
 
@@ -784,6 +787,7 @@ function ReviewPage() {
       <ProgressSidebar
           sections={sectionLabels}
           currentSection={currentGroupIdx}
+          maxUnlocked={maxUnlocked}
           questionProgress={questionProgress}
           onSelect={handleSectionChange}
         />

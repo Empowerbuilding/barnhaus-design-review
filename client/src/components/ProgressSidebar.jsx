@@ -159,7 +159,7 @@ const ROOM_ICONS = {
   default: '🏗️',
 };
 
-export default function ProgressSidebar({ sections, currentSection, questionProgress, onSelect }) {
+export default function ProgressSidebar({ sections, currentSection, questionProgress, onSelect, maxUnlocked }) {
   return (
     <div className="progress-sidebar">
       <style>{styles}</style>
@@ -171,7 +171,8 @@ export default function ProgressSidebar({ sections, currentSection, questionProg
           const progress = questionProgress?.[section] || questionProgress?.[roomType] || null;
           const isActive = i === currentSection;
           const isDone = progress && progress.current >= progress.total && progress.total > 0;
-          const isPending = !isActive && !isDone;
+          const isLocked = i > (maxUnlocked ?? currentSection);
+          const isPending = !isActive && !isDone && !isLocked;
 
           const fillPct = progress && progress.total > 0
             ? Math.round((progress.current / progress.total) * 100)
@@ -184,9 +185,10 @@ export default function ProgressSidebar({ sections, currentSection, questionProg
           return (
             <div
               key={i}
-              className={`sidebar-room ${statusClass}`}
-              onClick={() => onSelect && onSelect(i)}
-              title={section}
+              className={`sidebar-room ${statusClass}${isLocked ? ' locked' : ''}`}
+              onClick={() => !isLocked && onSelect && onSelect(i)}
+              title={isLocked ? 'Complete the current section first' : section}
+              style={{ cursor: isLocked ? 'not-allowed' : 'pointer', opacity: isLocked ? 0.4 : 1 }}
             >
               <div
                 className={`room-indicator ${statusClass}`}
