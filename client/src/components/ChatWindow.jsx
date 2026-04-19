@@ -266,6 +266,8 @@ export default function ChatWindow({ messages, onSend, isComplete, options, isTy
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [textMode, setTextMode] = useState(false);
+  const [flagMode, setFlagMode] = useState(false);
+  const [flagNote, setFlagNote] = useState('');
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -278,7 +280,7 @@ export default function ChatWindow({ messages, onSend, isComplete, options, isTy
 
   // When new options arrive, exit text mode
   useEffect(() => {
-    if (hasOptions) setTextMode(false);
+    if (hasOptions) { setTextMode(false); setFlagMode(false); setFlagNote(''); }
   }, [options]);
 
   const handleSend = async (text) => {
@@ -333,16 +335,67 @@ export default function ChatWindow({ messages, onSend, isComplete, options, isTy
       {/* Button mode */}
       {hasOptions && !textMode && !isComplete && (
         <div className="chat-options">
-          {options.map((opt, i) => (
-            <button
-              key={i}
-              className="option-btn"
-              disabled={sending}
-              onClick={() => handleSend(opt)}
-            >
-              {opt}
-            </button>
-          ))}
+          {options.map((opt, i) => {
+            const isFlag = /flag|items to flag/i.test(opt);
+            return (
+              <button
+                key={i}
+                className="option-btn"
+                disabled={sending}
+                onClick={() => isFlag ? setFlagMode(true) : handleSend(opt)}
+              >
+                {opt}
+              </button>
+            );
+          })}
+          {flagMode && (
+            <div style={{ padding: '0.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              <textarea
+                autoFocus
+                rows={3}
+                value={flagNote}
+                onChange={e => setFlagNote(e.target.value)}
+                placeholder="What do you want to flag for Michael? Be as specific as you'd like..."
+                style={{
+                  background: '#1a1a1a',
+                  border: '1px solid #3a3a3a',
+                  borderRadius: '8px',
+                  color: '#eee',
+                  fontSize: '0.85rem',
+                  padding: '0.5rem 0.75rem',
+                  resize: 'none',
+                  outline: 'none',
+                  fontFamily: 'inherit',
+                  width: '100%',
+                  boxSizing: 'border-box',
+                }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !e.shiftKey && flagNote.trim()) {
+                    e.preventDefault();
+                    handleSend('Flag for Michael: ' + flagNote.trim());
+                    setFlagMode(false);
+                    setFlagNote('');
+                  }
+                }}
+              />
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  className="option-btn"
+                  disabled={!flagNote.trim() || sending}
+                  onClick={() => { handleSend('Flag for Michael: ' + flagNote.trim()); setFlagMode(false); setFlagNote(''); }}
+                  style={{ flex: 1 }}
+                >
+                  Send flag to Michael
+                </button>
+                <button
+                  onClick={() => { setFlagMode(false); setFlagNote(''); }}
+                  style={{ background: 'transparent', border: '1px solid #3a3a3a', color: '#888', borderRadius: '8px', padding: '0 0.75rem', cursor: 'pointer', fontSize: '0.8rem' }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
           <button className="custom-question-link" onClick={() => setTextMode(true)}>
             I have a custom question
           </button>
