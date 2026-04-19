@@ -100,6 +100,9 @@ export default function EnhanceButton({ imageUrl, roomType, onEnhanced, autoEnha
     if (autoEnhancePrompt) {
       setManualPrompt(autoEnhancePrompt);
       setShowManual(true);
+    } else {
+      setManualPrompt('');
+      setShowManual(false);
     }
   }, [autoEnhancePrompt]);
 
