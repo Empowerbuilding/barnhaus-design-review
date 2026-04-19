@@ -240,7 +240,6 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
     <div className="pg-screen">
       <style>{styles}</style>
       <div className="pg-counter">{currentIdx + 1} / {items.length}</div>
-      </div>
 
       <div className="pg-image-area">
         {!isFirst && (
