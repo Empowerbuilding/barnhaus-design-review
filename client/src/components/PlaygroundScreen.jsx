@@ -2,86 +2,98 @@ import { useState, useCallback, useEffect } from 'react';
 import InspirationStrip from './InspirationStrip';
 import EnhanceButton from './EnhanceButton';
 
+const LOGO = 'https://barnhaussteelbuilders.com/assets/images/logo-BbjiAVC6.png';
+
 const styles = `
-  .pg-wrap {
-    background: #1a1a1a;
-    overflow-y: auto;
-    min-height: 100%;
+  .pg-screen {
+    position: fixed;
+    inset: 0;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    background: #1a1a1a;
+    color: #e0e0e0;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
   }
   .pg-header {
-    padding: 2rem 1.5rem 0.75rem;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.65rem 1.25rem;
+    border-bottom: 1px solid #2a2a2a;
+    flex-shrink: 0;
   }
-  .pg-logo {
-    height: 40px;
-    display: block;
-    margin: 0 auto 0.75rem;
-  }
-  .pg-subtitle {
+  .pg-logo { height: 28px; }
+  .pg-title {
     font-size: 0.7rem;
     font-weight: 600;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: #B8860B;
-    margin-bottom: 0.5rem;
   }
-  .pg-tagline {
-    font-size: 0.85rem;
-    color: #555;
-    letter-spacing: 0.02em;
+  .pg-counter {
+    font-size: 0.75rem;
+    color: #666;
+    min-width: 3rem;
+    text-align: right;
   }
-  .pg-gallery {
+  .pg-image-area {
+    flex: 1;
+    position: relative;
     display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    padding: 1.5rem 1.25rem 1rem;
-    width: 100%;
-    max-width: 720px;
-    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    background: #111;
   }
-  .pg-card {
-    display: flex;
-    flex-direction: column;
-  }
-  .pg-card-image {
-    width: 100%;
+  .pg-main-img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
     display: block;
-    border-radius: 10px 10px 0 0;
   }
-  .pg-card-room {
+  .pg-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #ccc;
+    cursor: pointer;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+    z-index: 2;
+    line-height: 1;
+  }
+  .pg-arrow:hover { background: rgba(255,255,255,0.18); }
+  .pg-arrow-left { left: 0.75rem; }
+  .pg-arrow-right { right: 0.75rem; }
+  .pg-room-label {
+    text-align: center;
     font-size: 0.65rem;
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: #B8860B;
-    padding: 0.6rem 0 0.75rem;
+    padding: 0.4rem 0 0.2rem;
+    flex-shrink: 0;
   }
-  .pg-enhanced-label {
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #DAA520;
-    margin-bottom: 0.4rem;
-  }
-  .pg-enhanced-img {
-    width: 100%;
-    display: block;
-    border-radius: 8px;
-    margin-bottom: 0.75rem;
+  .pg-bottom {
+    flex-shrink: 0;
   }
   .pg-footer {
-    width: 100%;
-    max-width: 720px;
-    padding: 1rem 1.25rem 2.5rem;
-    box-sizing: border-box;
+    padding: 0.5rem 1.25rem 0.75rem;
+    flex-shrink: 0;
   }
   .pg-send-btn {
     width: 100%;
-    padding: 0.9rem;
+    padding: 0.85rem;
     background: linear-gradient(135deg, #B8860B, #DAA520);
     color: #1a1a1a;
     border: none;
@@ -95,19 +107,40 @@ const styles = `
   }
   .pg-send-btn:hover:not(:disabled) { opacity: 0.85; transform: scale(1.01); }
   .pg-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  @media (max-width: 600px) {
-    .pg-gallery { padding: 1rem 0.75rem; }
-    .pg-footer { padding: 0.75rem 0.75rem 2rem; }
-  }
 `;
 
-function PlaygroundCard({ item, clientName, projectSlug, sessionId }) {
+export default function PlaygroundScreen({ feedback, project, clientName, projectSlug, sessionId, onSendToMichael }) {
+  const feedbackItems = Object.values(feedback);
+  let items = feedbackItems;
+  if (items.length === 0 && project?.groups) {
+    items = project.groups
+      .filter(g => g.roomType?.toLowerCase() !== 'floor plan')
+      .flatMap(g => (g.images || []).map(img => ({
+        imageId: img.id,
+        imageName: img.name,
+        roomType: g.roomType,
+        originalUrl: img.url,
+        status: null,
+        notes: '',
+      })));
+  }
+
+  const [currentIdx, setCurrentIdx] = useState(0);
   const [inspirationImages, setInspirationImages] = useState([]);
-  const [autoEnhancePrompt, setAutoEnhancePrompt] = useState(item.notes || '');
-  const [enhancedUrl, setEnhancedUrl] = useState(null);
+  const [autoEnhancePrompt, setAutoEnhancePrompt] = useState('');
+  const [enhancedUrls, setEnhancedUrls] = useState({});
+  const [sending, setSending] = useState(false);
+
+  const item = items[currentIdx];
+  const isFirst = currentIdx === 0;
+  const isLast = currentIdx === items.length - 1;
 
   useEffect(() => {
+    if (!item) return;
+    setInspirationImages([]);
+    setAutoEnhancePrompt(item.notes || '');
+
+    let cancelled = false;
     async function fetchInspiration() {
       try {
         const res = await fetch('/api/chat', {
@@ -124,7 +157,7 @@ function PlaygroundCard({ item, clientName, projectSlug, sessionId }) {
           }),
         });
         const data = await res.json();
-        if (data.inspiration && data.inspiration.length > 0) {
+        if (!cancelled && data.inspiration && data.inspiration.length > 0) {
           setInspirationImages(data.inspiration);
         }
       } catch {
@@ -132,7 +165,8 @@ function PlaygroundCard({ item, clientName, projectSlug, sessionId }) {
       }
     }
     fetchInspiration();
-  }, []);
+    return () => { cancelled = true; };
+  }, [currentIdx]);
 
   const handleVibePick = useCallback(async (img, index) => {
     setInspirationImages([]);
@@ -158,49 +192,11 @@ function PlaygroundCard({ item, clientName, projectSlug, sessionId }) {
     } catch {
       // silently fail
     }
-  }, [item.roomType, clientName, sessionId]);
+  }, [item?.roomType, clientName, sessionId]);
 
-  return (
-    <div className="pg-card">
-      <img src={item.originalUrl} alt={item.imageName} className="pg-card-image" />
-      <div className="pg-card-room">{item.roomType}</div>
-
-      {enhancedUrl && (
-        <>
-          <div className="pg-enhanced-label">✨ Visualized</div>
-          <img src={enhancedUrl} alt="Visualized render" className="pg-enhanced-img" />
-        </>
-      )}
-
-      <InspirationStrip images={inspirationImages} onPick={handleVibePick} />
-
-      <EnhanceButton
-        imageUrl={item.originalUrl}
-        roomType={item.roomType || 'room'}
-        onEnhanced={setEnhancedUrl}
-        autoEnhancePrompt={autoEnhancePrompt}
-      />
-    </div>
-  );
-}
-
-export default function PlaygroundScreen({ feedback, project, clientName, projectSlug, sessionId, onSendToMichael }) {
-  const [sending, setSending] = useState(false);
-
-  const feedbackItems = Object.values(feedback);
-  let items = feedbackItems;
-  if (items.length === 0 && project?.groups) {
-    items = project.groups
-      .filter(g => g.roomType?.toLowerCase() !== 'floor plan')
-      .flatMap(g => (g.images || []).map(img => ({
-        imageId: img.id,
-        imageName: img.name,
-        roomType: g.roomType,
-        originalUrl: img.url,
-        status: null,
-        notes: '',
-      })));
-  }
+  const handleEnhanced = useCallback((url) => {
+    if (item) setEnhancedUrls(prev => ({ ...prev, [item.imageId]: url }));
+  }, [item?.imageId]);
 
   const handleSend = async () => {
     setSending(true);
@@ -211,33 +207,50 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
     }
   };
 
+  if (!item) return null;
+
+  const displayUrl = enhancedUrls[item.imageId] || item.originalUrl;
+
   return (
-    <div className="pg-wrap">
+    <div className="pg-screen">
       <style>{styles}</style>
 
       <div className="pg-header">
-        <img src="https://barnhaussteelbuilders.com/assets/images/logo-BbjiAVC6.png" alt="Barnhaus" className="pg-logo" />
-        <div className="pg-subtitle">Make It Yours</div>
-        <div className="pg-tagline">Explore your renders. Pick a vibe. See it come to life.</div>
+        <img src={LOGO} alt="Barnhaus" className="pg-logo" />
+        <div className="pg-title">Make It Yours</div>
+        <div className="pg-counter">{currentIdx + 1} / {items.length}</div>
       </div>
 
-      <div className="pg-gallery">
-        {items.map(item => (
-          <PlaygroundCard
-            key={item.imageId}
-            item={item}
-            clientName={clientName}
-            projectSlug={projectSlug}
-            sessionId={sessionId}
-          />
-        ))}
+      <div className="pg-image-area">
+        {!isFirst && (
+          <button className="pg-arrow pg-arrow-left" onClick={() => setCurrentIdx(i => i - 1)}>‹</button>
+        )}
+        <img src={displayUrl} alt={item.imageName} className="pg-main-img" />
+        {!isLast && (
+          <button className="pg-arrow pg-arrow-right" onClick={() => setCurrentIdx(i => i + 1)}>›</button>
+        )}
       </div>
 
-      <div className="pg-footer">
-        <button className="pg-send-btn" onClick={handleSend} disabled={sending}>
-          {sending ? 'Sending…' : 'Send to Michael ✓'}
-        </button>
+      <div className="pg-room-label">{item.roomType}</div>
+
+      <div className="pg-bottom">
+        <InspirationStrip images={inspirationImages} onPick={handleVibePick} />
+        <EnhanceButton
+          key={item.imageId}
+          imageUrl={item.originalUrl}
+          roomType={item.roomType || 'room'}
+          onEnhanced={handleEnhanced}
+          autoEnhancePrompt={autoEnhancePrompt}
+        />
       </div>
+
+      {isLast && (
+        <div className="pg-footer">
+          <button className="pg-send-btn" onClick={handleSend} disabled={sending}>
+            {sending ? 'Sending…' : 'Send to Michael ✓'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
