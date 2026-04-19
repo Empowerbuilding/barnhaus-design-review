@@ -811,16 +811,24 @@ function stripThinkBlocks(text) {
   return text.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/<final>([\s\S]*?)<\/final>/i, '$1').trim();
 }
 
-async function sendViaGateway(message) {
+async function sendViaGateway(message, timeoutMs = 20000) {
   try {
-    const response = await fetch(`${JUANITO_URL}/tools/invoke`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${JUANITO_TOKEN}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        tool: 'sessions_send',
-        args: { sessionKey: SESSION_KEY, message, timeoutSeconds: 55 },
-      }),
-    });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    let response;
+    try {
+      response = await fetch(`${JUANITO_URL}/tools/invoke`, {
+        method: 'POST',
+        signal: controller.signal,
+        headers: { 'Authorization': `Bearer ${JUANITO_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tool: 'sessions_send',
+          args: { sessionKey: SESSION_KEY, message, timeoutSeconds: 18 },
+        }),
+      });
+    } finally {
+      clearTimeout(timer);
+    }
     if (!response.ok) throw new Error(`Gateway HTTP ${response.status}`);
     const result = await response.json();
     if (!result.ok) throw new Error(result.error || 'Gateway error');
@@ -841,7 +849,7 @@ async function sendViaGateway(message) {
       return clean;
     }
 
-    return "I'm still reviewing your designs — send a message and I'll respond.";
+    return null; // Queue backed up or no response — caller handles gracefully
   } catch (err) {
     console.error('Juanito gateway error:', err.message);
     return "I'm having trouble connecting right now. Please try again in a moment.";
@@ -962,7 +970,14 @@ One line intro then a bullet list of the actual rooms in this draft (${roomList}
 1-2 sentences: their answers go straight to Michael for Draft 2. He'll review everything and reach out to schedule the next step.
 
 Output the memo text only. No extra commentary, no questions.`;
-  return sendViaGateway(message);
+  // Try gateway with 20s timeout; retry once after 3s if queue was backed up
+  let memo = await sendViaGateway(message, 20000);
+  if (!memo) {
+    console.log('initJuanitoSession: gateway timeout, retrying in 3s...');
+    await new Promise(r => setTimeout(r, 3000));
+    memo = await sendViaGateway(message, 25000);
+  }
+  return memo;
 }
 
 async function generateDesignBrief(projectSlug, clientName, chatTranscript, feedback) {
