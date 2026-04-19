@@ -201,7 +201,7 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
   // Fetch current image vibes + prefetch next
   useEffect(() => {
     if (!item) return;
-    setAutoEnhancePrompt(promptCache.current[item.imageId] || item.notes || '');
+    setAutoEnhancePrompt(promptCache.current[item.imageId] || '');
 
     // Show cached immediately or fetch
     if (vibeCache.current[item.imageId]) {
