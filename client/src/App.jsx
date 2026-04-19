@@ -690,8 +690,7 @@ function ReviewPage() {
       });
       const data = await res.json();
       if (data.images?.length) {
-        // Append new images rather than replace so labeled option images stay visible
-        setInspirationImages(prev => [...prev, ...data.images]);
+        setInspirationImages(data.images);
         setInspirationOffset(nextOffset);
       }
     } catch {}
