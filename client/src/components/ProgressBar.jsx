@@ -109,11 +109,11 @@ const styles = `
           <div
             key={i}
             className={`progress-step ${i < currentIndex ? 'done' : ''} ${i === currentIndex ? 'active' : ''}`}
-            style={locked && i !== currentIndex ? {cursor:'not-allowed', opacity: i > currentIndex ? 0.4 : 1} : {}}
-            onClick={() => !locked && onSelect && onSelect(i)}
+            style={(locked || i > (maxUnlocked ?? currentIndex)) ? {cursor:'not-allowed', opacity: i > (maxUnlocked ?? currentIndex) ? 0.4 : 1} : {}}
+            onClick={() => i <= (maxUnlocked ?? currentIndex) && !locked && onSelect && onSelect(i)}
             role="button"
             tabIndex={0}
-            onKeyDown={e => e.key === 'Enter' && !locked && onSelect && onSelect(i)}
+            onKeyDown={e => e.key === 'Enter' && i <= (maxUnlocked ?? currentIndex) && !locked && onSelect && onSelect(i)}
           >
             <div className="step-dot" />
             <span className="step-label">{label}</span>

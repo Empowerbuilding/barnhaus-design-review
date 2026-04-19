@@ -779,7 +779,7 @@ function ReviewPage() {
         </div>
       </header>
 
-      <ProgressBar sections={sectionLabels} currentIndex={currentGroupIdx} onSelect={handleSectionChange} locked={false} />
+      <ProgressBar sections={sectionLabels} currentIndex={currentGroupIdx} onSelect={handleSectionChange} locked={false} maxUnlocked={maxUnlocked} />
 
       <div className="review-body">
         {/* Left sidebar — desktop only */}
