@@ -642,7 +642,7 @@ function ReviewPage() {
       const roomLabel = targetGroup.roomType || 'other';
       setQuestionProgress(prev => ({
         ...prev,
-        [SECTION_LABELS[roomLabel] || roomLabel]: { current: 0, total: prev[SECTION_LABELS[roomLabel] || roomLabel]?.total || 0 },
+        [SECTION_LABELS[roomLabel] || roomLabel]: { current: prev[SECTION_LABELS[roomLabel] || roomLabel]?.current || 0, total: prev[SECTION_LABELS[roomLabel] || roomLabel]?.total || 0 },
       }));
     }
 
