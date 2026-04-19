@@ -216,4 +216,36 @@ async function getInspirationForQuestion(serperContext, projectStyle, count, off
   }
 }
 
-module.exports = { getInspirationImages, getInspirationForQuestion, setProjectStyle, getProjectStyle };
+// Fetch one representative image per option so client can compare choices side by side
+async function getInspirationPerOption(serperContext, options, projectStyle) {
+  if (!SERPER_API_KEY || !serperContext || !options?.length) return [];
+  const style = projectStyle || '';
+
+  // Strip noise words from option labels to make cleaner queries
+  const cleanOption = (opt) => opt
+    .replace(/michael's call|flag for michael|something else|not sure|other/gi, '')
+    .replace(/\(.*?\)/g, '')  // remove parentheticals like (modern)
+    .trim();
+
+  const queries = options
+    .map(opt => cleanOption(opt))
+    .filter(opt => opt.length > 2)
+    .map(opt => {
+      const q = style ? `${style} ${opt} ${serperContext}` : `${opt} ${serperContext}`;
+      return q.replace(/\s+/g, ' ').trim();
+    });
+
+  if (!queries.length) return [];
+
+  try {
+    const results = await Promise.all(queries.map(q => fetchSerper(q, 1)));
+    return results
+      .map((imgs, i) => imgs[0] ? { ...imgs[0], optionLabel: options[i] } : null)
+      .filter(Boolean);
+  } catch (err) {
+    console.error('Inspiration per-option fetch error:', err.message);
+    return [];
+  }
+}
+
+module.exports = { getInspirationImages, getInspirationForQuestion, getInspirationPerOption, setProjectStyle, getProjectStyle };

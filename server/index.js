@@ -8,7 +8,7 @@ const { sendToJuanito, initJuanitoSession, generateDesignBrief, getQuestionsForR
 const { analyzeImage, groupAndSortImages, analyzeInspirationImage } = require('./claude');
 const { notifyDiscord, notifyDiscordBrief, writeToCRM } = require('./notify');
 const multer = require('multer');
-const { getInspirationImages, getInspirationForQuestion, setProjectStyle, getProjectStyle } = require('./inspiration');
+const { getInspirationImages, getInspirationForQuestion, getInspirationPerOption, setProjectStyle, getProjectStyle } = require('./inspiration');
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } });
 
 const app = express();
@@ -285,15 +285,18 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
       total: allQuestions.length,
     };
 
-    // Fetch inspiration images from QUESTION_BANK serperContext if this question needs them
-    // Also check Silas SEARCH tag as fallback
+    // Fetch one image per option for visual comparison, fallback to 4-image batch
     let inspirationFetch = Promise.resolve([]);
-    if (requiresImage && serperContext) {
-      inspirationFetch = getInspirationForQuestion(
+    if (requiresImage && serperContext && options.length > 1) {
+      // Filter out non-visual options before fetching
+      const visualOptions = options.filter(o => !/michael'?s call|flag|something else/i.test(o));
+      inspirationFetch = getInspirationPerOption(
         serperContext,
-        getProjectStyle(projectSlug || ''),
-        4
+        visualOptions,
+        getProjectStyle(projectSlug || '')
       );
+    } else if (requiresImage && serperContext) {
+      inspirationFetch = getInspirationForQuestion(serperContext, getProjectStyle(projectSlug || ''), 4);
     }
 
     const [silasResult, inspirationImages] = await Promise.all([
@@ -302,7 +305,6 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
     ]);
 
     const reply = silasResult?.text || silasResult || '';
-    // Use SEARCH tag from Silas if no serperContext in question bank
     const searchQuery = silasResult?.searchQuery || null;
     let finalImages = inspirationImages;
     if (!finalImages.length && searchQuery) {
