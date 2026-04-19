@@ -361,7 +361,6 @@ export default function ImageViewer({
             <button className="nav-arrow nav-next" onClick={goNext} aria-label="Next image">›</button>
           )}
         </div>
-      </div>
 
       {hasMultiple && (
         <div className="thumbnails">
