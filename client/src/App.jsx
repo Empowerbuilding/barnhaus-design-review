@@ -113,6 +113,7 @@ const appStyles = `
   /* Image panel */
   .image-panel {
     flex: 1;
+    height: 100%;
     overflow: hidden;
     position: relative;
     transition: flex 0.3s ease;
