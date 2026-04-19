@@ -119,6 +119,20 @@ const appStyles = `
     transition: flex 0.3s ease;
   }
 
+  .playground-container {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .playground-image-area {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
   /* Playground scrollable mode */
   .review-page.playground-mode {
     height: 100vh;
@@ -775,10 +789,9 @@ function ReviewPage() {
 
       <ProgressBar sections={sectionLabels} currentIndex={progressIndex} onSelect={handleSectionChange} locked={false} />
 
-      <div className="review-content">
-        {/* Image panel — full width on mobile, 65% on desktop */}
-        <div className="image-panel">
-          {phase === 'playground' ? (
+      {phase === 'playground' && (
+        <div className="playground-container">
+          <div className="playground-image-area">
             <PlaygroundScreen
               feedback={playgroundFeedback}
               project={project}
@@ -787,7 +800,17 @@ function ReviewPage() {
               sessionId={sessionId}
               onSendToMichael={handleSendToMichael}
             />
-          ) : (
+          </div>
+          <div className={`chat-panel desktop-only ${chatOpen ? 'chat-panel-open' : 'chat-panel-closed'}`}>
+            <ChatWindow messages={messages} onSend={sendChat} isComplete={completed} />
+          </div>
+        </div>
+      )}
+
+      <div className="review-content" style={phase === 'playground' ? {display:'none'} : {}}>
+        {/* Image panel — full width on mobile, 65% on desktop */}
+        <div className="image-panel">
+          {phase !== 'playground' && (
             <>
               {/* Desktop chat toggle button */}
               <button
