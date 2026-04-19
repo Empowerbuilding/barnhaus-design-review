@@ -417,7 +417,7 @@ export default function ImageViewer({
                 className={`inspiration-thumb ${selectedInspiration === i ? 'selected' : ''}`}
                 onClick={() => handleInspirationClick(img, i)}
               >
-                <img src={img.url || img.thumb} alt={img.optionLabel || img.title || ''} loading="lazy" />
+                <img src={img.thumb || img.url} alt={img.optionLabel || img.title || ''} loading="lazy" onError={e => { if (e.target.src !== img.url) e.target.src = img.url; }} />
                 {img.optionLabel
                   ? <div className="inspiration-thumb-title" style={{color:'#DAA520',fontWeight:600}}>{img.optionLabel}</div>
                   : img.title && <div className="inspiration-thumb-title">{img.title}</div>
