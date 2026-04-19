@@ -125,14 +125,15 @@ const appStyles = `
     overflow-y: auto;
   }
   .review-page.playground-mode .review-content {
-    overflow: visible;
-    flex: none;
-    height: auto;
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
   }
   .review-page.playground-mode .image-panel {
-    overflow: visible;
-    flex: none;
-    height: auto;
+    overflow-y: auto;
+    flex: 1;
+    height: 0;
+    min-height: 0;
   }
   .pg-wrap {
     width: 100%;
@@ -641,6 +642,7 @@ function ReviewPage() {
     if (idx === baseSectionLabels.length) {
       // Visualize tab clicked
       setPhase('playground');
+      triggerPlaygroundIntro();
     } else {
       if (phase === 'playground') setPhase('walkthrough');
       setCurrentGroupIdx(idx);
@@ -669,10 +671,34 @@ function ReviewPage() {
     [currentImage, currentGroup]
   );
 
+
+  const triggerPlaygroundIntro = useCallback(() => {
+    fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [],
+        clientName,
+        projectSlug,
+        currentRoom: 'playground',
+        isImageChangeTrigger: true,
+        triggerMessage: `[PLAYGROUND MODE] The client has finished the review and is now in the Make It Yours section. Send a short, friendly intro (2-3 sentences max) explaining: 1) They can browse the inspiration images below each render, 2) clicking a vibe image updates the enhance prompt, 3) hitting the Enhance button generates an AI version of the render. Keep it warm and excited — this is the fun part. Output ONLY the message to send.`,
+        sessionId,
+      }),
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (data.reply && data.reply !== 'NO_REPLY' && data.reply !== 'ANNOUNCE_SKIP')
+          setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+      })
+      .catch(() => {});
+  }, [clientName, projectSlug, sessionId]);
+
   // Phase 1 complete → go to Playground (no Discord post yet)
   const handleComplete = useCallback(() => {
     setPhase('playground');
-  }, []);
+    triggerPlaygroundIntro();
+  }, [triggerPlaygroundIntro]);
 
   // Phase 2 complete → post to Discord and show completion screen
   const handleSendToMichael = useCallback(async () => {
@@ -796,8 +822,8 @@ function ReviewPage() {
           )}
         </div>
 
-        {/* Desktop chat panel — only in walkthrough */}
-        {phase !== 'playground' && (
+        {/* Desktop chat panel */}
+        {(
           <div className={`chat-panel desktop-only ${chatOpen ? 'chat-panel-open' : 'chat-panel-closed'}`}>
             <ChatWindow
               messages={messages}
@@ -808,8 +834,8 @@ function ReviewPage() {
         )}
       </div>
 
-      {/* Mobile sticky bottom bar — only in walkthrough */}
-      {phase !== 'playground' && isMobile && (
+      {/* Mobile sticky bottom bar */}
+      {isMobile && (
         <div className="mobile-chat-bar" onClick={openDrawer}>
           <div className="mobile-chat-bar-inner">
             <div className="silas-dot" />
@@ -824,8 +850,8 @@ function ReviewPage() {
         </div>
       )}
 
-      {/* Mobile slide-up drawer — only in walkthrough */}
-      {phase !== 'playground' && (
+      {/* Mobile slide-up drawer */}
+      {(
         <ChatDrawer
           open={drawerOpen}
           onClose={closeDrawer}

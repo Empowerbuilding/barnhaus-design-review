@@ -13,6 +13,7 @@ const styles = `
     background: #1a1a1a;
     color: #e0e0e0;
     font-family: 'Inter', sans-serif;
+    position: relative;
   }
   .pg-header {
     display: flex;
@@ -238,11 +239,7 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
   return (
     <div className="pg-screen">
       <style>{styles}</style>
-
-      <div className="pg-header">
-        <img src={LOGO} alt="Barnhaus" className="pg-logo" />
-        <div className="pg-title">Make It Yours</div>
-        <div className="pg-counter">{currentIdx + 1} / {items.length}</div>
+      <div className="pg-counter">{currentIdx + 1} / {items.length}</div>
       </div>
 
       <div className="pg-image-area">
