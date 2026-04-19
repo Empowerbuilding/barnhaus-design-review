@@ -11,7 +11,7 @@ const styles = `
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    background: #1a1a1a;
+    background: red;
     color: #e0e0e0;
     font-family: 'Inter', sans-serif;
   }
