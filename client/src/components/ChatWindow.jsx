@@ -310,7 +310,7 @@ export default function ChatWindow({ messages, onSend, isComplete, options, isTy
         <div className="chat-header-status" />
       </div>
       <div className="chat-messages">
-        {messages.map((msg, i) => (
+        {messages.filter(msg => !msg.silent).map((msg, i) => (
           <div key={i} className={`chat-msg ${msg.role}`}>
             {msg.role === 'assistant' && <div className="msg-avatar silas-bubble">S</div>}
             <div className="msg-bubble">{msg.content}</div>

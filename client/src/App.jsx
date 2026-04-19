@@ -462,7 +462,7 @@ function ReviewPage() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        messages: messages.map(m => ({ role: m.role, content: m.content })),
+        messages: messages.filter(m => !m.silent).map(m => ({ role: m.role, content: m.content })),
         clientName,
         projectSlug,
         currentRoom: roomLabel,
@@ -528,7 +528,7 @@ function ReviewPage() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        messages: messages.map(m => ({ role: m.role, content: m.content })),
+        messages: messages.filter(m => !m.silent).map(m => ({ role: m.role, content: m.content })),
         clientName,
         projectSlug,
         currentRoom: roomLabel,
@@ -576,7 +576,7 @@ function ReviewPage() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            messages: newMessages.map(m => ({ role: m.role, content: m.content })),
+            messages: newMessages.filter(m => !m.silent).map(m => ({ role: m.role, content: m.content })),
             projectName: project?.projectName,
             clientName,
             currentRoom: currentGroup?.roomType || 'greeting',
@@ -660,9 +660,10 @@ function ReviewPage() {
   }, [currentSearchQuery, inspirationOffset, projectSlug]);
 
   const handleInspirationSelect = useCallback((message) => {
-    // Inspiration selections are context-only — do NOT advance question index or clear buttons
-    sendChat(message, { isInspirationSelection: true });
-  }, [sendChat]);
+    // Inspiration picks are silent — logged to transcript for the brief only, no Silas response
+    // Buttons stay, question index doesn't move, Silas doesn't reply
+    setMessages(prev => [...prev, { role: 'user', content: message, silent: true }]);
+  }, []);
 
   const handleComplete = useCallback(async () => {
     if (submitting) return;
