@@ -122,15 +122,20 @@ const appStyles = `
   .review-page.playground-mode {
     height: auto;
     min-height: 100vh;
-    overflow: visible;
+    overflow-y: auto;
   }
   .review-page.playground-mode .review-content {
     overflow: visible;
     flex: none;
+    height: auto;
   }
   .review-page.playground-mode .image-panel {
     overflow: visible;
     flex: none;
+    height: auto;
+  }
+  .pg-wrap {
+    width: 100%;
   }
 
   /* Desktop chat toggle button */
