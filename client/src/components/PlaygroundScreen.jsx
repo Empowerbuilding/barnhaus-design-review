@@ -154,6 +154,7 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
   const [autoEnhancePrompt, setAutoEnhancePrompt] = useState('');
   const [enhancedUrls, setEnhancedUrls] = useState({});
   const [sending, setSending] = useState(false);
+  const vibeCache = useRef({}); // cache by imageId
 
   // Guard: if no items, show loading/empty state
   if (items.length === 0) {
@@ -169,42 +170,42 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
   const isFirst = currentIdx === 0;
   const isLast = currentIdx === items.length - 1;
 
+  const fetchVibes = useCallback(async (idx, { updateState = false } = {}) => {
+    const target = items[idx];
+    if (!target || !target.roomType) return;
+    if (vibeCache.current[target.imageId]) {
+      if (updateState) setInspirationImages(vibeCache.current[target.imageId]);
+      return;
+    }
+    try {
+      const res = await fetch(`/api/inspiration?room=${encodeURIComponent(target.roomType)}&count=5`);
+      const data = await res.json();
+      const imgs = data.images || [];
+      vibeCache.current[target.imageId] = imgs;
+      if (updateState) setInspirationImages(imgs);
+    } catch {}
+  }, [items]);
+
+  // Fetch current image vibes + prefetch next
   useEffect(() => {
     if (!item) return;
-    setInspirationImages([]);
-    setInspirationLoading(true);
     setAutoEnhancePrompt(item.notes || '');
 
-    let cancelled = false;
-    async function fetchInspiration() {
-      try {
-        const res = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            messages: [],
-            clientName,
-            projectSlug,
-            currentRoom: item.roomType,
-            isImageChangeTrigger: true,
-            triggerMessage: `[PLAYGROUND] Fetch 4-6 inspiration images for a ${item.roomType}. Client note: "${item.notes || 'no specific preference'}". Return inspiration images only.`,
-            sessionId,
-          }),
-        });
-        const data = await res.json();
-        if (!cancelled) {
-          if (data.inspiration && data.inspiration.length > 0) {
-            setInspirationImages(data.inspiration);
-          }
-          setInspirationLoading(false);
-        }
-      } catch {
-        if (!cancelled) setInspirationLoading(false);
-      }
+    // Show cached immediately if available
+    if (vibeCache.current[item.imageId]) {
+      setInspirationImages(vibeCache.current[item.imageId]);
+      setInspirationLoading(false);
+    } else {
+      setInspirationImages([]);
+      setInspirationLoading(true);
+      fetchVibes(currentIdx, { updateState: true }).then(() => setInspirationLoading(false));
     }
-    fetchInspiration();
-    return () => { cancelled = true; };
-  }, [currentIdx]);
+
+    // Prefetch next image in background
+    if (currentIdx + 1 < items.length) {
+      fetchVibes(currentIdx + 1, { updateState: false });
+    }
+  }, [currentIdx, item, fetchVibes, items]);
 
   const handleVibePick = useCallback(async (img, index) => {
     setInspirationImages([]);

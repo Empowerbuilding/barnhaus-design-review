@@ -232,6 +232,19 @@ app.post('/api/enhance', async (req, res) => {
 });
 
 // Client picked an inspiration image — analyze it and send to Silas
+
+app.get('/api/inspiration', async (req, res) => {
+  const { room, style = '', count = 5 } = req.query;
+  if (!room) return res.status(400).json({ error: 'room required' });
+  try {
+    const images = await getInspirationImages(room, style, parseInt(count), []);
+    res.json({ images });
+  } catch (err) {
+    console.error('Inspiration fetch error:', err.message);
+    res.json({ images: [] });
+  }
+});
+
 app.post('/api/inspiration/pick', async (req, res) => {
   const { imageUrl, imageIndex, roomType, clientName, sessionId } = req.body;
   try {
