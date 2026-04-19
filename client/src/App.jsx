@@ -716,9 +716,10 @@ function ReviewPage() {
         sessionId,
         chatTranscript: messages,
         enhancedUrls: {},
+        vibes: savedVibes,
       }),
     }).catch(err => console.error('Submit feedback error:', err));
-  }, [project, clientName, sessionId, messages, projectSlug, submitting]);
+  }, [project, clientName, sessionId, messages, projectSlug, submitting, savedVibes]);
 
   if (loading) {
     return (

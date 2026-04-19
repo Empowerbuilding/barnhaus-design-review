@@ -22,7 +22,7 @@ function ratingColor(status) {
   return 0x555555;
 }
 
-async function notifyDiscord(projectName, clientName, feedback, enhancedUrls = {}) {
+async function notifyDiscord(projectName, clientName, feedback, enhancedUrls = {}, vibes = []) {
   const token = process.env.DISCORD_TOKEN;
   if (!token) return;
   const channelId = '1488756820892848229';
@@ -69,7 +69,26 @@ async function notifyDiscord(projectName, clientName, feedback, enhancedUrls = {
     }
   }
 
-  // 3. Playground visualizations (enhanced images not tied to feedback clicks)
+  // 3. Vibe images the client saved during the session
+  if (vibes && vibes.length > 0) {
+    await postToDiscord(token, channelId, { content: '**— 🎯 CLIENT VIBE PICKS —**' });
+    const vibeEmbeds = vibes.map(v => ({
+      color: 0xB8860B,
+      title: v.optionLabel || v.label || 'Vibe Pick',
+      description: v.note ? `"${v.note}"` : null,
+      fields: [
+        { name: 'Room', value: v.room || 'General', inline: true },
+        ...(v.optionLabel ? [{ name: 'Option', value: v.optionLabel, inline: true }] : []),
+      ].filter(f => f.value),
+      image: v.url ? { url: v.url } : undefined,
+      footer: v.source ? { text: v.source } : undefined,
+    }));
+    for (let i = 0; i < vibeEmbeds.length; i += 10) {
+      await postToDiscord(token, channelId, { embeds: vibeEmbeds.slice(i, i + 10) });
+    }
+  }
+
+  // 4. Playground visualizations (enhanced images not tied to feedback clicks)
   if (enhancedList.length > 0) {
     await postToDiscord(token, channelId, { content: '**— ✨ PLAYGROUND VISUALIZATIONS —**' });
     for (const { imageId, url } of enhancedList) {

@@ -415,7 +415,7 @@ Acknowledge their pick and continue with targeted detail questions.`;
 
 // Submit final feedback
 app.post('/api/feedback', async (req, res) => {
-  const { projectName, clientName, feedback, sessionId, chatTranscript } = req.body;
+  const { projectName, clientName, feedback, sessionId, chatTranscript, vibes } = req.body;
   try {
     // Generate AI design brief first (Silas summarizes decisions for Michael)
     const projectSlug = req.body.projectSlug || projectName?.toLowerCase().replace(/\s+/g, '-') || 'unknown';
@@ -425,7 +425,7 @@ app.post('/api/feedback', async (req, res) => {
 
     await Promise.allSettled([
       briefPromise,
-      notifyDiscord(projectName, clientName, feedback, req.body.enhancedUrls || {}),
+      notifyDiscord(projectName, clientName, feedback, req.body.enhancedUrls || {}, vibes || []),
       writeToCRM(projectName, clientName, feedback, chatTranscript),
       sessionId ? supabaseFetch(`/rest/v1/design_review_sessions?id=eq.${sessionId}`, {
         method: 'PATCH',
