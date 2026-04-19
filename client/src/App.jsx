@@ -426,6 +426,7 @@ function ReviewPage() {
     : null;
 
   const lastNotifiedImage = useRef(null);
+  const firedTriggers = useRef(new Set()); // prevent double-fire per imageKey
   const triggerAbortRef = useRef(null);
   const hasInputOnCurrentImage = useRef(false);
 
@@ -443,6 +444,10 @@ function ReviewPage() {
 
     lastNotifiedImage.current = imageKey;
     hasInputOnCurrentImage.current = false;
+
+    // Hard guard — only fire once per imageKey ever
+    if (firedTriggers.current.has(imageKey)) return;
+    firedTriggers.current.add(imageKey);
 
     if (triggerAbortRef.current) triggerAbortRef.current.abort();
     const controller = new AbortController();
@@ -511,7 +516,9 @@ function ReviewPage() {
     if (!currentImage || !currentGroup || phase !== 'walkthrough') return;
     const imageKey = `${currentGroup.roomType}-${currentImage.id}`;
     if (lastNotifiedImage.current === imageKey) return;
+    if (firedTriggers.current.has(imageKey)) return;
     lastNotifiedImage.current = imageKey;
+    firedTriggers.current.add(imageKey);
 
     const roomLabel = currentGroup.roomType || 'other';
     const features = currentImage.analysis?.features?.join(', ') || '';

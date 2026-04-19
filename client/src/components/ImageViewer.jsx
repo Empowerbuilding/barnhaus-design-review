@@ -330,7 +330,7 @@ export default function ImageViewer({
     const { img, idx } = inspirationLightbox;
     setSelectedInspiration(idx);
     const noteText = likedNote.trim() ? ` — What I like about it: ${likedNote.trim()}` : '';
-    const msg = `[Selected inspiration: ${img.title || 'image ' + (idx + 1)}]${noteText}`;
+    const msg = `[Vibe reference — this style appeals to me: ${img.title || 'image ' + (idx + 1)}]${noteText}`;
     setInspirationLightbox(null);
     setLikedNoteMode(false);
     setLikedNote('');
@@ -520,7 +520,7 @@ export default function ImageViewer({
                     onMouseEnter={e => e.target.style.background = '#DAA520'}
                     onMouseLeave={e => e.target.style.background = '#B8860B'}
                   >
-                    Yes, I like this direction
+                    This vibe appeals to me
                   </button>
                 </div>
               ) : (
