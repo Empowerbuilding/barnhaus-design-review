@@ -246,7 +246,11 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
 
     // Question bank drives buttons — Silas is instructed to ask the current question
     const roomBank = getQuestionsForRoom(currentRoom || 'default');
-    const allQuestions = roomBank?.questions || [];
+    // Prepend baseline as question[0] if it exists, so options stay in sync with Silas
+    const baselineQ = roomBank?.baseline && typeof roomBank.baseline === 'object' ? roomBank.baseline : null;
+    const allQuestions = baselineQ
+      ? [baselineQ, ...(roomBank?.questions || [])]
+      : (roomBank?.questions || []);
     const qIdx = roomQuestionIndexes.get(roomKey) || 0;
     const sectionDone = qIdx >= allQuestions.length;
     const currentQuestion = sectionDone ? null : allQuestions[qIdx];
@@ -263,7 +267,7 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
 
     // Advance question index only on real answers — not image changes or inspiration picks
     if (!isImageChangeTrigger && !isInspirationSelection) {
-      roomQuestionIndexes.set(roomKey, qIdx + 1); // uncapped — let it go past end
+      roomQuestionIndexes.set(roomKey, qIdx + 1); // capped at length — index === length means section done
     }
 
     const options = currentQuestion?.options || [];
