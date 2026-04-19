@@ -193,9 +193,20 @@ app.post('/api/chat', async (req, res) => {
       const roomQuestions = getQuestionsForRoom(currentRoom || 'default');
       const questionList = roomQuestions?.questions?.map((q, i) => `${i+1}. ${q}`).join('\n') || '';
       const openingNote = roomQuestions?.opening ? `\n\nROOM GUIDANCE:\n${roomQuestions.opening}` : '';
+      const behaviorRules = `
+
+RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
+- Ask ONE question at a time. Wait for the client to respond before asking the next.
+- Do NOT suggest moving to the next section or say "feel free to move on" — the client controls navigation.
+- Do NOT say "I've flagged that" and then wrap up. After flagging a structural item, immediately pivot to the next question on the list.
+- Stay in this room until the client navigates away. Keep the conversation going.
+- If the client gives a short answer, probe deeper before moving to the next question.
+- Output ONLY your message to the client. No reasoning, no meta-commentary.`;
+
       fullMessage = triggerMessage
         + openingNote
-        + (questionList ? `\n\nQUESTION BANK FOR ${(currentRoom || 'this room').toUpperCase()} — work through these conversationally, don't skip important ones:\n${questionList}` : '');
+        + (questionList ? `\n\nQUESTION BANK FOR ${(currentRoom || 'this room').toUpperCase()} — work through these conversationally, one at a time:\n${questionList}` : '')
+        + behaviorRules;
     } else {
       const lastUserMessage = [...messages].reverse().find(m => m.role === 'user')?.content || '';
       const contextPrefix = `[CONTEXT: room=${currentRoom}, image=${currentImage}, client=${clientName}]`;
