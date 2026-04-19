@@ -433,7 +433,7 @@ function ReviewPage() {
   const currentImage = currentGroup?.images?.[currentImageIdx];
   const isFloorPlan = currentGroup?.roomType?.toLowerCase() === 'floor plan';
   const baseSectionLabels = project?.groups?.map(g => SECTION_LABELS[g.roomType] || g.roomType) || [];
-  const sectionLabels = phase === 'playground' ? [...baseSectionLabels, 'Visualize'] : baseSectionLabels;
+  const sectionLabels = [...baseSectionLabels, 'Visualize'];
   const progressIndex = phase === 'playground' ? sectionLabels.length - 1 : currentGroupIdx;
   const playgroundFeedback = Object.fromEntries(
     Object.entries(feedback).filter(([, item]) => item.roomType?.toLowerCase() !== 'floor plan')
@@ -576,9 +576,15 @@ function ReviewPage() {
   }, [currentGroup, currentGroupIdx, currentImageIdx, project]);
 
   const handleSectionChange = useCallback((idx) => {
-    setCurrentGroupIdx(idx);
-    setCurrentImageIdx(0);
-  }, []);
+    if (idx === baseSectionLabels.length) {
+      // Visualize tab clicked
+      setPhase('playground');
+    } else {
+      if (phase === 'playground') setPhase('walkthrough');
+      setCurrentGroupIdx(idx);
+      setCurrentImageIdx(0);
+    }
+  }, [baseSectionLabels.length, phase]);
 
   const handleFeedback = useCallback(
     (imageId, status, notes) => {
@@ -675,7 +681,7 @@ function ReviewPage() {
         </div>
       </header>
 
-      <ProgressBar sections={sectionLabels} currentIndex={progressIndex} onSelect={handleSectionChange} locked={phase === 'walkthrough' || phase === 'playground'} />
+      <ProgressBar sections={sectionLabels} currentIndex={progressIndex} onSelect={handleSectionChange} locked={false} />
 
       <div className="review-content">
         {/* Image panel — full width on mobile, 65% on desktop */}
