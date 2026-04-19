@@ -367,6 +367,8 @@ function ReviewPage() {
   const [inspirationImages, setInspirationImages] = useState([]);
   const [questionProgress, setQuestionProgress] = useState({});
   const [silasTyping, setSilasTyping] = useState(false);
+  const [currentSearchQuery, setCurrentSearchQuery] = useState(null);
+  const [inspirationOffset, setInspirationOffset] = useState(0);
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth <= 768);
@@ -475,7 +477,8 @@ function ReviewPage() {
           setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
         }
         if (data.options) setChatOptions(data.options);
-        if (data.inspirationImages) setInspirationImages(data.inspirationImages);
+        if (data.inspirationImages) { setInspirationImages(data.inspirationImages); setInspirationOffset(0); }
+        if (data.searchQuery) setCurrentSearchQuery(data.searchQuery);
         if (data.roomProgress) {
           setQuestionProgress(prev => ({
             ...prev,
@@ -582,7 +585,8 @@ function ReviewPage() {
         const updatedMessages = [...newMessages, { role: 'assistant', content: data.reply }];
         setMessages(updatedMessages);
         if (data.options) setChatOptions(data.options);
-        if (data.inspirationImages) setInspirationImages(data.inspirationImages);
+        if (data.inspirationImages) { setInspirationImages(data.inspirationImages); setInspirationOffset(0); }
+        if (data.searchQuery) setCurrentSearchQuery(data.searchQuery);
         if (data.roomProgress) {
           const roomLabel = currentGroup?.roomType || 'other';
           setQuestionProgress(prev => ({
@@ -625,9 +629,27 @@ function ReviewPage() {
   const handleSectionChange = useCallback((idx) => {
     setChatOptions([]);
     setInspirationImages([]);
+    setInspirationOffset(0);
     setCurrentGroupIdx(idx);
     setCurrentImageIdx(0);
   }, []);
+
+  const handleLoadMoreInspiration = useCallback(async () => {
+    if (!currentSearchQuery) return;
+    const nextOffset = inspirationOffset + 4;
+    try {
+      const res = await fetch('/api/inspiration/more', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ searchQuery: currentSearchQuery, projectSlug, offset: nextOffset }),
+      });
+      const data = await res.json();
+      if (data.images?.length) {
+        setInspirationImages(data.images);
+        setInspirationOffset(nextOffset);
+      }
+    } catch {}
+  }, [currentSearchQuery, inspirationOffset, projectSlug]);
 
   const handleInspirationSelect = useCallback((message) => {
     sendChat(message);
@@ -747,6 +769,7 @@ function ReviewPage() {
               isLastImage={isLastImage}
               inspirationImages={inspirationImages}
               onInspirationSelect={handleInspirationSelect}
+              onLoadMoreInspiration={handleLoadMoreInspiration}
             />
           </div>
 

@@ -288,6 +288,7 @@ export default function ImageViewer({
   isLastImage,
   inspirationImages,
   onInspirationSelect,
+  onLoadMoreInspiration,
 }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -398,6 +399,27 @@ export default function ImageViewer({
               </div>
             ))}
           </div>
+          {onLoadMoreInspiration && (
+            <button
+              onClick={onLoadMoreInspiration}
+              style={{
+                marginTop: '0.5rem',
+                background: 'transparent',
+                border: '1px solid #3a3a3a',
+                color: '#888',
+                fontSize: '0.75rem',
+                padding: '0.3rem 0.8rem',
+                borderRadius: '12px',
+                cursor: 'pointer',
+                width: '100%',
+                transition: 'border-color 0.2s, color 0.2s',
+              }}
+              onMouseEnter={e => { e.target.style.borderColor = '#B8860B'; e.target.style.color = '#DAA520'; }}
+              onMouseLeave={e => { e.target.style.borderColor = '#3a3a3a'; e.target.style.color = '#888'; }}
+            >
+              None of these — show me 4 more
+            </button>
+          )}
         </div>
       )}
 

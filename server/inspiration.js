@@ -143,11 +143,11 @@ const STYLE_VARIANTS = {
   ],
 };
 
-async function fetchSerper(query, count) {
+async function fetchSerper(query, count, page = 1) {
   const res = await fetch('https://google.serper.dev/images', {
     method: 'POST',
     headers: { 'X-API-KEY': SERPER_API_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ q: query, num: count }),
+    body: JSON.stringify({ q: query, num: count, page }),
   });
   if (!res.ok) return [];
   const data = await res.json();
@@ -200,13 +200,16 @@ function getProjectStyle(projectSlug) {
   return projectStyles[projectSlug] || '';
 }
 
-async function getInspirationForQuestion(serperContext, projectStyle, count) {
+async function getInspirationForQuestion(serperContext, projectStyle, count, offset) {
   count = count || 4;
+  offset = offset || 0;
   projectStyle = projectStyle || '';
   if (!SERPER_API_KEY || !serperContext) return [];
   const query = projectStyle ? (projectStyle + ' ' + serperContext) : serperContext;
+  // Convert offset to page number (each page = 10 results, we request 4 per page starting at offset)
+  const page = Math.floor(offset / 4) + 1;
   try {
-    return await fetchSerper(query, count);
+    return await fetchSerper(query, count, page);
   } catch (err) {
     console.error('Inspiration question fetch error:', err.message);
     return [];

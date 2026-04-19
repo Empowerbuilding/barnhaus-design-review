@@ -270,10 +270,28 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
       ).catch(() => []);
     }
 
-    res.json({ reply, options: silasOptions, inspirationImages, questionIndex: qIdx, roomProgress });
+    res.json({ reply, options: silasOptions, inspirationImages, searchQuery: searchQuery || null, questionIndex: qIdx, roomProgress });
   } catch (err) {
     console.error('Chat error:', err.message);
     res.status(500).json({ error: 'Chat failed' });
+  }
+});
+
+// Load more inspiration images (next page of results)
+app.post('/api/inspiration/more', async (req, res) => {
+  const { searchQuery, projectSlug, offset = 0 } = req.body;
+  try {
+    if (!searchQuery) return res.json({ images: [] });
+    const images = await getInspirationForQuestion(
+      searchQuery,
+      getProjectStyle(projectSlug || ''),
+      4,
+      offset
+    );
+    res.json({ images: images || [] });
+  } catch (err) {
+    console.error('Inspiration more error:', err.message);
+    res.json({ images: [] });
   }
 });
 
