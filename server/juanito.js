@@ -815,25 +815,26 @@ function stripMarkdown(text) {
 
 function parseOptionsFromReply(rawText) {
   // Extract OPTIONS: [...] and SEARCH: "..." from end of Silas reply
+  // Handle both orderings: OPTIONS then SEARCH, or SEARCH then OPTIONS
   let workingText = rawText;
   let options = [];
   let searchQuery = null;
 
-  // Extract SEARCH: "..."
-  const searchMatch = workingText.match(/\nSEARCH:\s*"([^"]+)"\s*$/m);
-  if (searchMatch) {
-    searchQuery = searchMatch[1].trim();
-    workingText = workingText.slice(0, workingText.lastIndexOf('\nSEARCH:')).trim();
-  }
-
-  // Extract OPTIONS: [...]
-  const optionsMatch = workingText.match(/\nOPTIONS:\s*(\[.+?\])\s*$/s);
+  // Extract OPTIONS: [...] anywhere in the trailing lines
+  const optionsMatch = workingText.match(/\nOPTIONS:\s*(\[.*?\])/s);
   if (optionsMatch) {
     try {
       const parsed = JSON.parse(optionsMatch[1]);
       options = Array.isArray(parsed) ? parsed : [];
     } catch {}
-    workingText = workingText.slice(0, workingText.lastIndexOf('\nOPTIONS:')).trim();
+    workingText = workingText.replace(/\nOPTIONS:\s*\[.*?\]/s, '').trim();
+  }
+
+  // Extract SEARCH: "..." anywhere in the trailing lines
+  const searchMatch = workingText.match(/\nSEARCH:\s*"([^"]+)"/);
+  if (searchMatch) {
+    searchQuery = searchMatch[1].trim();
+    workingText = workingText.replace(/\nSEARCH:\s*"[^"]+"/, '').trim();
   }
 
   return { text: stripMarkdown(workingText), options, searchQuery };
