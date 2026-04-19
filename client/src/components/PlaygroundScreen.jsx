@@ -130,20 +130,23 @@ const styles = `
 `;
 
 export default function PlaygroundScreen({ feedback, project, clientName, projectSlug, sessionId, onSendToMichael }) {
-  const feedbackItems = Object.values(feedback);
-  let items = feedbackItems;
-  if (items.length === 0 && project?.groups) {
+  const feedbackItems = Object.values(feedback || {});
+  let items = feedbackItems.filter(i => i?.imageId);
+  if (items.length === 0 && project?.groups?.length > 0) {
     items = project.groups
       .filter(g => g.roomType?.toLowerCase() !== 'floor plan')
       .flatMap(g => (g.images || []).map(img => ({
         imageId: img.id,
         imageName: img.name,
         roomType: g.roomType,
-        originalUrl: img.url,
+        originalUrl: img.url || `/api/image/${img.id}`,
         status: null,
         notes: '',
-      })));
+      })))
+      .filter(i => i.imageId);
   }
+
+  console.log('[Playground] items:', items.length, 'feedback:', feedbackItems.length, 'groups:', project?.groups?.length);
 
   const [currentIdx, setCurrentIdx] = useState(0);
   const [inspirationImages, setInspirationImages] = useState([]);
@@ -151,6 +154,16 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
   const [autoEnhancePrompt, setAutoEnhancePrompt] = useState('');
   const [enhancedUrls, setEnhancedUrls] = useState({});
   const [sending, setSending] = useState(false);
+
+  // Guard: if no items, show loading/empty state
+  if (items.length === 0) {
+    return (
+      <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100%',background:'#1a1a1a',color:'#555',flexDirection:'column',gap:'1rem'}}>
+        <div style={{fontSize:'2rem'}}>🖼️</div>
+        <div style={{fontSize:'0.85rem',letterSpacing:'0.05em'}}>Loading your renders...</div>
+      </div>
+    );
+  }
 
   const item = items[currentIdx];
   const isFirst = currentIdx === 0;
