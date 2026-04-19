@@ -263,6 +263,8 @@ The SEARCH phrase must be specific to the exact visual choice you are asking abo
 - Asking about kitchen island → SEARCH: "kitchen island waterfall marble edge white oak cabinets houzz"
 - Asking about master shower → SEARCH: "master bath wet room freestanding tub glass shower modern farmhouse houzz"
 Do NOT include SEARCH for functional/layout questions (seat counts, appliance placement, room sizing, etc.).
+
+**IMPORTANT:** Whenever you include a SEARCH tag, your message text MUST reference the images. End your question with a natural callout like "I'm pulling up some reference images to the left — take a look and let me know which direction feels right" or "Check out the reference images on the left side of your screen." Never include a SEARCH tag silently — always tell the client to look at the pictures.
 `;
 
 const analysisCache = new Map();
