@@ -244,38 +244,43 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
       roomQuestionIndexes.set(roomKey, curIdx + 1);
     }
 
-    // Question bank drives buttons — Silas is instructed to ask the current question
+    // Question bank drives buttons — Silas is instructed to ask the next question
     const roomBank = getQuestionsForRoom(currentRoom || 'default');
     // Prepend baseline as question[0] if it exists, so options stay in sync with Silas
     const baselineQ = roomBank?.baseline && typeof roomBank.baseline === 'object' ? roomBank.baseline : null;
     const allQuestions = baselineQ
       ? [baselineQ, ...(roomBank?.questions || [])]
       : (roomBank?.questions || []);
-    const qIdx = roomQuestionIndexes.get(roomKey) || 0;
-    const sectionDone = qIdx >= allQuestions.length;
-    const currentQuestion = sectionDone ? null : allQuestions[qIdx];
 
-    // Inject the current question into Silas's message so he asks it
+    const qIdx = roomQuestionIndexes.get(roomKey) || 0;
+
+    // Advance FIRST on real client answers so we inject and return the NEXT question
+    if (!isImageChangeTrigger && !isInspirationSelection) {
+      roomQuestionIndexes.set(roomKey, qIdx + 1);
+    }
+
+    // Which question should Silas ask NOW?
+    const askIdx = (!isImageChangeTrigger && !isInspirationSelection) ? qIdx + 1 : qIdx;
+    const sectionDone = askIdx >= allQuestions.length;
+    const questionToAsk = sectionDone ? null : allQuestions[askIdx];
+
+    // Inject the correct next question into Silas's prompt
     if (!isImageChangeTrigger) {
-      if (currentQuestion) {
-        const qText = typeof currentQuestion === 'string' ? currentQuestion : currentQuestion.text;
-        fullMessage += `\n\n[NEXT QUESTION TO ASK: ${qText} — ask this now in your own words, naturally.]`;
+      if (questionToAsk) {
+        const qText = typeof questionToAsk === 'string' ? questionToAsk : questionToAsk.text;
+        fullMessage += `\n\n[NEXT QUESTION TO ASK: ${qText} — acknowledge their last answer briefly, then ask this in your own words naturally.]`;
       } else if (sectionDone) {
         fullMessage += `\n\n[ALL QUESTIONS FOR THIS SECTION ARE COMPLETE. Acknowledge their last answer warmly, give a brief summary of what was locked in, and let them know they can move to the next section using the Next button when ready.]`;
       }
     }
 
-    // Advance question index only on real answers — not image changes or inspiration picks
-    if (!isImageChangeTrigger && !isInspirationSelection) {
-      roomQuestionIndexes.set(roomKey, qIdx + 1); // capped at length — index === length means section done
-    }
-
-    const options = currentQuestion?.options || [];
-    const serperContext = currentQuestion?.serperContext || null;
-    const requiresImage = currentQuestion?.requiresImage || false;
+    // Options and images always come from the question Silas is about to ask
+    const options = questionToAsk?.options || [];
+    const serperContext = questionToAsk?.serperContext || null;
+    const requiresImage = questionToAsk?.requiresImage || false;
 
     const roomProgress = {
-      current: Math.min(qIdx + 1, allQuestions.length),
+      current: Math.min(askIdx + 1, allQuestions.length),
       total: allQuestions.length,
     };
 
