@@ -465,7 +465,6 @@ function ReviewPage() {
         currentImageId: currentImage.id,
         currentImageFeatures: currentImage.analysis?.features || [],
         sessionId,
-        isInspirationSelection,
         currentImageIndexInSection: currentImageIdx,
         isImageChangeTrigger: true,
         triggerMessage: trigger,
