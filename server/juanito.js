@@ -323,8 +323,8 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
   },
 
   'exterior': {
-    opening: `Start with a vibe check. Reference their specific kickoff style direction. Note that the renders shown are real Barnhaus renders/photos, not AI-generated — do NOT mention AI distortion or proportion warnings. Ask for their gut reaction on overall direction.`,
-    baseline: { text: "Standard Barnhaus exterior baseline: corrugated or standing seam metal roof, metal panel siding (corrugated, standing seam, or U-panel), black window frames, stone or brick wainscoting at base. Does this baseline work for you?", options: ["Approve baseline", "Change something"], requiresImage: false, serperContext: "" },
+    opening: `This is NOT a baseline presentation. Michael has already done the design work based on previous meetings with this client. You are presenting THEIR specific exterior render — a custom design Michael built for them. Do NOT describe it as a "baseline" or "starting point." Acknowledge the real work that went into it. Reference what you know about their kickoff preferences. Ask for their honest gut reaction on the overall direction. These are real Barnhaus renders, not AI — do NOT mention AI distortion or proportion warnings.`,
+    baseline: null,
     questions: [
       { text: "Does this color blocking and material palette match the vision you had in mind?", options: ["Yes, nailed it", "Something feels off", "Michael's call"], requiresImage: true, serperContext: "modern farmhouse exterior material palette metal siding stone wainscot houzz" },
       { text: "Are the rooflines and roof pitches hitting the mark, or do we need to adjust the pitch or form?", options: ["Rooflines look great", "Adjust the pitch", "Flag for Michael"], requiresImage: true, serperContext: "barndominium standing seam metal roof pitch form exterior houzz" },
