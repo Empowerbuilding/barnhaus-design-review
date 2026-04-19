@@ -243,34 +243,60 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
       roomQuestionIndexes.set(roomKey, curIdx + 1);
     }
 
-    // No mechanical options — Silas drives conversationally.
-    // Only fetch inspiration images on image-change triggers for aesthetic rooms.
+    // Question bank drives buttons — Silas is instructed to ask the current question
     const roomBank = getQuestionsForRoom(currentRoom || 'default');
     const allQuestions = roomBank?.questions || [];
     const qIdx = roomQuestionIndexes.get(roomKey) || 0;
+    const currentQuestion = allQuestions[Math.min(qIdx, allQuestions.length - 1)];
+
+    // Inject the current question into Silas's message so he asks it
+    if (currentQuestion && !isImageChangeTrigger) {
+      const qText = typeof currentQuestion === 'string' ? currentQuestion : currentQuestion.text;
+      fullMessage += `
+
+[NEXT QUESTION TO ASK: ${qText} — ask this now in your own words, naturally.]`;
+    }
+
+    // Advance question index when client answers (not on image change triggers)
+    if (!isImageChangeTrigger) {
+      roomQuestionIndexes.set(roomKey, Math.min(qIdx + 1, allQuestions.length - 1));
+    }
+
+    const nextQuestion = allQuestions[Math.min(qIdx + 1, allQuestions.length - 1)];
+    const options = currentQuestion?.options || [];
+    const serperContext = currentQuestion?.serperContext || nextQuestion?.serperContext || null;
+    const requiresImage = currentQuestion?.requiresImage || false;
 
     const roomProgress = {
       current: Math.min(qIdx + 1, allQuestions.length),
       total: allQuestions.length,
     };
 
-    // Get Silas reply first — inspiration images are driven by Silas's SEARCH tag
-    const silasResult = await sendToJuanito(fullMessage, messages, sessionId);
-    const reply = silasResult?.text || silasResult || '';
-    const silasOptions = silasResult?.options || [];
-    const searchQuery = silasResult?.searchQuery || null;
-
-    // Fetch inspiration images if Silas included a SEARCH tag
-    let inspirationImages = [];
-    if (searchQuery) {
-      inspirationImages = await getInspirationForQuestion(
-        searchQuery,
+    // Fetch inspiration images from QUESTION_BANK serperContext if this question needs them
+    // Also check Silas SEARCH tag as fallback
+    let inspirationFetch = Promise.resolve([]);
+    if (requiresImage && serperContext) {
+      inspirationFetch = getInspirationForQuestion(
+        serperContext,
         getProjectStyle(projectSlug || ''),
         4
-      ).catch(() => []);
+      );
     }
 
-    res.json({ reply, options: silasOptions, inspirationImages, searchQuery: searchQuery || null, questionIndex: qIdx, roomProgress });
+    const [silasResult, inspirationImages] = await Promise.all([
+      sendToJuanito(fullMessage, messages, sessionId),
+      inspirationFetch,
+    ]);
+
+    const reply = silasResult?.text || silasResult || '';
+    // Use SEARCH tag from Silas if no serperContext in question bank
+    const searchQuery = silasResult?.searchQuery || null;
+    let finalImages = inspirationImages;
+    if (!finalImages.length && searchQuery) {
+      finalImages = await getInspirationForQuestion(searchQuery, getProjectStyle(projectSlug || ''), 4).catch(() => []);
+    }
+
+    res.json({ reply, options, inspirationImages: finalImages, searchQuery: serperContext || searchQuery || null, questionIndex: qIdx, roomProgress });
   } catch (err) {
     console.error('Chat error:', err.message);
     res.status(500).json({ error: 'Chat failed' });
