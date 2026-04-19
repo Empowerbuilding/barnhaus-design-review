@@ -335,6 +335,8 @@ export default function ChatWindow({ messages, onSend, isComplete, options, isTy
         <div ref={bottomRef} />
       </div>
 
+      {/* DEBUG */}
+      <div style={{fontSize:'10px',color:'#666',padding:'2px 8px'}}>opts:{JSON.stringify(options)} textMode:{String(textMode)} hasOpts:{String(hasOptions)}</div>
       {/* Button mode */}
       {hasOptions && !textMode && !isComplete && (
         <div className="chat-options">
