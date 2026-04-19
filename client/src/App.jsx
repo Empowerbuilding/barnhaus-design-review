@@ -341,6 +341,28 @@ function ReviewPage() {
   const [chatOpen, setChatOpen] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
+
+  // Inactivity timeout — stop pinging server after 2h of no client interaction
+  const lastActivityRef = useRef(Date.now());
+  useEffect(() => {
+    const bump = () => { lastActivityRef.current = Date.now(); };
+    window.addEventListener('click', bump);
+    window.addEventListener('keydown', bump);
+    window.addEventListener('touchstart', bump);
+    const check = setInterval(() => {
+      if (Date.now() - lastActivityRef.current > 2 * 60 * 60 * 1000) {
+        // 2 hours of inactivity — mark completed to stop all API calls
+        setCompleted(true);
+      }
+    }, 60 * 1000);
+    return () => {
+      window.removeEventListener('click', bump);
+      window.removeEventListener('keydown', bump);
+      window.removeEventListener('touchstart', bump);
+      clearInterval(check);
+    };
+  }, []);
+
   const [chatOptions, setChatOptions] = useState([]);
   const [inspirationImages, setInspirationImages] = useState([]);
   const [questionProgress, setQuestionProgress] = useState({});
@@ -431,7 +453,7 @@ function ReviewPage() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        messages: [],
+        messages: messages.map(m => ({ role: m.role, content: m.content })),
         clientName,
         projectSlug,
         currentRoom: roomLabel,
@@ -459,7 +481,7 @@ function ReviewPage() {
         }
       })
       .catch(() => {});
-  }, [currentGroup, currentImage, currentGroupIdx, currentImageIdx, project, sessionId, clientName, phase]);
+  }, [currentGroup, currentImage, currentGroupIdx, currentImageIdx, project, sessionId, clientName, phase, messages]);
 
   useEffect(() => {
     const lastMsg = messages[messages.length - 1];
@@ -493,7 +515,7 @@ function ReviewPage() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        messages: [],
+        messages: messages.map(m => ({ role: m.role, content: m.content })),
         clientName,
         projectSlug,
         currentRoom: roomLabel,
@@ -514,7 +536,7 @@ function ReviewPage() {
         if (data.inspirationImages) setInspirationImages(data.inspirationImages);
       })
       .catch(() => {});
-  }, [currentImage, currentGroup, currentImageIdx, clientName, projectSlug, sessionId, phase]);
+  }, [currentImage, currentGroup, currentImageIdx, clientName, projectSlug, sessionId, phase, messages]);
 
   const sendChat = useCallback(
     async (userMessage) => {

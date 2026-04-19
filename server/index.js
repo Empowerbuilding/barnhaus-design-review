@@ -278,7 +278,7 @@ app.get('/api/inspiration', async (req, res) => {
 });
 
 app.post('/api/inspiration/pick', async (req, res) => {
-  const { imageUrl, imageIndex, roomType, clientName, sessionId } = req.body;
+  const { imageUrl, imageIndex, roomType, clientName, sessionId, messages } = req.body;
   try {
     // Analyze the image in parallel with sending the pick to Silas
     const description = await analyzeInspirationImage(imageUrl);
@@ -298,7 +298,7 @@ The client selected inspiration image ${imageIndex} for the ${roomType}.
 Image URL: ${imageUrl}
 Acknowledge their pick and continue with targeted detail questions.`;
 
-    const reply = await sendToJuanito(contextMsg);
+    const reply = await sendToJuanito(contextMsg, messages || []);
 
     // Save picked image to session
     if (sessionId) {
