@@ -300,7 +300,11 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
     let inspirationFetch = Promise.resolve([]);
     if (requiresImage && serperContext && bankOptions.length > 1) {
       // Filter out non-visual options before fetching
-      const visualOptions = bankOptions.filter(o => !/michael'?s call|flag|something else/i.test(o));
+      const visualOptions = bankOptions.filter(o => !/michael'?s call|flag|something else|nailed it|feels off|feels right|yes|no|skip|happy with|approve|adjust|need more|missing|perfect|great|works/i.test(o));
+      // Only do per-option fetch if remaining visual options are meaningful choices (not yes/no)
+      if (visualOptions.length < 2) {
+        inspirationFetch = getInspirationForQuestion(serperContext, getProjectStyle(projectSlug || ''), 4);
+      } else
       inspirationFetch = getInspirationPerOption(
         serperContext,
         visualOptions,
