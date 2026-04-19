@@ -185,7 +185,7 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
       return;
     }
     try {
-      const res = await fetch(`/api/inspiration?room=${encodeURIComponent(target.roomType)}&count=5`);
+      const res = await fetch(`/api/inspiration?room=${encodeURIComponent(target.roomType)}&count=6`);
       const data = await res.json();
       const imgs = data.images || [];
       vibeCache.current[target.imageId] = imgs;
