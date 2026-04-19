@@ -487,12 +487,7 @@ function ReviewPage() {
         if (data.options) setChatOptions(data.options);
         if (data.inspirationImages) { setInspirationImages(data.inspirationImages); setInspirationOffset(0); }
         if (data.searchQuery) setCurrentSearchQuery(data.searchQuery);
-        if (data.roomProgress) {
-          setQuestionProgress(prev => ({
-            ...prev,
-            [SECTION_LABELS[roomLabel] || roomLabel]: data.roomProgress,
-          }));
-        }
+        // Don't update roomProgress from image change trigger — only client answers drive the counter
       })
       .catch(() => { setSilasTyping(false); });
   }, [currentGroup, currentImage, currentGroupIdx, currentImageIdx, project, sessionId, clientName, phase, messages]);
@@ -645,6 +640,14 @@ function ReviewPage() {
     if (targetGroup?.images?.[0]) {
       const targetKey = `${targetGroup.roomType}-${targetGroup.images[0].id}`;
       firedTriggers.current.delete(targetKey);
+    }
+    // Initialize progress for target section so bar shows 0/N immediately
+    if (targetGroup) {
+      const roomLabel = targetGroup.roomType || 'other';
+      setQuestionProgress(prev => ({
+        ...prev,
+        [SECTION_LABELS[roomLabel] || roomLabel]: { current: 0, total: prev[SECTION_LABELS[roomLabel] || roomLabel]?.total || 0 },
+      }));
     }
 
     // Load saved messages for the target section (empty if first visit)
