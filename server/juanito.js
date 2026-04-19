@@ -315,10 +315,20 @@ Say: "I've flagged that layout change for your live meeting with Michael. He'll 
 
 STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Silas is moving to the room finishes now.`,
     questions: [
-      { text: "Are all the rooms you requested accounted for on this floor plan?", options: ["Yes, all rooms are here", "Some rooms are missing", "Flag for Michael"], requiresImage: false, serperContext: "" },
-      { text: "Is the house oriented correctly for your driveway approach and your best views?", options: ["Yes, orientation works great", "Needs adjustment", "Flag for Michael"], requiresImage: false, serperContext: "" },
-      { text: "How is the overall circulation feeling — can you mentally walk from the entry through the main living areas without confusion?", options: ["Flows naturally", "Has some confusion points", "Flag for Michael"], requiresImage: false, serperContext: "" },
-      { text: "Any gut reactions on room sizes or placement before we move into the finishes?", options: ["Everything looks good", "I have items to flag", "Flag for Michael"], requiresImage: false, serperContext: "" }
+      { text: "Are all the rooms and spaces you asked for actually accounted for on this floor plan?", options: ["Yes, all rooms are here", "Some rooms are missing", "Flag for Michael"], requiresImage: false, serperContext: "" },
+      { text: "Is the house oriented correctly on the property — front entry facing the right direction, best views landing at the back where you want them?", options: ["Yes, orientation is right", "Needs adjustment", "Flag for Michael"], requiresImage: false, serperContext: "" },
+      { text: "Mentally walk from the front door through the entry and into the main living area — does that path feel natural, or does something feel off in the sequencing?", options: ["Flows naturally", "Something feels off", "Flag for Michael"], requiresImage: false, serperContext: "" },
+      { text: "How does the separation between public and private zones feel? Can guests move through the living areas without crossing through the bedroom wing?", options: ["Yes, zones are well separated", "Feels too open between zones", "Flag for Michael"], requiresImage: false, serperContext: "" },
+      { text: "The master suite — does its location feel right? Is it far enough from guest bedrooms and living areas for privacy?", options: ["Yes, placement is perfect", "Needs more privacy", "Flag for Michael"], requiresImage: false, serperContext: "" },
+      { text: "How are the guest bedrooms landing — do they feel properly separated from each other, or too close together?", options: ["Well separated", "Too close together", "Flag for Michael"], requiresImage: false, serperContext: "" },
+      { text: "Kitchen placement — does it feel connected to the right spaces? You want it accessible from the garage/entry for groceries and open to the main living area.", options: ["Kitchen placement works great", "Something feels off with the connection", "Flag for Michael"], requiresImage: false, serperContext: "" },
+      { text: "Mudroom and laundry — are they landing in the right spot relative to the garage entry and the main living areas?", options: ["Yes, perfect location", "Needs adjustment", "Flag for Michael"], requiresImage: false, serperContext: "" },
+      { text: "Outdoor living connection — does the back patio and outdoor living feel properly connected to the great room and kitchen, or does it feel like an afterthought?", options: ["Well connected to indoor spaces", "Feels disconnected", "Flag for Michael"], requiresImage: false, serperContext: "" },
+      { text: "Are there any rooms that feel too small for how you actually plan to use them?", options: ["Everything feels properly sized", "Some rooms feel too small", "Flag for Michael"], requiresImage: false, serperContext: "" },
+      { text: "Are there any rooms that feel oversized or wasting square footage that could be better used elsewhere?", options: ["No, all space is being used well", "Some rooms feel too large", "Flag for Michael"], requiresImage: false, serperContext: "" },
+      { text: "Storage — beyond the closets, are there enough dedicated storage spaces throughout the plan for how you actually live?", options: ["Storage looks sufficient", "Need more storage", "Flag for Michael"], requiresImage: false, serperContext: "" },
+      { text: "Any hallways that feel too long, too dark, or like dead-end corridors that won't feel good to live with?", options: ["Hallways feel fine", "I have concerns", "Flag for Michael"], requiresImage: false, serperContext: "" },
+      { text: "Overall — what is the single biggest thing you want Michael to address before Draft 2?", options: ["Nothing major, ready to move on", "I have a specific request", "Flag for Michael"], requiresImage: false, serperContext: "" }
     ]
   },
 
