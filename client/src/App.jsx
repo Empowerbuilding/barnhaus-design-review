@@ -118,6 +118,21 @@ const appStyles = `
     transition: flex 0.3s ease;
   }
 
+  /* Playground scrollable mode */
+  .review-page.playground-mode {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+  .review-page.playground-mode .review-content {
+    overflow: visible;
+    flex: none;
+  }
+  .review-page.playground-mode .image-panel {
+    overflow: visible;
+    flex: none;
+  }
+
   /* Desktop chat toggle button */
   .chat-toggle-btn {
     position: absolute;
@@ -417,7 +432,12 @@ function ReviewPage() {
   const currentGroup = project?.groups?.[currentGroupIdx];
   const currentImage = currentGroup?.images?.[currentImageIdx];
   const isFloorPlan = currentGroup?.roomType?.toLowerCase() === 'floor plan';
-  const sectionLabels = project?.groups?.map(g => SECTION_LABELS[g.roomType] || g.roomType) || [];
+  const baseSectionLabels = project?.groups?.map(g => SECTION_LABELS[g.roomType] || g.roomType) || [];
+  const sectionLabels = phase === 'playground' ? [...baseSectionLabels, 'Visualize'] : baseSectionLabels;
+  const progressIndex = phase === 'playground' ? sectionLabels.length - 1 : currentGroupIdx;
+  const playgroundFeedback = Object.fromEntries(
+    Object.entries(feedback).filter(([, item]) => item.roomType?.toLowerCase() !== 'floor plan')
+  );
 
   const nextSectionLabel = project?.groups?.[currentGroupIdx + 1]
     ? SECTION_LABELS[project.groups[currentGroupIdx + 1].roomType] || project.groups[currentGroupIdx + 1].roomType
@@ -646,20 +666,8 @@ function ReviewPage() {
     );
   }
 
-  if (phase === 'playground') {
-    return (
-      <PlaygroundScreen
-        feedback={feedback}
-        clientName={clientName}
-        projectSlug={projectSlug}
-        sessionId={sessionId}
-        onSendToMichael={handleSendToMichael}
-      />
-    );
-  }
-
   return (
-    <div className="review-page">
+    <div className={`review-page${phase === 'playground' ? ' playground-mode' : ''}`}>
       <header className="review-header">
         <div className="header-inner">
           <img src="https://barnhaussteelbuilders.com/assets/images/logo-BbjiAVC6.png" alt="Barnhaus Steel Builders" className="header-logo" />
@@ -667,54 +675,68 @@ function ReviewPage() {
         </div>
       </header>
 
-      <ProgressBar sections={sectionLabels} currentIndex={currentGroupIdx} onSelect={handleSectionChange} locked={phase === 'walkthrough'} />
+      <ProgressBar sections={sectionLabels} currentIndex={progressIndex} onSelect={handleSectionChange} locked={phase === 'walkthrough' || phase === 'playground'} />
 
       <div className="review-content">
         {/* Image panel — full width on mobile, 65% on desktop */}
         <div className="image-panel">
-          {/* Desktop chat toggle button */}
-          <button
-            className="chat-toggle-btn desktop-only"
-            onClick={() => setChatOpen(o => !o)}
-            aria-label={chatOpen ? 'Hide chat' : 'Show chat'}
-          >
-            💬 {chatOpen ? 'Hide Silas' : 'Silas'}
-          </button>
+          {phase === 'playground' ? (
+            <PlaygroundScreen
+              feedback={playgroundFeedback}
+              clientName={clientName}
+              projectSlug={projectSlug}
+              sessionId={sessionId}
+              onSendToMichael={handleSendToMichael}
+            />
+          ) : (
+            <>
+              {/* Desktop chat toggle button */}
+              <button
+                className="chat-toggle-btn desktop-only"
+                onClick={() => setChatOpen(o => !o)}
+                aria-label={chatOpen ? 'Hide chat' : 'Show chat'}
+              >
+                💬 {chatOpen ? 'Hide Silas' : 'Silas'}
+              </button>
 
-          <ImageViewer
-            image={currentImage}
-            images={currentGroup?.images || []}
-            currentIndex={currentImageIdx}
-            onSelectImage={setCurrentImageIdx}
-            isFloorPlan={isFloorPlan}
-            roomType={currentGroup?.roomType}
-            feedback={feedback[currentImage?.id]}
-            onFeedback={(status, notes) => handleFeedback(currentImage?.id, status, notes)}
-            onNext={handleNextImage}
-            hasNext={
-              currentImageIdx < (currentGroup?.images?.length || 0) - 1 ||
-              currentGroupIdx < (project?.groups?.length || 0) - 1
-            }
-            onComplete={handleComplete}
-            isLastImage={
-              currentGroupIdx === (project?.groups?.length || 0) - 1 &&
-              currentImageIdx === (currentGroup?.images?.length || 0) - 1
-            }
-          />
+              <ImageViewer
+                image={currentImage}
+                images={currentGroup?.images || []}
+                currentIndex={currentImageIdx}
+                onSelectImage={setCurrentImageIdx}
+                isFloorPlan={isFloorPlan}
+                roomType={currentGroup?.roomType}
+                feedback={feedback[currentImage?.id]}
+                onFeedback={(status, notes) => handleFeedback(currentImage?.id, status, notes)}
+                onNext={handleNextImage}
+                hasNext={
+                  currentImageIdx < (currentGroup?.images?.length || 0) - 1 ||
+                  currentGroupIdx < (project?.groups?.length || 0) - 1
+                }
+                onComplete={handleComplete}
+                isLastImage={
+                  currentGroupIdx === (project?.groups?.length || 0) - 1 &&
+                  currentImageIdx === (currentGroup?.images?.length || 0) - 1
+                }
+              />
+            </>
+          )}
         </div>
 
-        {/* Desktop chat panel */}
-        <div className={`chat-panel desktop-only ${chatOpen ? 'chat-panel-open' : 'chat-panel-closed'}`}>
-          <ChatWindow
-            messages={messages}
-            onSend={sendChat}
-            isComplete={completed}
-          />
-        </div>
+        {/* Desktop chat panel — only in walkthrough */}
+        {phase !== 'playground' && (
+          <div className={`chat-panel desktop-only ${chatOpen ? 'chat-panel-open' : 'chat-panel-closed'}`}>
+            <ChatWindow
+              messages={messages}
+              onSend={sendChat}
+              isComplete={completed}
+            />
+          </div>
+        )}
       </div>
 
-      {/* Mobile sticky bottom bar */}
-      {isMobile && (
+      {/* Mobile sticky bottom bar — only in walkthrough */}
+      {phase !== 'playground' && isMobile && (
         <div className="mobile-chat-bar" onClick={openDrawer}>
           <div className="mobile-chat-bar-inner">
             <div className="silas-dot" />
@@ -729,14 +751,16 @@ function ReviewPage() {
         </div>
       )}
 
-      {/* Mobile slide-up drawer */}
-      <ChatDrawer
-        open={drawerOpen}
-        onClose={closeDrawer}
-        messages={messages}
-        onSend={sendChat}
-        isComplete={completed}
-      />
+      {/* Mobile slide-up drawer — only in walkthrough */}
+      {phase !== 'playground' && (
+        <ChatDrawer
+          open={drawerOpen}
+          onClose={closeDrawer}
+          messages={messages}
+          onSend={sendChat}
+          isComplete={completed}
+        />
+      )}
     </div>
   );
 }

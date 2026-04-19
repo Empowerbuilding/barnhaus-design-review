@@ -135,7 +135,7 @@ export default function FeedbackButtons({ imageId, feedback, onFeedback, onNext,
 
       <div className="next-btn-row">
         {isLastImage ? (
-          <button className="btn-next btn-submit" onClick={onComplete}>Finish Review →</button>
+          <button className="btn-next btn-submit" onClick={onComplete}>Visualize Your Changes →</button>
         ) : hasNext ? (
           <button className="btn-next" onClick={onNext}>Next →</button>
         ) : null}

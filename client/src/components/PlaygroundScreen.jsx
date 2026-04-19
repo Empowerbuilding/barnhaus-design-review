@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import InspirationStrip from './InspirationStrip';
 import EnhanceButton from './EnhanceButton';
 
@@ -6,31 +6,7 @@ const styles = `
   .playground-screen {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
     background: #1a1a1a;
-  }
-  .playground-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.75rem 1.5rem;
-    background: #222;
-    border-bottom: 1px solid #2a2a2a;
-    flex-shrink: 0;
-  }
-  .playground-header-inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
-  }
-  .playground-logo { height: 44px; }
-  .playground-subtitle {
-    font-size: 0.7rem;
-    letter-spacing: 0.25em;
-    color: #666;
-    text-transform: uppercase;
-    font-weight: 400;
   }
   .playground-intro {
     padding: 1.5rem 2rem 0.5rem;
@@ -132,20 +108,6 @@ const styles = `
     display: block;
     margin-bottom: 0.75rem;
   }
-  .btn-get-inspiration {
-    margin-bottom: 0.5rem;
-    background: transparent;
-    border: 1px solid #3a3a3a;
-    border-radius: 8px;
-    color: #888;
-    font-size: 0.8rem;
-    padding: 0.45rem 0.9rem;
-    cursor: pointer;
-    font-family: 'Inter', sans-serif;
-    transition: border-color 0.2s, color 0.2s;
-  }
-  .btn-get-inspiration:hover:not(:disabled) { border-color: #666; color: #f0f0f0; }
-  .btn-get-inspiration:disabled { opacity: 0.5; cursor: not-allowed; }
   .playground-footer {
     display: flex;
     flex-direction: column;
@@ -180,7 +142,6 @@ const styles = `
   @media (max-width: 768px) {
     .playground-gallery { padding: 1rem; }
     .playground-intro { padding: 1rem 1rem 0.25rem; }
-    .playground-logo { height: 36px; }
   }
 `;
 
@@ -188,34 +149,33 @@ function PlaygroundCard({ item, clientName, projectSlug, sessionId }) {
   const [inspirationImages, setInspirationImages] = useState([]);
   const [autoEnhancePrompt, setAutoEnhancePrompt] = useState(item.notes || '');
   const [enhancedUrl, setEnhancedUrl] = useState(null);
-  const [fetchingInspo, setFetchingInspo] = useState(false);
 
-  const fetchInspiration = async () => {
-    setFetchingInspo(true);
-    try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [],
-          clientName,
-          projectSlug,
-          currentRoom: item.roomType,
-          isImageChangeTrigger: true,
-          triggerMessage: `[PLAYGROUND] Fetch 4-6 inspiration images for a ${item.roomType}. Client note: "${item.notes || 'no specific preference'}". Return inspiration images only.`,
-          sessionId,
-        }),
-      });
-      const data = await res.json();
-      if (data.inspiration && data.inspiration.length > 0) {
-        setInspirationImages(data.inspiration);
+  useEffect(() => {
+    async function fetchInspiration() {
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: [],
+            clientName,
+            projectSlug,
+            currentRoom: item.roomType,
+            isImageChangeTrigger: true,
+            triggerMessage: `[PLAYGROUND] Fetch 4-6 inspiration images for a ${item.roomType}. Client note: "${item.notes || 'no specific preference'}". Return inspiration images only.`,
+            sessionId,
+          }),
+        });
+        const data = await res.json();
+        if (data.inspiration && data.inspiration.length > 0) {
+          setInspirationImages(data.inspiration);
+        }
+      } catch {
+        // silently fail
       }
-    } catch {
-      // silently fail
-    } finally {
-      setFetchingInspo(false);
     }
-  };
+    fetchInspiration();
+  }, []);
 
   const handleVibePick = useCallback(async (img, index) => {
     setInspirationImages([]);
@@ -271,16 +231,6 @@ function PlaygroundCard({ item, clientName, projectSlug, sessionId }) {
 
         <InspirationStrip images={inspirationImages} onPick={handleVibePick} />
 
-        {inspirationImages.length === 0 && (
-          <button
-            className="btn-get-inspiration"
-            onClick={fetchInspiration}
-            disabled={fetchingInspo}
-          >
-            {fetchingInspo ? 'Loading…' : '🔍 Get Inspiration'}
-          </button>
-        )}
-
         <EnhanceButton
           imageUrl={item.originalUrl}
           roomType={item.roomType || 'room'}
@@ -311,17 +261,6 @@ export default function PlaygroundScreen({ feedback, clientName, projectSlug, se
   return (
     <div className="playground-screen">
       <style>{styles}</style>
-
-      <header className="playground-header">
-        <div className="playground-header-inner">
-          <img
-            src="https://barnhaussteelbuilders.com/assets/images/logo-BbjiAVC6.png"
-            alt="Barnhaus Steel Builders"
-            className="playground-logo"
-          />
-          <div className="playground-subtitle">Design Playground</div>
-        </div>
-      </header>
 
       <div className="playground-intro">
         <h2>Visualize Your Changes</h2>
