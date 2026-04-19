@@ -871,7 +871,9 @@ async function sendToJuanito(message, chatHistory = [], sessionId = null) {
     if (!response.ok) throw new Error(`Anthropic API ${response.status}`);
     const data = await response.json();
     const raw = data.content[0].text.trim();
+    console.log('[SILAS RAW]', JSON.stringify(raw.slice(-300)));
     const parsed = parseOptionsFromReply(raw);
+    console.log('[SILAS PARSED]', JSON.stringify({ options: parsed.options, searchQuery: parsed.searchQuery }));
     return parsed.text
       ? parsed
       : { text: "I'm still reviewing your designs — send a message and I'll respond.", options: [] };
