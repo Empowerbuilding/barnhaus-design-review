@@ -769,7 +769,7 @@ function ReviewPage() {
               hasNext={hasNext}
               onComplete={handleComplete}
               isLastImage={isLastImage}
-              inspirationImages={currentGroup?.roomType === 'floor_plan' ? [] : inspirationImages}
+              inspirationImages={currentGroup?.roomType?.toLowerCase().includes('floor') ? [] : inspirationImages}
               onInspirationSelect={handleInspirationSelect}
               onLoadMoreInspiration={handleLoadMoreInspiration}
             />
