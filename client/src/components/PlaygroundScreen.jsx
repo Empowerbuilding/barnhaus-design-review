@@ -170,11 +170,15 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
   const isFirst = currentIdx === 0;
   const isLast = currentIdx === items.length - 1;
 
-  const fetchVibes = useCallback(async (idx, { updateState = false } = {}) => {
+  const fetchVibesForIdx = useCallback(async (idx, applyToState) => {
     const target = items[idx];
     if (!target || !target.roomType) return;
+    // Return cache immediately
     if (vibeCache.current[target.imageId]) {
-      if (updateState) setInspirationImages(vibeCache.current[target.imageId]);
+      if (applyToState) {
+        setInspirationImages(vibeCache.current[target.imageId]);
+        setInspirationLoading(false);
+      }
       return;
     }
     try {
@@ -182,8 +186,13 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
       const data = await res.json();
       const imgs = data.images || [];
       vibeCache.current[target.imageId] = imgs;
-      if (updateState) setInspirationImages(imgs);
-    } catch {}
+      if (applyToState) {
+        setInspirationImages(imgs);
+        setInspirationLoading(false);
+      }
+    } catch {
+      if (applyToState) setInspirationLoading(false);
+    }
   }, [items]);
 
   // Fetch current image vibes + prefetch next
@@ -191,21 +200,21 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
     if (!item) return;
     setAutoEnhancePrompt(item.notes || '');
 
-    // Show cached immediately if available
+    // Show cached immediately or fetch
     if (vibeCache.current[item.imageId]) {
       setInspirationImages(vibeCache.current[item.imageId]);
       setInspirationLoading(false);
     } else {
       setInspirationImages([]);
       setInspirationLoading(true);
-      fetchVibes(currentIdx, { updateState: true }).then(() => setInspirationLoading(false));
+      fetchVibesForIdx(currentIdx, true);
     }
 
-    // Prefetch next image in background
+    // Prefetch next in background (don't apply to state)
     if (currentIdx + 1 < items.length) {
-      fetchVibes(currentIdx + 1, { updateState: false });
+      fetchVibesForIdx(currentIdx + 1, false);
     }
-  }, [currentIdx, item, fetchVibes, items]);
+  }, [currentIdx]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleVibePick = useCallback(async (img, index) => {
     setInspirationImages([]);
