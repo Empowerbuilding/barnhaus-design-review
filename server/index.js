@@ -248,24 +248,26 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
     const roomBank = getQuestionsForRoom(currentRoom || 'default');
     const allQuestions = roomBank?.questions || [];
     const qIdx = roomQuestionIndexes.get(roomKey) || 0;
-    const currentQuestion = allQuestions[Math.min(qIdx, allQuestions.length - 1)];
+    const sectionDone = qIdx >= allQuestions.length;
+    const currentQuestion = sectionDone ? null : allQuestions[qIdx];
 
     // Inject the current question into Silas's message so he asks it
-    if (currentQuestion && !isImageChangeTrigger) {
-      const qText = typeof currentQuestion === 'string' ? currentQuestion : currentQuestion.text;
-      fullMessage += `
-
-[NEXT QUESTION TO ASK: ${qText} — ask this now in your own words, naturally.]`;
+    if (!isImageChangeTrigger) {
+      if (currentQuestion) {
+        const qText = typeof currentQuestion === 'string' ? currentQuestion : currentQuestion.text;
+        fullMessage += `\n\n[NEXT QUESTION TO ASK: ${qText} — ask this now in your own words, naturally.]`;
+      } else if (sectionDone) {
+        fullMessage += `\n\n[ALL QUESTIONS FOR THIS SECTION ARE COMPLETE. Acknowledge their last answer warmly, give a brief summary of what was locked in, and let them know they can move to the next section using the Next button when ready.]`;
+      }
     }
 
     // Advance question index only on real answers — not image changes or inspiration picks
     if (!isImageChangeTrigger && !isInspirationSelection) {
-      roomQuestionIndexes.set(roomKey, Math.min(qIdx + 1, allQuestions.length - 1));
+      roomQuestionIndexes.set(roomKey, qIdx + 1); // uncapped — let it go past end
     }
 
-    const nextQuestion = allQuestions[Math.min(qIdx + 1, allQuestions.length - 1)];
     const options = currentQuestion?.options || [];
-    const serperContext = currentQuestion?.serperContext || nextQuestion?.serperContext || null;
+    const serperContext = currentQuestion?.serperContext || null;
     const requiresImage = currentQuestion?.requiresImage || false;
 
     const roomProgress = {
