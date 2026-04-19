@@ -5,6 +5,7 @@ import ChatDrawer from './components/ChatDrawer';
 import ImageViewer from './components/ImageViewer';
 import ProgressBar from './components/ProgressBar';
 import ProgressSidebar from './components/ProgressSidebar';
+import InspirationVault from './components/InspirationVault';
 import OverviewScreen from './components/OverviewScreen';
 import './App.css';
 
@@ -369,6 +370,7 @@ function ReviewPage() {
   const [questionProgress, setQuestionProgress] = useState({});
   const [silasTyping, setSilasTyping] = useState(false);
   const [currentSearchQuery, setCurrentSearchQuery] = useState(null);
+  const [savedVibes, setSavedVibes] = useState([]);
   const [inspirationOffset, setInspirationOffset] = useState(0);
 
   useEffect(() => {
@@ -686,9 +688,10 @@ function ReviewPage() {
     } catch {}
   }, [currentSearchQuery, inspirationOffset, projectSlug]);
 
-  const handleInspirationSelect = useCallback((message) => {
-    // Inspiration picks are silent — logged to transcript for the brief only, no Silas response
-    // Buttons stay, question index doesn't move, Silas doesn't reply
+  const handleInspirationSelect = useCallback((message, vaultItem) => {
+    // Save to vault
+    if (vaultItem) setSavedVibes(prev => [...prev, vaultItem]);
+    // Still log silently to transcript for the brief
     setMessages(prev => [...prev, { role: 'user', content: message, silent: true }]);
   }, []);
 
@@ -776,7 +779,8 @@ function ReviewPage() {
 
       <div className="review-body">
         {/* Left sidebar — desktop only */}
-        <ProgressSidebar
+        <InspirationVault items={savedVibes} />
+      <ProgressSidebar
           sections={sectionLabels}
           currentSection={currentGroupIdx}
           questionProgress={questionProgress}

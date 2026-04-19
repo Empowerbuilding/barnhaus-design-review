@@ -402,7 +402,8 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
       { text: "TV: are you planning to mount the TV above the mantle?", options: ["Yes, TV above mantle", "No TV at fireplace", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Flanking cabinets: match the wood finish of the floating shelves, or paint them to match the kitchen cabinets?", options: ["Match wood floating shelves", "Paint to match kitchen", "Michael's call"], requiresImage: true, serperContext: "flanking cabinets fireplace built-in floating shelves great room houzz" },
       { text: "Hearth: raised hearth bench at the base, or firebox flush to the floor?", options: ["Raised hearth bench", "Flush to floor", "Michael's call"], requiresImage: false, serperContext: "" },
-      { text: "Ceiling in the great room: vault confirmed, or any changes to the height or form?", options: ["Vault looks great", "Adjust vault height", "Flag for Michael"], requiresImage: false, serperContext: "" }
+      { text: "Ceiling in the great room: vault confirmed, or any changes to the height or form?", options: ["Vault looks great", "Adjust vault height", "Flag for Michael"], requiresImage: false, serperContext: "" },
+      { text: "Vault ceiling finish — how do you want to finish that vault above the great room? Clean sheetrock lets the form do the talking, tongue-and-groove wood planking adds warmth, or heavy timber trusses/beams give it that ranch lodge character.", options: ["Clean sheetrock", "Tongue-and-groove wood", "Heavy timber beams/trusses", "Michael's call"], requiresImage: true, serperContext: "vaulted great room ceiling tongue groove wood timber beams trusses modern farmhouse houzz" }
     ]
   },
 

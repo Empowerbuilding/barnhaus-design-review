@@ -331,10 +331,16 @@ export default function ImageViewer({
     setSelectedInspiration(idx);
     const noteText = likedNote.trim() ? ` — What I like about it: ${likedNote.trim()}` : '';
     const msg = `[Vibe reference — this style appeals to me: ${img.title || 'image ' + (idx + 1)}]${noteText}`;
+    const vaultItem = {
+      thumb: img.thumb || img.url,
+      title: img.title || 'Reference image',
+      source: img.source || '',
+      note: likedNote.trim(),
+    };
     setInspirationLightbox(null);
     setLikedNoteMode(false);
     setLikedNote('');
-    if (onInspirationSelect) onInspirationSelect(msg);
+    if (onInspirationSelect) onInspirationSelect(msg, vaultItem);
   };
 
   return (
