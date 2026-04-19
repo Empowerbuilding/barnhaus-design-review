@@ -268,6 +268,9 @@ export default function ChatWindow({ messages, onSend, isComplete, options, isTy
   const [textMode, setTextMode] = useState(false);
   const [flagMode, setFlagMode] = useState(false);
   const [flagNote, setFlagNote] = useState('');
+  const [changeMode, setChangeMode] = useState(false);
+  const [changeOpt, setChangeOpt] = useState('');
+  const [changeNote, setChangeNote] = useState('');
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -280,7 +283,7 @@ export default function ChatWindow({ messages, onSend, isComplete, options, isTy
 
   // When new options arrive, exit text mode
   useEffect(() => {
-    if (hasOptions) { setTextMode(false); setFlagMode(false); setFlagNote(''); }
+    if (hasOptions) { setTextMode(false); setFlagMode(false); setFlagNote(''); setChangeMode(false); setChangeOpt(''); setChangeNote(''); }
   }, [options]);
 
   const handleSend = async (text) => {
@@ -337,12 +340,17 @@ export default function ChatWindow({ messages, onSend, isComplete, options, isTy
         <div className="chat-options">
           {options.map((opt, i) => {
             const isFlag = /flag|items to flag/i.test(opt);
+            const isDissatisfied = /change something|something feels off|needs adjustment|adjust|something else|has some confusion|need more|need larger|missing|feels off/i.test(opt) && !/michael|flag/i.test(opt);
             return (
               <button
                 key={i}
                 className="option-btn"
                 disabled={sending}
-                onClick={() => isFlag ? setFlagMode(true) : handleSend(opt)}
+                onClick={() => {
+                  if (isFlag) { setFlagMode(true); }
+                  else if (isDissatisfied) { setChangeOpt(opt); setChangeMode(true); setChangeNote(''); }
+                  else { handleSend(opt); }
+                }}
               >
                 {opt}
               </button>
@@ -389,6 +397,50 @@ export default function ChatWindow({ messages, onSend, isComplete, options, isTy
                 </button>
                 <button
                   onClick={() => { setFlagMode(false); setFlagNote(''); }}
+                  style={{ background: 'transparent', border: '1px solid #3a3a3a', color: '#888', borderRadius: '8px', padding: '0 0.75rem', cursor: 'pointer', fontSize: '0.8rem' }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+          {changeMode && (
+            <div style={{ padding: '0.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              <div style={{ color: '#DAA520', fontSize: '0.8rem', fontWeight: 600 }}>What would you like to change?</div>
+              <textarea
+                autoFocus
+                rows={3}
+                value={changeNote}
+                onChange={e => setChangeNote(e.target.value)}
+                placeholder="Be as specific as you'd like — Michael will use this to adjust Draft 2..."
+                style={{
+                  background: '#1a1a1a', border: '1px solid #3a3a3a', borderRadius: '8px',
+                  color: '#eee', fontSize: '0.85rem', padding: '0.5rem 0.75rem',
+                  resize: 'none', outline: 'none', fontFamily: 'inherit',
+                  width: '100%', boxSizing: 'border-box',
+                }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !e.shiftKey && changeNote.trim()) {
+                    e.preventDefault();
+                    handleSend(changeOpt + ': ' + changeNote.trim());
+                    setChangeMode(false); setChangeNote(''); setChangeOpt('');
+                  }
+                }}
+              />
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  className="option-btn"
+                  disabled={!changeNote.trim() || sending}
+                  onClick={() => {
+                    handleSend(changeOpt + ': ' + changeNote.trim());
+                    setChangeMode(false); setChangeNote(''); setChangeOpt('');
+                  }}
+                  style={{ flex: 1 }}
+                >
+                  Send feedback
+                </button>
+                <button
+                  onClick={() => { setChangeMode(false); setChangeNote(''); setChangeOpt(''); }}
                   style={{ background: 'transparent', border: '1px solid #3a3a3a', color: '#888', borderRadius: '8px', padding: '0 0.75rem', cursor: 'pointer', fontSize: '0.8rem' }}
                 >
                   Cancel
