@@ -242,12 +242,24 @@ function PlaygroundCard({ item, clientName, projectSlug, sessionId }) {
   );
 }
 
-export default function PlaygroundScreen({ feedback, clientName, projectSlug, sessionId, onSendToMichael }) {
+export default function PlaygroundScreen({ feedback, project, clientName, projectSlug, sessionId, onSendToMichael }) {
   const [sending, setSending] = useState(false);
 
-  const allItems = Object.values(feedback);
-  const flagged = allItems.filter(f => f.status === 'change' || f.status === 'question');
-  const items = flagged.length > 0 ? flagged : allItems;
+  // Build items from feedback, falling back to all project images (except floor plan)
+  const feedbackItems = Object.values(feedback);
+  let items = feedbackItems;
+  if (items.length === 0 && project?.groups) {
+    items = project.groups
+      .filter(g => g.roomType?.toLowerCase() !== 'floor plan')
+      .flatMap(g => (g.images || []).map(img => ({
+        imageId: img.id,
+        imageName: img.name,
+        roomType: g.roomType,
+        originalUrl: img.url,
+        status: null,
+        notes: '',
+      })));
+  }
 
   const handleSend = async () => {
     setSending(true);

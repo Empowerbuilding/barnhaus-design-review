@@ -683,6 +683,7 @@ function ReviewPage() {
           {phase === 'playground' ? (
             <PlaygroundScreen
               feedback={playgroundFeedback}
+              project={project}
               clientName={clientName}
               projectSlug={projectSlug}
               sessionId={sessionId}
