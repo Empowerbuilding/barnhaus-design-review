@@ -275,7 +275,7 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
       <style>{styles}</style>
 
       <div className="playground-intro">
-        <h2>Visualize Your Changes</h2>
+        <h2>Make It Yours</h2>
         <p>
           Below are the rooms you flagged. Browse inspiration, enhance the renders,
           and send your final vision to Michael.
