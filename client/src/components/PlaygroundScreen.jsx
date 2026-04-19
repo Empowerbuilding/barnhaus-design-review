@@ -6,12 +6,13 @@ const LOGO = 'https://barnhaussteelbuilders.com/assets/images/logo-BbjiAVC6.png'
 
 const styles = `
   .pg-screen {
-    position: absolute;
+    position: fixed;
     inset: 0;
+    z-index: 1000;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    background: red;
+    background: #1a1a1a;
     color: #e0e0e0;
     font-family: 'Inter', sans-serif;
   }
