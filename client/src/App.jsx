@@ -335,6 +335,7 @@ function ReviewPage() {
   const [phase, setPhase] = useState('overview'); // 'overview' | 'walkthrough'
   const [memo, setMemo] = useState(null);
   const [messages, setMessages] = useState([]);
+  const sectionMessages = useRef({}); // persists chat history per section index
   const [completed, setCompleted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [sessionId, setSessionId] = useState(null);
@@ -635,12 +636,38 @@ function ReviewPage() {
   }, [currentGroup, currentGroupIdx, currentImageIdx, project]);
 
   const handleSectionChange = useCallback((idx) => {
+    // Save current section's messages before leaving
+    sectionMessages.current[currentGroupIdx] = messages;
+
+    // Load saved messages for the target section (empty if first visit)
+    const saved = sectionMessages.current[idx] || [];
+    setMessages(saved);
+
+    // If returning to a section mid-conversation, restore its options too
+    // (options are lost on nav — Silas will re-surface them on next message naturally)
     setChatOptions([]);
     setInspirationImages([]);
     setInspirationOffset(0);
     setCurrentGroupIdx(idx);
     setCurrentImageIdx(0);
-  }, []);
+
+    // If returning to a section that already has a conversation, add a silent re-orient note
+    if (saved.length > 0) {
+      const targetGroup = project?.groups?.[idx];
+      const roomLabel = targetGroup?.roomType || 'room';
+      const reorientMsg = {
+        role: 'user',
+        content: `[Client returned to the ${SECTION_LABELS[roomLabel] || roomLabel} section — pick up the conversation right where you left off. Do not re-introduce yourself or repeat questions already answered.]`,
+        silent: true,
+      };
+      // We can't call sendChat here (state not updated yet) — attach to saved for next Silas call
+      sectionMessages.current[idx] = [...saved, reorientMsg];
+      setTimeout(() => setMessages(prev => {
+        if (prev[prev.length - 1]?.content?.includes('returned to the')) return prev;
+        return [...prev, reorientMsg];
+      }), 50);
+    }
+  }, [currentGroupIdx, messages, project]);
 
   const handleLoadMoreInspiration = useCallback(async () => {
     if (!currentSearchQuery) return;
