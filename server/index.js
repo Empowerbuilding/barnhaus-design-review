@@ -226,14 +226,23 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
           }`
         : '';
 
+      const currentIdx = roomQuestionIndexes.get(roomKey) || 0;
+      const positionNote = currentIdx > 0
+        ? `\n\n[PROGRESS: You have already covered ${currentIdx} question(s) in this room. Resume from question ${currentIdx + 1} — do NOT re-ask anything already covered.]`
+        : '';
+
       fullMessage = triggerMessage
         + openingNote
         + (questionList ? `\n\nQUESTION BANK FOR ${(currentRoom || 'this room').toUpperCase()} — work through these conversationally. Skip anything already answered above:\n${questionList}` : '')
         + priorAnswers
+        + positionNote
         + behaviorRules;
 
-      // Reset question index for this room on new image trigger
-      roomQuestionIndexes.set(roomKey, 0);
+      // Preserve question index on image change — do NOT reset to 0
+      // Index already reflects answered questions; only initialize if first visit
+      if (!roomQuestionIndexes.has(roomKey)) {
+        roomQuestionIndexes.set(roomKey, 0);
+      }
     } else {
       const lastUserMessage = [...messages].reverse().find(m => m.role === 'user')?.content || '';
       const contextPrefix = `[CONTEXT: room=${currentRoom}, image=${currentImage}, client=${clientName}]`;
