@@ -4,7 +4,7 @@ const path = require('path');
 const { WebSocketServer } = require('ws');
 const http = require('http');
 const { getProjectRenders, streamImage, getImageBase64 } = require('./drive');
-const { sendToJuanito, initJuanitoSession, generateDesignBrief, getQuestionsForRoom, QUESTION_BANK } = require('./juanito');
+const { sendToJuanito, initJuanitoSession, generateDesignBrief, getQuestionsForRoom, QUESTION_BANK, setSessionContext } = require('./juanito');
 const { analyzeImage, groupAndSortImages, analyzeInspirationImage } = require('./claude');
 const { notifyDiscord, notifyDiscordBrief, writeToCRM } = require('./notify');
 const multer = require('multer');
@@ -128,6 +128,8 @@ app.post('/api/session/start', async (req, res) => {
     if (memo) {
       const styleMatch = memo.match(/scandinavian|farmhouse|modern|rustic|industrial|transitional|mediterranean|craftsman|contemporary|minimalist/gi);
       if (styleMatch) setProjectStyle(projectSlug, [...new Set(styleMatch.map(s => s.toLowerCase()))].slice(0, 2).join(' '));
+      // Store memo as session context so Silas has client-specific knowledge on every call
+      if (sessionId) setSessionContext(sessionId, memo);
     }
     res.json({ sessionId: sessionId || null, memo });
   } catch (err) {
@@ -252,7 +254,7 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
     };
 
     const [reply, inspirationImages] = await Promise.all([
-      sendToJuanito(fullMessage, messages),
+      sendToJuanito(fullMessage, messages, sessionId),
       inspirationFetch,
     ]);
 
@@ -298,7 +300,7 @@ The client selected inspiration image ${imageIndex} for the ${roomType}.
 Image URL: ${imageUrl}
 Acknowledge their pick and continue with targeted detail questions.`;
 
-    const reply = await sendToJuanito(contextMsg, messages || []);
+    const reply = await sendToJuanito(contextMsg, messages || [], sessionId);
 
     // Save picked image to session
     if (sessionId) {

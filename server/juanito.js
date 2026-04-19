@@ -237,6 +237,16 @@ When running as Silas inside the Barnhaus client-facing review portal (review.ba
 `;
 
 const analysisCache = new Map();
+// Store project context memo per session so Silas has client-specific context
+const sessionContextStore = new Map();
+
+function setSessionContext(sessionId, memo) {
+  if (sessionId && memo) sessionContextStore.set(sessionId, memo);
+}
+
+function getSessionContext(sessionId) {
+  return sessionContextStore.get(sessionId) || '';
+}
 
 const QUESTION_BANK = {
   'floor plan': {
@@ -762,9 +772,25 @@ async function sendViaGateway(message) {
   }
 }
 
-async function sendToJuanito(message, chatHistory = []) {
+function stripMarkdown(text) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '$1')   // **bold**
+    .replace(/\*(.+?)\*/g, '$1')         // *italic*
+    .replace(/^#{1,6}\s+/gm, '')          // ## headers
+    .replace(/^[-*]\s+/gm, '• ')          // bullet points
+    .replace(/`(.+?)`/g, '$1')             // `code`
+    .trim();
+}
+
+async function sendToJuanito(message, chatHistory = [], sessionId = null) {
   try {
     if (!ANTHROPIC_KEY) return "I'm having trouble connecting right now. Please try again in a moment.";
+
+    // Inject project-specific context from the session memo
+    const projectContext = sessionId ? getSessionContext(sessionId) : '';
+    const systemPrompt = projectContext
+      ? SILAS_SYSTEM_PROMPT + '\n\n---\n\n## THIS CLIENT\'S PROJECT CONTEXT (from Juanito\'s briefing):\n' + projectContext
+      : SILAS_SYSTEM_PROMPT;
 
     const historyWindow = chatHistory.slice(-29);
     const messages = [...historyWindow, { role: 'user', content: message }];
@@ -779,14 +805,14 @@ async function sendToJuanito(message, chatHistory = []) {
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
         max_tokens: 1024,
-        system: SILAS_SYSTEM_PROMPT,
+        system: systemPrompt,
         messages,
       }),
     });
 
     if (!response.ok) throw new Error(`Anthropic API ${response.status}`);
     const data = await response.json();
-    const reply = data.content[0].text.trim();
+    const reply = stripMarkdown(data.content[0].text.trim());
     return reply || "I'm still reviewing your designs — send a message and I'll respond.";
   } catch (err) {
     console.error('Silas API error:', err.message);
@@ -888,4 +914,4 @@ Output the brief text only. Michael will use this to brief his drafting session.
   return brief;
 }
 
-module.exports = { sendToJuanito, initJuanitoSession, generateDesignBrief, analyzeImageWithJuanito: analyzeImageWithClaude, getQuestionsForRoom, groupAndSortImages, QUESTION_BANK };
+module.exports = { sendToJuanito, initJuanitoSession, generateDesignBrief, analyzeImageWithJuanito: analyzeImageWithClaude, getQuestionsForRoom, groupAndSortImages, QUESTION_BANK, setSessionContext };
