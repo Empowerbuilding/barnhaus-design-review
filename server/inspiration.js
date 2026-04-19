@@ -237,11 +237,19 @@ async function getInspirationPerOption(serperContext, options, projectStyle) {
 
   if (!queries.length) return [];
 
+  // Fetch more per option when few options, so UI always shows ~4 images
+  const imgsPerOption = queries.length <= 2 ? 2 : 1;
+
   try {
-    const results = await Promise.all(queries.map(q => fetchSerper(q, 1)));
-    return results
-      .map((imgs, i) => imgs[0] ? { ...imgs[0], optionLabel: options[i] } : null)
-      .filter(Boolean);
+    const results = await Promise.all(queries.map(q => fetchSerper(q, imgsPerOption)));
+    // Expand: each option gets imgsPerOption images, all labeled with optionLabel
+    const labeled = [];
+    results.forEach((imgs, i) => {
+      imgs.slice(0, imgsPerOption).forEach(img => {
+        if (img) labeled.push({ ...img, optionLabel: options[i] });
+      });
+    });
+    return labeled;
   } catch (err) {
     console.error('Inspiration per-option fetch error:', err.message);
     return [];

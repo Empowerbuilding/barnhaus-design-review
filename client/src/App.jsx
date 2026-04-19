@@ -700,30 +700,24 @@ function ReviewPage() {
     setMessages(prev => [...prev, { role: 'user', content: message, silent: true }]);
   }, []);
 
-  const handleComplete = useCallback(async () => {
+  const handleComplete = useCallback(() => {
     if (submitting) return;
     setSubmitting(true);
-    try {
-      const res = await fetch('/api/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          projectName: project?.projectName,
-          projectSlug,
-          clientName,
-          feedback: [],
-          sessionId,
-          chatTranscript: messages,
-          enhancedUrls: {},
-        }),
-      });
-      if (!res.ok) throw new Error('Server error ' + res.status);
-      setCompleted(true);
-    } catch (err) {
-      console.error('Submit feedback error:', err);
-      alert('Failed to submit feedback: ' + err.message);
-      setSubmitting(false);
-    }
+    // Show complete screen immediately — fire submission in background
+    setCompleted(true);
+    fetch('/api/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        projectName: project?.projectName,
+        projectSlug,
+        clientName,
+        feedback: [],
+        sessionId,
+        chatTranscript: messages,
+        enhancedUrls: {},
+      }),
+    }).catch(err => console.error('Submit feedback error:', err));
   }, [project, clientName, sessionId, messages, projectSlug, submitting]);
 
   if (loading) {
