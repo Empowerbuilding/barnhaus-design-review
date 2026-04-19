@@ -214,9 +214,21 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
 - If the client gives a short answer, probe deeper before moving to the next question.
 - Output ONLY your message to the client. No reasoning, no meta-commentary.`;
 
+      // Build a summary of what's already been discussed in this room so Silas doesn't repeat
+      const priorAnswers = messages.length > 0
+        ? `\n\nALREADY COVERED IN THIS SESSION — DO NOT RE-ASK THESE:\nThe following topics have already been discussed with the client. Do not bring them up again unless the client raises them:\n${
+            messages
+              .filter(m => m.role === 'user')
+              .slice(-15)
+              .map(m => `- Client said: "${(m.content || '').slice(0, 120)}"`)
+              .join('\n')
+          }`
+        : '';
+
       fullMessage = triggerMessage
         + openingNote
-        + (questionList ? `\n\nQUESTION BANK FOR ${(currentRoom || 'this room').toUpperCase()} — work through these conversationally, one at a time:\n${questionList}` : '')
+        + (questionList ? `\n\nQUESTION BANK FOR ${(currentRoom || 'this room').toUpperCase()} — work through these conversationally. Skip anything already answered above:\n${questionList}` : '')
+        + priorAnswers
         + behaviorRules;
 
       // Reset question index for this room on new image trigger
@@ -231,21 +243,23 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
       roomQuestionIndexes.set(roomKey, curIdx + 1);
     }
 
-    // Determine current question for this room to get options + inspiration
-    const qIdx = roomQuestionIndexes.get(roomKey) || 0;
+    // No mechanical options — Silas drives conversationally.
+    // Only fetch inspiration images on image-change triggers for aesthetic rooms.
     const roomBank = getQuestionsForRoom(currentRoom || 'default');
     const allQuestions = roomBank?.questions || [];
-    const currentQuestion = allQuestions[qIdx];
+    const qIdx = roomQuestionIndexes.get(roomKey) || 0;
 
-    let options = currentQuestion?.options || [];
     let inspirationFetch = Promise.resolve([]);
-
-    if (currentQuestion?.requiresImage && currentQuestion?.serperContext) {
-      inspirationFetch = getInspirationForQuestion(
-        currentQuestion.serperContext,
-        getProjectStyle(projectSlug || ''),
-        4
-      );
+    if (isImageChangeTrigger) {
+      // On image change, look for the first aesthetic question in the bank to seed vibe images
+      const aestheticQ = allQuestions.find(q => q.requiresImage && q.serperContext);
+      if (aestheticQ) {
+        inspirationFetch = getInspirationForQuestion(
+          aestheticQ.serperContext,
+          getProjectStyle(projectSlug || ''),
+          4
+        );
+      }
     }
 
     const roomProgress = {
@@ -258,7 +272,8 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
       inspirationFetch,
     ]);
 
-    res.json({ reply, options, inspirationImages: inspirationImages || [], questionIndex: qIdx, roomProgress });
+    // No pre-set options — send empty array so ChatWindow stays in text mode
+    res.json({ reply, options: [], inspirationImages: inspirationImages || [], questionIndex: qIdx, roomProgress });
   } catch (err) {
     console.error('Chat error:', err.message);
     res.status(500).json({ error: 'Chat failed' });
