@@ -28,12 +28,12 @@ const styles = `
     flex-wrap: wrap;
   }
   .btn-enhance-auto {
-    background: linear-gradient(135deg, #1a3a1a, #2d5a2d);
-    color: #7ddc7d;
+    background: linear-gradient(135deg, #B8860B, #DAA520);
+    color: #1a1a1a;
     border: 1px solid #3a7a3a;
   }
   .btn-enhance-auto:hover:not(:disabled) {
-    background: linear-gradient(135deg, #2d5a2d, #3a7a3a);
+    background: linear-gradient(135deg, #d4a017, #e8b820);
     opacity: 1;
   }
   .btn-manual-toggle {
