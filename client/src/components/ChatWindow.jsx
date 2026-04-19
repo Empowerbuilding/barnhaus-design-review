@@ -207,9 +207,11 @@ export default function ChatWindow({ messages, onSend, isComplete }) {
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const bottomRef = useRef(null);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    inputRef.current?.focus();
   }, [messages]);
 
   const handleSend = async () => {
@@ -259,6 +261,8 @@ export default function ChatWindow({ messages, onSend, isComplete }) {
       </div>
       <div className="chat-input-area">
         <input
+          ref={inputRef}
+          autoFocus
           type="text"
           value={input}
           onChange={e => setInput(e.target.value)}
