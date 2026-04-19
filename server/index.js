@@ -262,7 +262,6 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
       roomQuestionIndexes.set(roomKey, qIdx + 1);
     }
 
-    console.log('[PROGRESS]', { roomKey, qIdx, askIdx, current: Math.min(askIdx+1, allQuestions.length), total: allQuestions.length, isImageChangeTrigger, isInspirationSelection });
     const sectionDone = askIdx >= allQuestions.length;
     const questionToAsk = sectionDone ? null : allQuestions[askIdx];
 
