@@ -412,7 +412,7 @@ STEP 4 — AUTO-ADVANCE: After collecting their floor plan notes, tell them Sila
     questions: [
       { text: "Is there a fireplace in this room?", options: ["Yes, run fireplace flow", "No fireplace", "Michael's call"], requiresImage: false, serperContext: "" },
       { text: "Built-in shelving or entertainment center on any wall?", options: ["Yes, add built-ins", "No, keep it open", "Michael's call"], requiresImage: true, serperContext: "living room built-in shelving entertainment center modern farmhouse houzz" },
-      { text: "Ceiling: vault, flat high, or coffered?", options: ["Vault", "Flat and high", "Coffered", "Michael's call"], requiresImage: false, serperContext: "" },
+      { text: "Ceiling in this room — do you want to vault it, keep it flat and high, add a coffered grid, or leave it for Michael to decide based on what makes structural sense?", options: ["Vault it", "Flat and high", "Coffered ceiling", "Michael's call"], requiresImage: true, serperContext: "living room vaulted ceiling vs coffered ceiling vs flat high ceiling modern farmhouse houzz" },
       { text: "Natural light: are we happy with the window placement in this room?", options: ["Yes, windows look great", "Need more light", "Flag for Michael"], requiresImage: false, serperContext: "" }
     ]
   },

@@ -284,8 +284,10 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
       }
     }
 
-    // Options and images always come from the question Silas is about to ask
-    const options = questionToAsk?.options || [];
+    // Options: prefer what Silas actually says (parsed from his response);
+    // fall back to question bank only as a pre-flight for inspiration image fetching.
+    // We resolve final options AFTER getting Silas's reply below.
+    const bankOptions = questionToAsk?.options || [];
     const serperContext = questionToAsk?.serperContext || null;
     const requiresImage = questionToAsk?.requiresImage || false;
 
@@ -296,9 +298,9 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
 
     // Fetch one image per option for visual comparison, fallback to 4-image batch
     let inspirationFetch = Promise.resolve([]);
-    if (requiresImage && serperContext && options.length > 1) {
+    if (requiresImage && serperContext && bankOptions.length > 1) {
       // Filter out non-visual options before fetching
-      const visualOptions = options.filter(o => !/michael'?s call|flag|something else/i.test(o));
+      const visualOptions = bankOptions.filter(o => !/michael'?s call|flag|something else/i.test(o));
       inspirationFetch = getInspirationPerOption(
         serperContext,
         visualOptions,
@@ -315,6 +317,10 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
 
     const reply = silasResult?.text || silasResult || '';
     const searchQuery = silasResult?.searchQuery || null;
+    // Use Silas's parsed OPTIONS as the source of truth for buttons.
+    // Fall back to question bank options only if Silas didn't output any.
+    const silasOptions = Array.isArray(silasResult?.options) ? silasResult.options : [];
+    const options = silasOptions.length > 0 ? silasOptions : bankOptions;
     let finalImages = inspirationImages;
     if (!finalImages.length && searchQuery) {
       finalImages = await getInspirationForQuestion(searchQuery, getProjectStyle(projectSlug || ''), 4).catch(() => []);
