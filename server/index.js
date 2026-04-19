@@ -4,7 +4,7 @@ const path = require('path');
 const { WebSocketServer } = require('ws');
 const http = require('http');
 const { getProjectRenders, streamImage, getImageBase64 } = require('./drive');
-const { sendToJuanito, initJuanitoSession, generateDesignBrief } = require('./juanito');
+const { sendToJuanito, initJuanitoSession, generateDesignBrief, getQuestionsForRoom } = require('./juanito');
 const { analyzeImage, groupAndSortImages, analyzeInspirationImage } = require('./claude');
 const { notifyDiscord, notifyDiscordBrief, writeToCRM, enhanceImage } = require('./notify');
 const multer = require('multer');
@@ -189,7 +189,13 @@ app.post('/api/chat', async (req, res) => {
     let fullMessage;
 
     if (isImageChangeTrigger && triggerMessage) {
-      fullMessage = triggerMessage;
+      // Append the question bank for this room so Silas always has it in context
+      const roomQuestions = getQuestionsForRoom(currentRoom || 'default');
+      const questionList = roomQuestions?.questions?.map((q, i) => `${i+1}. ${q}`).join('\n') || '';
+      const openingNote = roomQuestions?.opening ? `\n\nROOM GUIDANCE:\n${roomQuestions.opening}` : '';
+      fullMessage = triggerMessage
+        + openingNote
+        + (questionList ? `\n\nQUESTION BANK FOR ${(currentRoom || 'this room').toUpperCase()} — work through these conversationally, don't skip important ones:\n${questionList}` : '');
     } else {
       const lastUserMessage = [...messages].reverse().find(m => m.role === 'user')?.content || '';
       const contextPrefix = `[CONTEXT: room=${currentRoom}, image=${currentImage}, client=${clientName}]`;
