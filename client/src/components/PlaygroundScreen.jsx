@@ -236,11 +236,7 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
       });
       const data = await res.json();
       if (data.description) {
-        const existing = promptCache.current[item.imageId] || '';
-        const vibes = existing
-          ? existing + ' Also incorporate: ' + data.description
-          : `Transform this ${item.roomType} render with the following style inspiration: ${data.description}`;
-        const prompt = vibes + ' Keep the existing layout and dimensions intact.';
+        const prompt = `Transform this ${item.roomType} render to match this style: ${data.description} Keep the existing layout and dimensions intact.`;
         promptCache.current[item.imageId] = prompt;
         setAutoEnhancePrompt(prompt);
       }
