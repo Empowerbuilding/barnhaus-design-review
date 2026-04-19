@@ -254,6 +254,15 @@ When running as Silas inside the Barnhaus client-facing review portal (review.ba
 **Fast-click buttons:** When you ask a question that has 2-4 clear answer choices, append this exact line at the very end of your message (after your text, on its own line):
 OPTIONS: ["Choice A", "Choice B", "Choice C"]
 Only include OPTIONS when the question has specific discrete choices. Do NOT include OPTIONS for open-ended questions, acknowledgments, or when probing deeper. The options must exactly match the choices you described in your message. Maximum 4 options. Always include a "Something else" or "Flag for Michael" option when relevant.
+
+**Inspiration images:** When you ask an aesthetic/visual question (anything about materials, colors, styles, finishes, fixtures, layouts), also append this line directly after OPTIONS (or alone if no OPTIONS):
+SEARCH: "tight specific search phrase for houzz or pinterest"
+The SEARCH phrase must be specific to the exact visual choice you are asking about — not the room in general. Examples:
+- Asking about roof color → SEARCH: "standing seam metal roof dark charcoal white walls modern farmhouse houzz"
+- Asking about stone wainscot → SEARCH: "hill country limestone stone wainscot white metal siding exterior houzz"
+- Asking about kitchen island → SEARCH: "kitchen island waterfall marble edge white oak cabinets houzz"
+- Asking about master shower → SEARCH: "master bath wet room freestanding tub glass shower modern farmhouse houzz"
+Do NOT include SEARCH for functional/layout questions (seat counts, appliance placement, room sizing, etc.).
 `;
 
 const analysisCache = new Map();
@@ -803,16 +812,29 @@ function stripMarkdown(text) {
 }
 
 function parseOptionsFromReply(rawText) {
-  // Extract OPTIONS: [...] from end of Silas reply
-  const optionsMatch = rawText.match(/\nOPTIONS:\s*(\[.+?\])\s*$/s);
-  if (!optionsMatch) return { text: stripMarkdown(rawText), options: [] };
-  try {
-    const options = JSON.parse(optionsMatch[1]);
-    const text = stripMarkdown(rawText.slice(0, rawText.lastIndexOf('\nOPTIONS:')).trim());
-    return { text, options: Array.isArray(options) ? options : [] };
-  } catch {
-    return { text: stripMarkdown(rawText), options: [] };
+  // Extract OPTIONS: [...] and SEARCH: "..." from end of Silas reply
+  let workingText = rawText;
+  let options = [];
+  let searchQuery = null;
+
+  // Extract SEARCH: "..."
+  const searchMatch = workingText.match(/\nSEARCH:\s*"([^"]+)"\s*$/m);
+  if (searchMatch) {
+    searchQuery = searchMatch[1].trim();
+    workingText = workingText.slice(0, workingText.lastIndexOf('\nSEARCH:')).trim();
   }
+
+  // Extract OPTIONS: [...]
+  const optionsMatch = workingText.match(/\nOPTIONS:\s*(\[.+?\])\s*$/s);
+  if (optionsMatch) {
+    try {
+      const parsed = JSON.parse(optionsMatch[1]);
+      options = Array.isArray(parsed) ? parsed : [];
+    } catch {}
+    workingText = workingText.slice(0, workingText.lastIndexOf('\nOPTIONS:')).trim();
+  }
+
+  return { text: stripMarkdown(workingText), options, searchQuery };
 }
 
 async function sendToJuanito(message, chatHistory = [], sessionId = null) {

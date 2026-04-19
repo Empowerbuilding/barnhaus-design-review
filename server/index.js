@@ -249,32 +249,28 @@ RULES FOR THIS IMAGE — READ BEFORE RESPONDING:
     const allQuestions = roomBank?.questions || [];
     const qIdx = roomQuestionIndexes.get(roomKey) || 0;
 
-    let inspirationFetch = Promise.resolve([]);
-    if (isImageChangeTrigger) {
-      // On image change, look for the first aesthetic question in the bank to seed vibe images
-      const aestheticQ = allQuestions.find(q => q.requiresImage && q.serperContext);
-      if (aestheticQ) {
-        inspirationFetch = getInspirationForQuestion(
-          aestheticQ.serperContext,
-          getProjectStyle(projectSlug || ''),
-          4
-        );
-      }
-    }
-
     const roomProgress = {
       current: Math.min(qIdx + 1, allQuestions.length),
       total: allQuestions.length,
     };
 
-    const [silasResult, inspirationImages] = await Promise.all([
-      sendToJuanito(fullMessage, messages, sessionId),
-      inspirationFetch,
-    ]);
-
+    // Get Silas reply first — inspiration images are driven by Silas's SEARCH tag
+    const silasResult = await sendToJuanito(fullMessage, messages, sessionId);
     const reply = silasResult?.text || silasResult || '';
     const silasOptions = silasResult?.options || [];
-    res.json({ reply, options: silasOptions, inspirationImages: inspirationImages || [], questionIndex: qIdx, roomProgress });
+    const searchQuery = silasResult?.searchQuery || null;
+
+    // Fetch inspiration images if Silas included a SEARCH tag
+    let inspirationImages = [];
+    if (searchQuery) {
+      inspirationImages = await getInspirationForQuestion(
+        searchQuery,
+        getProjectStyle(projectSlug || ''),
+        4
+      ).catch(() => []);
+    }
+
+    res.json({ reply, options: silasOptions, inspirationImages, questionIndex: qIdx, roomProgress });
   } catch (err) {
     console.error('Chat error:', err.message);
     res.status(500).json({ error: 'Chat failed' });
