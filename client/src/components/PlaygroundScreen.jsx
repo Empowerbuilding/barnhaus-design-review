@@ -6,13 +6,12 @@ const LOGO = 'https://barnhaussteelbuilders.com/assets/images/logo-BbjiAVC6.png'
 
 const styles = `
   .pg-screen {
-    position: fixed;
-    inset: 0;
+    height: 100%;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     background: #1a1a1a;
     color: #e0e0e0;
-    overflow: hidden;
     font-family: 'Inter', sans-serif;
   }
   .pg-header {
@@ -107,6 +106,26 @@ const styles = `
   }
   .pg-send-btn:hover:not(:disabled) { opacity: 0.85; transform: scale(1.01); }
   .pg-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  @keyframes pg-pulse {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 0.65; }
+  }
+  .pg-skeleton-strip {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+  }
+  .pg-skeleton-box {
+    flex: 1;
+    height: 72px;
+    border-radius: 6px;
+    background: rgba(184, 134, 11, 0.25);
+    animation: pg-pulse 1.4s ease-in-out infinite;
+  }
+  .pg-skeleton-box:nth-child(2) { animation-delay: 0.15s; }
+  .pg-skeleton-box:nth-child(3) { animation-delay: 0.3s; }
+  .pg-skeleton-box:nth-child(4) { animation-delay: 0.45s; }
+  .pg-skeleton-box:nth-child(5) { animation-delay: 0.6s; }
 `;
 
 export default function PlaygroundScreen({ feedback, project, clientName, projectSlug, sessionId, onSendToMichael }) {
@@ -127,6 +146,7 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
 
   const [currentIdx, setCurrentIdx] = useState(0);
   const [inspirationImages, setInspirationImages] = useState([]);
+  const [inspirationLoading, setInspirationLoading] = useState(false);
   const [autoEnhancePrompt, setAutoEnhancePrompt] = useState('');
   const [enhancedUrls, setEnhancedUrls] = useState({});
   const [sending, setSending] = useState(false);
@@ -138,6 +158,7 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
   useEffect(() => {
     if (!item) return;
     setInspirationImages([]);
+    setInspirationLoading(true);
     setAutoEnhancePrompt(item.notes || '');
 
     let cancelled = false;
@@ -157,11 +178,14 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
           }),
         });
         const data = await res.json();
-        if (!cancelled && data.inspiration && data.inspiration.length > 0) {
-          setInspirationImages(data.inspiration);
+        if (!cancelled) {
+          if (data.inspiration && data.inspiration.length > 0) {
+            setInspirationImages(data.inspiration);
+          }
+          setInspirationLoading(false);
         }
       } catch {
-        // silently fail
+        if (!cancelled) setInspirationLoading(false);
       }
     }
     fetchInspiration();
@@ -234,7 +258,14 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
       <div className="pg-room-label">{item.roomType}</div>
 
       <div className="pg-bottom">
-        <InspirationStrip images={inspirationImages} onPick={handleVibePick} />
+        {inspirationLoading && inspirationImages.length === 0
+          ? (
+            <div className="pg-skeleton-strip">
+              {[0,1,2,3,4].map(i => <div key={i} className="pg-skeleton-box" />)}
+            </div>
+          )
+          : <InspirationStrip images={inspirationImages} onPick={handleVibePick} />
+        }
         <EnhanceButton
           key={item.imageId}
           imageUrl={item.originalUrl}
