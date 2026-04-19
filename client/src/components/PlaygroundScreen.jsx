@@ -5,6 +5,7 @@ import EnhanceButton from './EnhanceButton';
 const LOGO = 'https://barnhaussteelbuilders.com/assets/images/logo-BbjiAVC6.png';
 
 const styles = `
+  @keyframes spin { to { transform: rotate(360deg); } }
   .pg-screen {
     display: flex;
     flex-direction: column;
@@ -154,7 +155,9 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
   const [autoEnhancePrompt, setAutoEnhancePrompt] = useState('');
   const [enhancedUrls, setEnhancedUrls] = useState({});
   const [sending, setSending] = useState(false);
-  const vibeCache = useRef({}); // cache by imageId
+  const [vibeLoading, setVibeLoading] = useState(false);
+  const vibeCache = useRef({});
+  const promptCache = useRef({}); // per-imageId prompt // cache by imageId
 
   // Guard: if no items, show loading/empty state
   if (items.length === 0) {
@@ -198,7 +201,7 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
   // Fetch current image vibes + prefetch next
   useEffect(() => {
     if (!item) return;
-    setAutoEnhancePrompt(item.notes || '');
+    setAutoEnhancePrompt(promptCache.current[item.imageId] || item.notes || '');
 
     // Show cached immediately or fetch
     if (vibeCache.current[item.imageId]) {
@@ -217,8 +220,8 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
   }, [currentIdx]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleVibePick = useCallback(async (img, index) => {
-    setInspirationImages([]);
-    if (!img) return;
+    if (!img || !item) return;
+    setVibeLoading(true);
     try {
       const res = await fetch('/api/inspiration/pick', {
         method: 'POST',
@@ -233,14 +236,16 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
       });
       const data = await res.json();
       if (data.description) {
-        setAutoEnhancePrompt(
-          `Transform this render to match the client's chosen inspiration style. ${data.description} Maintain the existing room layout and dimensions exactly.`
-        );
+        const prompt = `Transform this ${item.roomType} render to match the client's chosen vibe. ${data.description} Keep the existing layout and dimensions intact.`;
+        promptCache.current[item.imageId] = prompt;
+        setAutoEnhancePrompt(prompt);
       }
     } catch {
       // silently fail
+    } finally {
+      setVibeLoading(false);
     }
-  }, [item?.roomType, clientName, sessionId]);
+  }, [item, clientName, sessionId]);
 
   const handleEnhanced = useCallback((url) => {
     if (item) setEnhancedUrls(prev => ({ ...prev, [item.imageId]: url }));
@@ -286,6 +291,12 @@ export default function PlaygroundScreen({ feedback, project, clientName, projec
           )
           : <InspirationStrip images={inspirationImages} onPick={handleVibePick} />
         }
+        {vibeLoading && (
+          <div style={{padding:'0.5rem 1rem',fontSize:'0.75rem',color:'#B8860B',letterSpacing:'0.05em',display:'flex',alignItems:'center',gap:'0.5rem'}}>
+            <span style={{display:'inline-block',width:'10px',height:'10px',border:'2px solid #B8860B',borderTopColor:'transparent',borderRadius:'50%',animation:'spin 0.7s linear infinite'}} />
+            Building your prompt…
+          </div>
+        )}
         <EnhanceButton
           key={item.imageId}
           imageUrl={item.originalUrl}
